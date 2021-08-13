@@ -4,7 +4,7 @@ import urls from "../../utils/urls";
 export const helloWorld = () =>
   fetch(urls.baseUrl + urls.api.example, {
     method: "get",
-    mode: "same-origin",
+    mode: "no-cors",
     credentials: "include",
   })
     .then((response) => response.json())
