@@ -1,0 +1,31 @@
+{
+  "parser": "babel-eslint",
+  "env": {
+    "browser": true,
+    "es6": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2018,
+    "sourceType": "module"
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:prettier/recommended",
+    "plugin:react/recommended",
+    "prettier"
+  ],
+  "settings": {
+    "react": {
+      "version": "detect"
+    },
+    "linkComponents": [
+      "Hyperlink",
+      {"name": "NavLink", "linkAttribute": "href"}
+    ]
+  },
+  "rules": {
+    "no-underscore-dangle": "off",
+    "react/jsx-props-no-spreading": "off",
+    "implicit-arrow-linebreak": "off"
+  }
+}
