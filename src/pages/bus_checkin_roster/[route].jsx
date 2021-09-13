@@ -6,8 +6,8 @@ import ArrowBackIosIcon from "@material-ui/icons/ArrowBackIos";
 import EditIcon from "@material-ui/icons/Edit";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import ModalComponent from "../../client/components/modal";
-import urls from "../../utils/urls";
+import ModalComponent from "../../components/modal";
+import urls from "../../../utils/urls";
 
 const useStyles = makeStyles(() => ({
   container: {

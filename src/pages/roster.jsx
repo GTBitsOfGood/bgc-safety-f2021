@@ -3,11 +3,11 @@ import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
-import modalStyles from "../client/components/Modal.module.css";
+import modalStyles from "../components/Modal.module.css"
 import TextField from "@material-ui/core/TextField";
 import styles from "./roster.module.css";
-import ModalComponent from "../client/components/modal";
-import urls from "../utils/urls";
+import ModalComponent from "../components/modal";
+import urls from "../../utils/urls";
 import { useSession } from "next-auth/client";
 
 const fetch = require("node-fetch");

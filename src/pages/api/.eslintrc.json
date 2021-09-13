@@ -1,4 +1,6 @@
 {
+  // TODO lint :(
+  "root": false,
   "env": {
     "es6": true,
     "node": true

@@ -19,7 +19,7 @@ import {
 } from "@material-ui/core";
 
 import Link from "next/link";
-import urls from "../utils/urls";
+import urls from "../../utils/urls";
 
 const fetch = require("node-fetch");
 

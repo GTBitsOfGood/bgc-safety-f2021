@@ -1,4 +1,4 @@
-import { exampleAction } from "../../server/example/actions/example";
+import { exampleAction } from "../../../server/example/actions/example";
 
 // @route   POST api/example
 // @desc    Example API

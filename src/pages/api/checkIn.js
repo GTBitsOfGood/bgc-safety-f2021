@@ -1,6 +1,6 @@
 /* eslint-disable no-use-before-define */
-import mongoDB from "../../server/mongodb/index";
-import Student from "../../server/mongodb/models/Student";
+import mongoDB from "../../../server/mongodb/index";
+import Student from "../../../server/mongodb/models/Student";
 import useCors from "./corsMiddleware";
 
 export default async (req, res) => {

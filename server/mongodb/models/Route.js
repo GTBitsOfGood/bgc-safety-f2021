@@ -11,4 +11,3 @@ const RouteSchema = new Schema({
 });
 
 export default mongoose.models.Route || mongoose.model("Route", RouteSchema);
-mo;

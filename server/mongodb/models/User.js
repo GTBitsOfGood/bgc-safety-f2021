@@ -9,6 +9,11 @@ const UserSchema = new Schema({
     unique: true,
     validate: {
       validator(email) {
+        // don't validate in non-prod
+        if (process.env.NODE_ENV !== "production") {
+          return true;
+        }
+
         return /^[A-Za-z0-9._%+-]+@bgcma.org$/.test(email);
       },
       message: "Please enter a valid email.",

@@ -2,8 +2,8 @@ import {
   getAllRoutes,
   addRoute,
   editRouteName,
-} from "../../server/mongodb/actions/Route";
-import mongoDB from "../../server/mongodb";
+} from "../../../server/mongodb/actions/Route";
+import mongoDB from "../../../server/mongodb";
 import useCors from "./corsMiddleware";
 
 export default async (req, res) => {

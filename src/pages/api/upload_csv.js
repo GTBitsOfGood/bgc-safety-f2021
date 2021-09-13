@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
-import mongoDB from "../../server/mongodb/index";
-import Student from "../../server/mongodb/models/Student";
-import Club from "../../server/mongodb/models/Club";
+import mongoDB from "../../../server/mongodb/index";
+import Student from "../../../server/mongodb/models/Student";
+import Club from "../../../server/mongodb/models/Club";
 import useCors from "./corsMiddleware";
 
 const neatCsv = require("neat-csv");

@@ -1,8 +1,8 @@
 import React from "react";
 import axios from "axios";
 
-import urls from "../utils/urls";
-import FileUploader from "../client/components/file_uploader";
+import urls from "../../utils/urls";
+import FileUploader from "../components/file_uploader";
 
 class CSVUpload extends React.Component {
   constructor(props) {

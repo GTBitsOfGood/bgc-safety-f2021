@@ -2,7 +2,7 @@ import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Link from "next/link";
 const fetch = require("node-fetch");
-import urls from "../utils/urls";
+import urls from "../../utils/urls";
 
 const ClubName = "Harland"; // TODO: Allow user to select a club
 
