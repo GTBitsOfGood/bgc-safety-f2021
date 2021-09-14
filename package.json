@@ -14,16 +14,17 @@
   "homepage": "https://github.com/GTBitsOfGood/nextjs-starter#readme",
   "scripts": {
     "dev": "next -p 3000",
+    "seed": "node -r esm ./cmd/seed.js",
     "build": "next build",
     "start": "next build && next start",
     "lint": "eslint \"**/*.{js,jsx}\"",
     "lint:fix": "eslint \"**/*.{js,jsx}\" --fix",
     "format": "prettier \"**/*.{js,jsx}\" --write",
     "format:check": "prettier \"**/*.{js,jsx}\" -l",
-    "secrets": "npm run secrets:logout && cross-env-shell BW_SESSION=`bw login product@bitsofgood.org --raw` \"npm run secrets:sync\"",
-    "secrets:logout": "(bw logout || exit 0)",
-    "secrets:login": "bw login product@bitsofgood.org",
-    "secrets:sync": "bw sync && bw get item [ID_OR_NAME_FROM_STEP_2] | fx .notes > \".env\""
+    "secrets": "npm run secrets:logout && cross-env-shell BW_SESSION=`npx bw login product@bitsofgood.org --raw` \"npm run secrets:sync\"",
+    "secrets:logout": "(npx bw logout || exit 0)",
+    "secrets:login": "npx bw login product@bitsofgood.org",
+    "secrets:sync": "npx bw sync && npx bw get item e141fcfd-c713-4043-8b82-acc3013c6b38 | npx fx .notes > \".env\""
   },
   "husky": {
     "hooks": {
@@ -39,21 +40,37 @@
     ]
   },
   "dependencies": {
+    "@material-ui/core": "^4.11.3",
+    "@material-ui/icons": "^4.11.2",
+    "@material-ui/lab": "^4.0.0-alpha.57",
+    "@material-ui/styles": "^4.11.3",
+    "axios": "^0.21.1",
     "bcryptjs": "^2.4.3",
     "clsx": "^1.1.1",
+    "cors": "^2.8.5",
     "dotenv": "^10.0.0",
+    "eslint-config-airbnb": "^18.2.1",
+    "express": "^4.17.1",
+    "express-openid-connect": "^2.3.0",
     "focus-visible": "^5.2.0",
     "isomorphic-unfetch": "^3.1.0",
+    "js-cookie": "^2.2.1",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.21",
     "mongodb": "^4.0.0",
     "mongoose": "^5.13.2",
+    "neat-csv": "^5.2.0",
     "next": "^11.0.1",
+    "next-auth": "^3.13.2",
+    "next-cookies": "^2.0.3",
     "next-images": "^1.8.1",
+    "node-fetch": "^2.6.1",
     "normalize.css": "^8.0.1",
+    "postman": "^0.2.0",
     "prop-types": "^15.7.2",
     "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "react-dom": "^17.0.2",
+    "styled-components": "^5.3.0"
   },
   "devDependencies": {
     "@bitwarden/cli": "^1.17.1",
@@ -66,10 +83,13 @@
     "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-react": "^7.24.0",
     "eslint-plugin-react-hooks": "^4.2.0",
+    "esm": "^3.2.25",
+    "faker": "^5.5.3",
     "fx": "^20.0.2",
     "husky": "^7.0.1",
     "lint-staged": "^11.0.1",
     "prettier": "2.3.2",
-    "prettier-eslint": "^12.0.0"
+    "prettier-eslint": "^12.0.0",
+    "vercel": "^23.1.2"
   }
 }

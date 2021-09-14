@@ -6,13 +6,13 @@ import { exampleAction } from "../../../server/example/actions/example";
 const handler = (req, res) =>
   exampleAction()
     .then((text) =>
-      res.status(201).json({
+      res.status(201).send({
         success: true,
         payload: text,
       })
     )
     .catch(() =>
-      res.status(500).json({
+      res.status(201).send({
         success: false,
         message: "Failed to run action!",
       })

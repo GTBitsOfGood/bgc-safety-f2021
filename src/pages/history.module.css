@@ -1,0 +1,40 @@
+.container {
+  margin: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.filters h2 {
+  margin-right: 20px;
+}
+
+.filters {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.sort {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+}
+
+.sort h2 {
+  margin-right: 20px;
+}
+
+.roster {
+  width: fit-content;
+}
+
+.th {
+  background-color: rgba(128, 128, 128, 0.39);
+  width: 200px;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

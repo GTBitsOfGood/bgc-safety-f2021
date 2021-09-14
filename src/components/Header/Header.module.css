@@ -1,25 +1,21 @@
 .root {
-    display: flex;
-    flex-direction: row;
-    padding: 8px 4px;
-    background-color: #004b4b;
-    align-items: center;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  padding: 8px 4px;
+  align-items: center;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.5);
 }
 
-.route, .endRoute {
-    color: white;
-    padding: 12px 24px;
-    margin: 0 16px;
-    font-size: 20px;
-    cursor: pointer;
-    border-radius: 8px;
-    transition: 0.25s background-color;
+.dropdown-menu select {
+  display: none;
 }
 
-.route:hover, .endRoute:hover, .selected {
-    background-color: #002d2d;
-}
-
-.endRoute {
-    margin-left: auto;
+.printButton {
+  background-color: #c4c4c4;
+  border: none;
+  padding: 16px 20px;
+  text-align: center;
+  font-size: 16px;
 }
