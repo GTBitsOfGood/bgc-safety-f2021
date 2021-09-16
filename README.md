@@ -24,13 +24,15 @@ A MongoDB server is required for this project. Pulling secrets will point your l
 - Go through the installation instructions.
   - Leave the port at default 27017
 - Set the `MONGO_DB` environment variable in your `.env` file to `mongodb://localhost:27017`
+- (Optional but recommended) Run `npm run seed` to insert testing data into your database.
+  - **Note**: the `seed` command will nuke your database!
 
 ## Running
 
 ### Development
 
 - Run `npm run dev`
-
+- Contact a leadership member for the test user credentials
 - To understand this code better, read the [Code Tour](/CODETOUR.md).
   - This project previously used a different organizational structure, so some things will not line up.
 
