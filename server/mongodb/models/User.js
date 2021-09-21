@@ -14,7 +14,7 @@ const UserSchema = new Schema({
           return true;
         }
 
-        return /^[A-Za-z0-9._%+-]+@bgcma.org$/.test(email);
+        return /^[A-Za-z0-9._%+-]+@bgcma\.org$/.test(email);
       },
       message: "Please enter a valid email.",
     },
