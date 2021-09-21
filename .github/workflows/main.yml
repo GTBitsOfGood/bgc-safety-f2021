@@ -32,8 +32,6 @@ jobs:
 
       - name: Vercel Deployment
         env:
-          TEST_TOKEN: ${{ secrets.TEST_TOKEN }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          echo $TEST_TOKEN
-          npx vercel --confirm $VERCEL_TOKEN
+          npx vercel --confirm --token $VERCEL_TOKEN
