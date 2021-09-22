@@ -40,7 +40,7 @@ jobs:
             ::set-output name=DEPLOY_LINK::$( \
               (npx vercel --confirm --token $VERCEL_TOKEN >> out.log); \
               cat out.log | egrep -o 'https:\/\/bgc-safety-f2021-.+-bitsofgood.vercel.app' \
-            ) \
+            )\
           "
           echo "::set-output name=DEPLOY_TIMESTAMP::$(date +'%Y-%m-%dT%H:%M:%S')"
         id: deploy
