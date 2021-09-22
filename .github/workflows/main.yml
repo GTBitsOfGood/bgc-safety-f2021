@@ -37,9 +37,11 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
           echo "\
-            ::set-output name=DEPLOY_LINK:: \
-            $(npx vercel --confirm --token $VERCEL TOKEN \
-            | egrep -o 'https:\/\/bgc-safety-f2021-.+-bitsofgood.vercel.app')"
+            ::set-output name=DEPLOY_LINK::$( \
+              (npx vercel --confirm --token $VERCEL_TOKEN >> out.log); \
+              cat out.log | egrep -o 'https:\/\/bgc-safety-f2021-.+-bitsofgood.vercel.app' \
+            ) \
+          "
         id: deploy
 
       - name: Pull Request Updater GitHub Action
