@@ -11,7 +11,7 @@
 
 ### Pulling Secrets
 
-- Run `npm run secrets-dev` to sync development secrets from Bitwarden and save them to a local `.env` file. Contact a leadership member for the Bitwarden password.
+- Run `npm run secrets-dev` to sync development secrets from Bitwarden and save them to a local `.env` file. Contact a leadership member for the Bitwarden password. asdasd
 
 **NEVER** commit any secrets or your `.env` file.
 
