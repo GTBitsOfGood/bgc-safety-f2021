@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -13,6 +13,9 @@ import Calendar from "../components/calendar";
 import ModalComponent from "../components/modal";
 import styles from "./history.module.css";
 import urls from "../../utils/urls";
+import Router from "next/router";
+import { getUserType } from "./login";
+import { useSession } from "next-auth/client";
 
 const fetch = require("node-fetch");
 
@@ -226,16 +229,32 @@ const DateSelect = (props) => {
 
 function History({ students }) {
   const classes = useStyles();
-  const [visibleStudents, setVisibleStudents] = React.useState([]);
-  const [filters, setFilters] = React.useState(["", "", ""]);
+  const [visibleStudents, setVisibleStudents] = useState([]);
+  const [filters, setFilters] = useState(["", "", ""]);
   const filterLabels = ["schoolName", "grade", "attendance"];
-  const [filteredStudents, setFilteredStudents] = React.useState([]);
+  const [filteredStudents, setFilteredStudents] = useState([]);
   const sortingLabels = ["Alphabetical", "Grade", "Low Attendance"];
-  const [sort, setSort] = React.useState("");
-  const [date, setDate] = React.useState(new Date(startDate));
+  const [sort, setSort] = useState("");
+  const [date, setDate] = useState(new Date(startDate));
+  const [session, loading] = useSession();
+  const [userType, setUserType] = useState("");
+
+  useEffect(() => {
+    async function validateUserType() {
+      if (session) {
+        const type = await getUserType(session);
+        if (type === "BusDriver") {
+          //arbitrary non-route url
+          Router.push("/not_authorized");
+        }
+        setUserType(type);
+      }
+    }
+    validateUserType();
+  }, [session]);
 
   // fetching date data from api
-  React.useEffect(
+  useEffect(
     () => async () => {
       students = await updateStudents(date, students);
       filterStudents();
@@ -264,7 +283,7 @@ function History({ students }) {
   }
 
   // sorting
-  React.useEffect(() => {
+  useEffect(() => {
     const sortedStudents = [...visibleStudents];
     if (sort == "") {
       setVisibleStudents(filteredStudents);
@@ -287,7 +306,7 @@ function History({ students }) {
   }, [sort]);
 
   // filtering
-  React.useEffect(() => {
+  useEffect(() => {
     filterStudents();
   }, [filters]);
 
@@ -387,106 +406,117 @@ function History({ students }) {
   );
 
   return (
-    <div className={styles.container}>
-      <p style={{ fontSize: "200", margin: "0" }}>Bus Attendance Matrix</p>
-      <h2 style={{ marginTop: "5px", marginBottom: "20px" }}>
-        {`${ClubName} Boys and Girls Club `}
-        2019-2020 Afterschool Registration
-      </h2>
-      <Filters />
-      <Sorting />
+    <>
+      {session && userType !== "BusDriver" && userType !== "" ? (
+        <div className={styles.container}>
+          <p style={{ fontSize: "200", margin: "0" }}>Bus Attendance Matrix</p>
+          <h2 style={{ marginTop: "5px", marginBottom: "20px" }}>
+            {`${ClubName} Boys and Girls Club `}
+            2019-2020 Afterschool Registration
+          </h2>
+          <Filters />
+          <Sorting />
 
-      <DateSelect date={date} setDate={setDate} />
+          <DateSelect date={date} setDate={setDate} />
 
-      <table className={classes.table}>
-        <thead
-          style={{ backgroundColor: "#E0E0E0", width: "calc( 100% - 1em )" }}
-        >
-          <tr className={classes.tr}>
-            <th className={classes.th} style={{ width: "25%" }}>
-              Student Name
-            </th>
-            <th className={classes.th}>Days Attended This Month </th>
-            <th className={classes.th} style={{ width: "25%" }}>
-              Status
-            </th>
-          </tr>
-        </thead>
+          <table className={classes.table}>
+            <thead
+              style={{
+                backgroundColor: "#E0E0E0",
+                width: "calc( 100% - 1em )",
+              }}
+            >
+              <tr className={classes.tr}>
+                <th className={classes.th} style={{ width: "25%" }}>
+                  Student Name
+                </th>
+                <th className={classes.th}>Days Attended This Month </th>
+                <th className={classes.th} style={{ width: "25%" }}>
+                  Status
+                </th>
+              </tr>
+            </thead>
 
-        <tbody className={classes.tbody}>
-          {visibleStudents.map((student) => (
-            <tr className={classes.tr}>
-              <td
-                className={classes.td}
-                style={{
-                  backgroundColor:
-                    student.attendance < 0.6 ? lowAttendance : "",
-                  width: "25%",
-                }}
-              >
-                <ModalComponent
-                  button={<>{`${student.lastName}, ${student.firstName}`}</>}
-                  buttonStyle={classes.ModalComponentButton}
-                >
-                  <div className={classes.ModalComponent}>
-                    <div className={classes.content}>
-                      <div className={classes.info}>
-                        <h1>{`${student.firstName} ${student.lastName}`}</h1>
-                        <p>{`School: ${student.schoolName}`}</p>
-                        <p>{`Grade: ${student.grade}`}</p>
-                        <p>{`Status: ${student.status}`}</p>
-                        <p>{`Contact: ${student.contact}`}</p>
-                        <p>{`Emergency: ${student.emergency}`}</p>
-                      </div>
-                      <div className={classes.calendar}>
-                        <Calendar
-                          defaultMonth={date.getMonth()}
-                          defaultYear={date.getFullYear()}
-                          getDatesAttended={() => student.datesAttended}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </ModalComponent>
-              </td>
-              <td className={classes.td}>
-                <div style={{ display: "flex", flexDirection: "row" }}>
-                  <div
-                    style={{
-                      width: `${100 * student.attendance}%`,
-                      height: "20px",
-                    }}
-                    color={student.attendance < 0.6 ? "warning" : "success"}
-                  />
-                  <p style={{ margin: "0px 0px 0px 3px" }}>
-                    {Math.round(student.attendance * daysInMonth)}
-                  </p>
-                </div>
-              </td>
-              <td className={classes.td} style={{ width: "25%" }}>
-                <div className={styles.status}>
-                  <span
-                    className={classes.dot}
+            <tbody className={classes.tbody}>
+              {visibleStudents.map((student) => (
+                <tr className={classes.tr}>
+                  <td
+                    className={classes.td}
                     style={{
                       backgroundColor:
-                        student.attendance < 0.6
-                          ? lowAttendance
-                          : highAttendance,
+                        student.attendance < 0.6 ? lowAttendance : "",
+                      width: "25%",
                     }}
-                  />
+                  >
+                    <ModalComponent
+                      button={
+                        <>{`${student.lastName}, ${student.firstName}`}</>
+                      }
+                      buttonStyle={classes.ModalComponentButton}
+                    >
+                      <div className={classes.ModalComponent}>
+                        <div className={classes.content}>
+                          <div className={classes.info}>
+                            <h1>{`${student.firstName} ${student.lastName}`}</h1>
+                            <p>{`School: ${student.schoolName}`}</p>
+                            <p>{`Grade: ${student.grade}`}</p>
+                            <p>{`Status: ${student.status}`}</p>
+                            <p>{`Contact: ${student.contact}`}</p>
+                            <p>{`Emergency: ${student.emergency}`}</p>
+                          </div>
+                          <div className={classes.calendar}>
+                            <Calendar
+                              defaultMonth={date.getMonth()}
+                              defaultYear={date.getFullYear()}
+                              getDatesAttended={() => student.datesAttended}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </ModalComponent>
+                  </td>
+                  <td className={classes.td}>
+                    <div style={{ display: "flex", flexDirection: "row" }}>
+                      <div
+                        style={{
+                          width: `${100 * student.attendance}%`,
+                          height: "20px",
+                        }}
+                        color={student.attendance < 0.6 ? "warning" : "success"}
+                      />
+                      <p style={{ margin: "0px 0px 0px 3px" }}>
+                        {Math.round(student.attendance * daysInMonth)}
+                      </p>
+                    </div>
+                  </td>
+                  <td className={classes.td} style={{ width: "25%" }}>
+                    <div className={styles.status}>
+                      <span
+                        className={classes.dot}
+                        style={{
+                          backgroundColor:
+                            student.attendance < 0.6
+                              ? lowAttendance
+                              : highAttendance,
+                        }}
+                      />
 
-                  {student.attendance < 0.6 ? (
-                    <p style={{ margin: "5px" }}>Low Attendance</p>
-                  ) : (
-                    <p style={{ margin: "5px" }}>Active</p>
-                  )}
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+                      {student.attendance < 0.6 ? (
+                        <p style={{ margin: "5px" }}>Low Attendance</p>
+                      ) : (
+                        <p style={{ margin: "5px" }}>Active</p>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div />
+      )}
+    </>
   );
 }
 

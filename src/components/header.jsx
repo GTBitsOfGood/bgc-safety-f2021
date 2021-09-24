@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { withRouter } from "next/router";
 import Link from "next/link";
 import styled from "styled-components";
@@ -150,8 +150,7 @@ const Header = (props) => {
     return fRoutes;
   };
   const queryUser = async () => {
-    console.log("QUERY USER", session.user.email);
-    const res = await fetch(`/api/user?email=${session.user}`);
+    const res = await fetch(`/api/user?email=${session.user.email}`);
     return await res.json();
   };
 
@@ -175,12 +174,15 @@ const Header = (props) => {
     setAnchorEl(null);
   };
 
-  React.useEffect(() => async () => {
-    if (!loading && session && filteredRoutes.length == 0) {
-      let currentUser = await queryUser();
-      setFilteredRoutes(filterRoutes(currentUser));
+  useEffect(() => {
+    async function performFilters() {
+      if (!loading && session && filteredRoutes.length == 0) {
+        let currentUser = await queryUser();
+        setFilteredRoutes(filterRoutes(currentUser));
+      }
     }
-  });
+    performFilters();
+  }, [loading, session]);
 
   if (loading || !session) {
     // console.log(loading)
@@ -220,7 +222,6 @@ const Header = (props) => {
             open={open}
             onClose={handleClose}
           >
-            {/* {filterRoutes(currentUser)} */}
             {filteredRoutes.map((route, index) => (
               <MenuItem
                 className={classes.menuFont}
@@ -232,7 +233,6 @@ const Header = (props) => {
                 </Link>
               </MenuItem>
             ))}
-
             <MenuItem className={classes.menuFont} onClick={handleClose}>
               My profile
             </MenuItem>

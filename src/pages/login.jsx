@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Router from "next/router";
 import { Button, Typography, InputBase } from "@material-ui/core";
@@ -50,53 +50,83 @@ const LoginField = withStyles({
   },
 })(InputBase);
 
+const getUserType = async (session) => {
+  const res = await fetch(`/api/user?email=${session.user.email}`);
+  const userData = await res.json();
+  return userData[0].type;
+};
+
 const Login = () => {
-  const [error, setError] = React.useState(null);
-  const [username, setUsername] = React.useState(null);
-  const [password, setPassword] = React.useState(null);
+  const [error, setError] = useState(null);
+  const [username, setUsername] = useState(null);
+  const [password, setPassword] = useState(null);
   const [session, loading] = useSession();
-  console.log("heyo");
-  console.log(process.env.NEXTAUTH_URL);
+  const [userType, setUserType] = useState("");
+  // console.log("heyo");
+  // console.log(process.env.NEXTAUTH_URL);
   const classes = useStyles();
-  function gotoLanding() {
-    Router.replace("/history");
-  }
 
-  async function handleSubmit(event) {
-    event.preventDefault();
-    const url = `${urls.baseUrl}/api/login`;
-
-    try {
-      fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: username,
-          password,
-        }),
-      })
-        .then((res) => res.json())
-        .then((response) => {
-          if (response.success) {
-            sessionStorage.token = response.payload;
-            Router.replace("/history");
-          } else {
-            setError(response.message);
-          }
-        })
-        .catch((err) => {
-          setError(err);
-        });
-    } catch (err) {
-      console.error(
-        "You have an error in your code or there are Network issues.",
-        err
-      );
-      throw new Error(err);
+  useEffect(() => {
+    async function checkUserType() {
+      const type = await getUserType(session);
+      setUserType(type);
     }
-  }
+    if (session) {
+      checkUserType();
+    }
+  }, [session]);
+
+  const gotoLanding = async () => {
+    /*
+    Default landing page (open to discussion): 
+      - Bus Driver: route_selection
+      - Attendance Clerk/Club Director: roster
+      - Admin: roster (ideally "Overview of Clubs" - Figma)
+    */
+    if (userType === "BusDriver") {
+      Router.replace("/route_selection");
+    } else if (userType === "ClubDirector") {
+      Router.replace("/roster");
+    } else if (userType === "Admin") {
+      Router.replace("/roster");
+    }
+  };
+
+  // async function handleSubmit(event) {
+  //   event.preventDefault();
+  //   const url = `${urls.baseUrl}/api/login`;
+
+  //   try {
+  //     fetch(url, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         email: username,
+  //         password,
+  //       }),
+  //     })
+  //       // .then((res) => res.json())
+  //       .then((response) => {
+  //         if (response.success) {
+  //           sessionStorage.token = response.payload;
+  //           router.replace("/history");
+  //         } else {
+  //           setError(response.message);
+  //         }
+  //       })
+  //       .catch((err) => {
+  //         setError(err);
+  //       });
+  //   } catch (err) {
+  //     console.error(
+  //       "You have an error in your code or there are Network issues.",
+  //       err
+  //     );
+  //     throw new Error(err);
+  //   }
+  // }
   return (
     <div className={classes.container}>
       <img className={classes.image} src="bgc-logo.png" alt="BGC Logo" />
@@ -105,30 +135,6 @@ const Login = () => {
       </Typography>
 
       {error && <p className={classes.error}>{error}</p>}
-      {/* 
-      <LoginField
-        className={classes.input}
-        variant="filled"
-        placeholder="Username"
-        value={username}
-        onChange={e => setUsername(e.target.value)}
-      />
-      <LoginField
-        className={classes.input}
-        variant="filled"
-        placeholder="Password"
-        type="password"
-        value={password}
-        onChange={e => setPassword(e.target.value)}
-      />
-
-      <Button
-        className={classes.button}
-        variant="contained"
-        onClick={handleSubmit}
-      >
-        Log In
-      </Button> */}
       {!session && (
         <>
           Not signed in <br />
@@ -164,4 +170,5 @@ const Login = () => {
   );
 };
 
+export { getUserType };
 export default Login;

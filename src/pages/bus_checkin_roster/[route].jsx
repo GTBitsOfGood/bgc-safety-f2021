@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Button } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
@@ -8,6 +8,9 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import ModalComponent from "../../components/modal";
 import urls from "../../../utils/urls";
+import { useSession } from "next-auth/client";
+import { getUserType } from "../login";
+import Router from "next/router";
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -123,8 +126,24 @@ let initial = false;
 const Roster = () => {
   const router = useRouter();
   const classes = useStyles();
+  const [session, loading] = useSession();
   const { route } = router.query;
-  const [students, setStudents] = React.useState([]);
+  const [students, setStudents] = useState([]);
+  const [userType, setUserType] = useState("");
+
+  useEffect(() => {
+    async function validateUserType() {
+      if (session) {
+        const type = await getUserType(session);
+        if (type !== "BusDriver") {
+          //arbitrary non-route url
+          Router.push("/not_authorized");
+        }
+        setUserType(type);
+      }
+    }
+    validateUserType();
+  }, [session]);
 
   const submitAttendance = async (index) => {
     // show modal
@@ -171,7 +190,7 @@ const Roster = () => {
   const SubmitModalContent = () => {
     let date = new Date();
     date = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
-    const [note, setNote] = React.useState("");
+    const [note, setNote] = useState("");
 
     return (
       <form
@@ -227,9 +246,7 @@ const Roster = () => {
   };
 
   const NoteModalContent = (props) => {
-    const [studentNote, setStudentNote] = React.useState(
-      students[props.index].note
-    );
+    const [studentNote, setStudentNote] = useState(students[props.index].note);
     return (
       <form
         className={classes.ModalContent}
@@ -338,50 +355,57 @@ const Roster = () => {
   }
 
   return (
-    <div className={classes.container}>
-      <div className={classes.header}>
-        <Link href="/route_selection">
-          <button className={classes.backbtn}>
-            <ArrowBackIosIcon />
-            <h1 className={classes.text}>Back </h1>
-          </button>
-        </Link>
-        <h1>{route}</h1>
-      </div>
-      <table style={{ width: "100%" }}>
-        <thead>
-          <tr className={classes.tr}>
-            <th className={classes.th} style={{ width: "25%" }}>
-              Name
-            </th>
-            <th className={classes.th}>Status</th>
-          </tr>
-        </thead>
-        <tbody className={classes.tbody}>
-          {students.map((student, index) => (
-            <tr className={classes.tr} key={index}>
-              <td className={classes.td} style={{ width: "25%" }}>
-                {student.name}
-              </td>
-              {student.checkedIn ? (
-                <StudentCheckedIn
-                  justCheckedIn={student.note == ""}
-                  index={index}
-                />
-              ) : (
-                <StudentNotCheckedIn index={index} />
-              )}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <ModalComponent
-        button={<h1 style={{ margin: "0px" }}>Submit</h1>}
-        buttonStyle={classes.mainSubmitBtn}
-      >
-        <SubmitModalContent />
-      </ModalComponent>
-    </div>
+    <>
+      {session && userType === "BusDriver" ? (
+        <div className={classes.container}>
+          {" "}
+          <div className={classes.header}>
+            <Link href="/route_selection">
+              <button className={classes.backbtn}>
+                <ArrowBackIosIcon />
+                <h1 className={classes.text}>Back </h1>
+              </button>
+            </Link>
+            <h1>{route}</h1>
+          </div>
+          <table style={{ width: "100%" }}>
+            <thead>
+              <tr className={classes.tr}>
+                <th className={classes.th} style={{ width: "25%" }}>
+                  Name
+                </th>
+                <th className={classes.th}>Status</th>
+              </tr>
+            </thead>
+            <tbody className={classes.tbody}>
+              {students.map((student, index) => (
+                <tr className={classes.tr} key={index}>
+                  <td className={classes.td} style={{ width: "25%" }}>
+                    {student.name}
+                  </td>
+                  {student.checkedIn ? (
+                    <StudentCheckedIn
+                      justCheckedIn={student.note == ""}
+                      index={index}
+                    />
+                  ) : (
+                    <StudentNotCheckedIn index={index} />
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <ModalComponent
+            button={<h1 style={{ margin: "0px" }}>Submit</h1>}
+            buttonStyle={classes.mainSubmitBtn}
+          >
+            <SubmitModalContent />
+          </ModalComponent>
+        </div>
+      ) : (
+        <div />
+      )}
+    </>
   );
 };
 

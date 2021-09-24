@@ -1,8 +1,11 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Link from "next/link";
 const fetch = require("node-fetch");
 import urls from "../../utils/urls";
+import { useSession } from "next-auth/client";
+import { getUserType } from "./login";
+import Router from "next/router";
 
 const ClubName = "Harland"; // TODO: Allow user to select a club
 
@@ -32,10 +35,26 @@ const useStyles = makeStyles(() => ({
 }));
 
 const RouteSelection = ({ schools }) => {
-  const [selectedSchool, setselectedSchool] = React.useState("");
+  const [selectedSchool, setselectedSchool] = useState("");
   const classes = useStyles();
+  const [session, loading] = useSession();
+  const [userType, setUserType] = useState("");
 
-  React.useEffect(() => {
+  useEffect(() => {
+    async function validateUserType() {
+      if (session) {
+        const type = await getUserType(session);
+        if (type !== "BusDriver") {
+          //arbitrary non-route url
+          Router.push("/not_authorized");
+        }
+        setUserType(type);
+      }
+    }
+    validateUserType();
+  }, [session]);
+
+  useEffect(() => {
     // render/link to bus checkin page passing in selected school as props
   }, [selectedSchool]);
 
@@ -45,28 +64,35 @@ const RouteSelection = ({ schools }) => {
   };
 
   return (
-    <div className={classes.container}>
-      <h1 className={classes.text}>Select a Bus Route:</h1>
-      <div className={classes.btnContainer}>
-        {schools.map((school) => {
-          return (
-            <Link
-              href="/bus_checkin_roster/[route]"
-              as={`bus_checkin_roster/${school.name}`}
-            >
-              <a
-                className={classes.btn}
-                style={{
-                  backgroundColor: school.complete ? "#6FCF97" : "#C4C4C4",
-                }}
-              >
-                {school.name} -{school.complete ? " Complete" : " Incomplete"}
-              </a>
-            </Link>
-          );
-        })}
-      </div>
-    </div>
+    <>
+      {session && userType === "BusDriver" ? (
+        <div className={classes.container}>
+          <h1 className={classes.text}>Select a Bus Route:</h1>
+          <div className={classes.btnContainer}>
+            {schools.map((school) => {
+              return (
+                <Link
+                  href="/bus_checkin_roster/[route]"
+                  as={`bus_checkin_roster/${school.name}`}
+                >
+                  <a
+                    className={classes.btn}
+                    style={{
+                      backgroundColor: school.complete ? "#6FCF97" : "#C4C4C4",
+                    }}
+                  >
+                    {school.name} -
+                    {school.complete ? " Complete" : " Incomplete"}
+                  </a>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+        <div />
+      )}
+    </>
   );
 };
 

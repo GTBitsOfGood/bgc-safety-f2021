@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Button,
@@ -14,6 +14,9 @@ import EditIcon from "@material-ui/icons/Edit";
 import AddIcon from "@material-ui/icons/Add";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import urls from "../../utils/urls";
+import { useSession } from "next-auth/client";
+import { getUserType } from "./login";
+import Router from "next/router";
 // import {getStudentsByName, changeStudentRoute} from "../pages/api/student";
 
 const fetch = require("node-fetch");
@@ -124,20 +127,36 @@ const useStyles = makeStyles(() => ({
 
 const BusRoutes = ({ savedRoutes }) => {
   const classes = useStyles();
-  const [routes, setRoutes] = React.useState(savedRoutes);
-  const [selectedRoute, setSelectedRoute] = React.useState(routes[0]);
-  const [editedRoute, setEditedRoute] = React.useState(
+  const [session, loading] = useSession();
+  const [routes, setRoutes] = useState(savedRoutes);
+  const [selectedRoute, setSelectedRoute] = useState(routes[0]);
+  const [editedRoute, setEditedRoute] = useState(
     routes.length > 0 ? routes[0].name : ""
   );
-  const [routeEditable, setEditable] = React.useState(false);
-  const [modalOpen, setModalOpen] = React.useState(false);
-  const [modalOpen2, setModalOpen2] = React.useState(false);
+  const [routeEditable, setEditable] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen2, setModalOpen2] = useState(false);
 
-  const [routeNameError, setRouteNameError] = React.useState(false);
-  const [newRouteError, setNewRouteError] = React.useState(false);
-  const [editNameError, setEditNameError] = React.useState(false);
+  const [routeNameError, setRouteNameError] = useState(false);
+  const [newRouteError, setNewRouteError] = useState(false);
+  const [editNameError, setEditNameError] = useState(false);
 
-  const [studentList, setStudentList] = React.useState([]);
+  const [studentList, setStudentList] = useState([]);
+  const [userType, setUserType] = useState("");
+
+  useEffect(() => {
+    async function validateUserType() {
+      if (session) {
+        const type = await getUserType(session);
+        if (type === "BusDriver") {
+          //arbitrary non-route url
+          Router.push("/not_authorized");
+        }
+        setUserType(type);
+      }
+    }
+    validateUserType();
+  }, [session]);
 
   const addRoute = () => {
     setModalOpen(true);
@@ -273,48 +292,273 @@ const BusRoutes = ({ savedRoutes }) => {
   let modalName = "";
 
   return (
-    <div>
-      <div className={classes.container}>
-        <div className={classes.pagehead}>
-          <div className={classes.routeNameContainer}>
-            <div>
-              <TextField
-                id="route-name"
-                value={editedRoute}
-                disabled={!routeEditable}
-                onChange={handleNameChange}
-                InputProps={{ className: classes.routeName }}
-              />
-              <div hidden={!editNameError} className={classes.error}>
-                Sorry, an error occurred. Couldn't update route name.
+    <>
+      {session && userType === "Admin" && userType === "ClubDirector" ? (
+        <div>
+          <div className={classes.container}>
+            <div className={classes.pagehead}>
+              <div className={classes.routeNameContainer}>
+                <div>
+                  <TextField
+                    id="route-name"
+                    value={editedRoute}
+                    disabled={!routeEditable}
+                    onChange={handleNameChange}
+                    InputProps={{ className: classes.routeName }}
+                  />
+                  <div hidden={!editNameError} className={classes.error}>
+                    Sorry, an error occurred. Couldn't update route name.
+                  </div>
+                </div>
+                <EditIcon
+                  className={
+                    routeEditable ? classes.hideIcon : classes.editIcon
+                  }
+                  onClick={() => {
+                    setEditable(true);
+                    setEditedRoute(selectedRoute.name);
+                    document.getElementById("route-name").focus();
+                    document.getElementById("route-name").select();
+                  }}
+                />
+                <CheckCircleIcon
+                  className={
+                    routeEditable ? classes.checkIcon : classes.hideIcon
+                  }
+                  onClick={() => {
+                    setEditable(false);
+                    updateRouteName(editedRoute);
+                  }}
+                />
+              </div>
+
+              <div className={classes.btnContainer}>
+                <Button className={classes.btn} onClick={addStudent}>
+                  Add New Student
+                </Button>
+                <Dialog
+                  style={{ padding: 10, margin: 10, minWidth: 600 }}
+                  open={modalOpen2}
+                  onClose={handleClose2}
+                >
+                  <div
+                    style={{
+                      textAlign: "right",
+                      padding: 5,
+                      marginRight: 5,
+                      cursor: "pointer",
+                    }}
+                    onClick={handleClose}
+                  >
+                    x
+                  </div>
+                  <DialogTitle style={{ fontSize: 18 }}>
+                    Adding New Student to the Route
+                  </DialogTitle>
+                  <DialogContent>
+                    <div>
+                      <label className={classes.label}>
+                        Student First Name:
+                      </label>
+                      <input
+                        id="FirstName"
+                        className={classes.textField}
+                        placeholder="Type name here..."
+                        required
+                      />
+                      <div hidden={!routeNameError} className={classes.error}>
+                        Name cannot be blank.
+                      </div>
+                    </div>
+                    <div>
+                      <label className={classes.label}>
+                        Student Last Name:
+                      </label>
+                      <input
+                        id="LastName"
+                        className={classes.textField}
+                        placeholder="Type name here..."
+                        required
+                      />
+                      <div hidden={!routeNameError} className={classes.error}>
+                        Name cannot be blank.
+                      </div>
+                    </div>
+                    <div>
+                      <label className={classes.label}>Student ID:</label>
+                      <input
+                        id="studentID"
+                        className={classes.textField}
+                        placeholder="Type name here..."
+                        required
+                      />
+                      <div hidden={!routeNameError} className={classes.error}>
+                        Name cannot be blank.
+                      </div>
+                    </div>
+                    <div>
+                      <label className={classes.label}>School Name:</label>
+                      <input
+                        id="schoolName"
+                        className={classes.textField}
+                        placeholder="Type name here..."
+                        required
+                      />
+                      <div hidden={!routeNameError} className={classes.error}>
+                        Name cannot be blank.
+                      </div>
+                    </div>
+                    <div>
+                      <label className={classes.label}>Grade:</label>
+                      <input
+                        id="grade"
+                        className={classes.textField}
+                        placeholder="Type name here..."
+                        required
+                      />
+                      <div hidden={!routeNameError} className={classes.error}>
+                        Name cannot be blank.
+                      </div>
+                    </div>
+                    <div>
+                      <label className={classes.label}>Club Name:</label>
+                      <input
+                        id="clubName"
+                        className={classes.textField}
+                        placeholder="Type name here..."
+                        required
+                      />
+                      <div hidden={!routeNameError} className={classes.error}>
+                        Name cannot be blank.
+                      </div>
+                    </div>
+                    <div>
+                      <label className={classes.label}>Notes:</label>
+                      <input
+                        id="notes"
+                        className={classes.textField}
+                        placeholder="Type name here..."
+                        required
+                      />
+                      <div hidden={!routeNameError} className={classes.error}>
+                        Name cannot be blank.
+                      </div>
+                    </div>
+                  </DialogContent>
+                  <div hidden={!newRouteError} className={classes.error}>
+                    Sorry, an error occurred. Cannot create new student in
+                    route.
+                  </div>
+                  <DialogActions>
+                    <Button
+                      style={{ margin: 5 }}
+                      variant="contained"
+                      color="primary"
+                      size="large"
+                      onClick={() => {
+                        let studentFirstName =
+                          document.getElementById("FirstName").value;
+                        let studentLastName =
+                          document.getElementById("LastName").value;
+                        let studentId =
+                          document.getElementById("studentID").value;
+                        let grade = document.getElementById("grade").value;
+                        let school =
+                          document.getElementById("schoolName").value;
+                        let club = document.getElementById("clubName").value;
+                        let notes = document.getElementById("notes").value;
+
+                        handleCreate2(
+                          studentFirstName,
+                          studentLastName,
+                          school,
+                          grade
+                        );
+                      }}
+                    >
+                      Create
+                    </Button>
+                  </DialogActions>
+                </Dialog>
+
+                <Button
+                  className={classes.btn}
+                  onClick={() => {
+                    let studentId = document.getElementById("studentID").value;
+                    handleCreate3(studentId);
+                  }}
+                >
+                  Save Changes
+                </Button>
               </div>
             </div>
-            <EditIcon
-              className={routeEditable ? classes.hideIcon : classes.editIcon}
-              onClick={() => {
-                setEditable(true);
-                setEditedRoute(selectedRoute.name);
-                document.getElementById("route-name").focus();
-                document.getElementById("route-name").select();
-              }}
-            />
-            <CheckCircleIcon
-              className={routeEditable ? classes.checkIcon : classes.hideIcon}
-              onClick={() => {
-                setEditable(false);
-                updateRouteName(editedRoute);
-              }}
-            />
-          </div>
 
-          <div className={classes.btnContainer}>
-            <Button className={classes.btn} onClick={addStudent}>
-              Add New Student
-            </Button>
+            <table className={classes.table}>
+              <thead
+                style={{
+                  backgroundColor: "#E0E0E0",
+                  width: "calc( 100% - 1em )",
+                }}
+              >
+                <tr className={classes.tr}>
+                  <th className={classes.th}>Student Name</th>
+                  <th className={classes.th}>School </th>
+                  <th className={classes.th}>Grade </th>
+                  <th className={classes.th}>Contact </th>
+                  <th className={classes.th}>Emergency </th>
+                </tr>
+              </thead>
+
+              <tbody className={classes.tbody}>
+                {studentList.map((entry, index) => (
+                  <tr key={index} className={classes.tr}>
+                    <td scope="col">{entry.firstName + entry.lastName}</td>
+                    <td scope="col">{entry.school}</td>
+                    <td scope="col">{entry.grade}</td>
+                    <td scope="col">None</td>
+                    <td scope="col">None</td>
+                  </tr>
+                ))}
+              </tbody>
+              {/* <tbody className={classes.tbody}>
+                                
+            <tr className={classes.tr}>
+              <td scope="col">Donuts</td>
+              <td scope="col">Dheeraj</td>
+              <td scope="col">Donuts</td>
+              <td scope="col">Dheeraj</td>
+              <td scope="col">Donuts</td>
+            </tr>
+
+
+          </tbody> */}
+            </table>
+          </div>
+          <div className={classes.routeTabs}>
+            <ButtonGroup
+              size="large"
+              variant="contained"
+              color="primary"
+              style={{ margin: 10 }}
+            >
+              {routes.map((route) => (
+                <Button
+                  onClick={() => {
+                    setSelectedRoute(route);
+                    updateName(route.name);
+                  }}
+                >
+                  {route.name}
+                </Button>
+              ))}
+            </ButtonGroup>
+            <Fab style={{ margin: 10 }} color="primary" onClick={addRoute}>
+              <AddIcon />
+            </Fab>
             <Dialog
               style={{ padding: 10, margin: 10, minWidth: 600 }}
-              open={modalOpen2}
-              onClose={handleClose2}
+              open={modalOpen}
+              onClose={handleClose}
             >
               <div
                 style={{
@@ -328,13 +572,13 @@ const BusRoutes = ({ savedRoutes }) => {
                 x
               </div>
               <DialogTitle style={{ fontSize: 18 }}>
-                Adding New Student to the Route
+                Creating New Bus Route
               </DialogTitle>
               <DialogContent>
                 <div>
-                  <label className={classes.label}>Student First Name:</label>
+                  <label className={classes.label}>Bus Route Name:</label>
                   <input
-                    id="FirstName"
+                    id="ModalName"
                     className={classes.textField}
                     placeholder="Type name here..."
                     required
@@ -344,80 +588,21 @@ const BusRoutes = ({ savedRoutes }) => {
                   </div>
                 </div>
                 <div>
-                  <label className={classes.label}>Student Last Name:</label>
-                  <input
-                    id="LastName"
+                  <label className={classes.label}>
+                    Upload Student Data (.csv):
+                  </label>
+                  <Button
                     className={classes.textField}
-                    placeholder="Type name here..."
-                    required
-                  />
-                  <div hidden={!routeNameError} className={classes.error}>
-                    Name cannot be blank.
-                  </div>
-                </div>
-                <div>
-                  <label className={classes.label}>Student ID:</label>
-                  <input
-                    id="studentID"
-                    className={classes.textField}
-                    placeholder="Type name here..."
-                    required
-                  />
-                  <div hidden={!routeNameError} className={classes.error}>
-                    Name cannot be blank.
-                  </div>
-                </div>
-                <div>
-                  <label className={classes.label}>School Name:</label>
-                  <input
-                    id="schoolName"
-                    className={classes.textField}
-                    placeholder="Type name here..."
-                    required
-                  />
-                  <div hidden={!routeNameError} className={classes.error}>
-                    Name cannot be blank.
-                  </div>
-                </div>
-                <div>
-                  <label className={classes.label}>Grade:</label>
-                  <input
-                    id="grade"
-                    className={classes.textField}
-                    placeholder="Type name here..."
-                    required
-                  />
-                  <div hidden={!routeNameError} className={classes.error}>
-                    Name cannot be blank.
-                  </div>
-                </div>
-                <div>
-                  <label className={classes.label}>Club Name:</label>
-                  <input
-                    id="clubName"
-                    className={classes.textField}
-                    placeholder="Type name here..."
-                    required
-                  />
-                  <div hidden={!routeNameError} className={classes.error}>
-                    Name cannot be blank.
-                  </div>
-                </div>
-                <div>
-                  <label className={classes.label}>Notes:</label>
-                  <input
-                    id="notes"
-                    className={classes.textField}
-                    placeholder="Type name here..."
-                    required
-                  />
-                  <div hidden={!routeNameError} className={classes.error}>
-                    Name cannot be blank.
-                  </div>
+                    variant="contained"
+                    color="secondary"
+                    size="small"
+                  >
+                    Select File
+                  </Button>
                 </div>
               </DialogContent>
               <div hidden={!newRouteError} className={classes.error}>
-                Sorry, an error occurred. Cannot create new student in route.
+                Sorry, an error occurred. Cannot create new route.
               </div>
               <DialogActions>
                 <Button
@@ -426,166 +611,20 @@ const BusRoutes = ({ savedRoutes }) => {
                   color="primary"
                   size="large"
                   onClick={() => {
-                    let studentFirstName =
-                      document.getElementById("FirstName").value;
-                    let studentLastName =
-                      document.getElementById("LastName").value;
-                    let studentId = document.getElementById("studentID").value;
-                    let grade = document.getElementById("grade").value;
-                    let school = document.getElementById("schoolName").value;
-                    let club = document.getElementById("clubName").value;
-                    let notes = document.getElementById("notes").value;
-
-                    handleCreate2(
-                      studentFirstName,
-                      studentLastName,
-                      school,
-                      grade
-                    );
+                    modalName = document.getElementById("ModalName").value;
+                    handleCreate(modalName);
                   }}
                 >
                   Create
                 </Button>
               </DialogActions>
             </Dialog>
-
-            <Button
-              className={classes.btn}
-              onClick={() => {
-                let studentId = document.getElementById("studentID").value;
-                handleCreate3(studentId);
-              }}
-            >
-              Save Changes
-            </Button>
           </div>
         </div>
-
-        <table className={classes.table}>
-          <thead
-            style={{ backgroundColor: "#E0E0E0", width: "calc( 100% - 1em )" }}
-          >
-            <tr className={classes.tr}>
-              <th className={classes.th}>Student Name</th>
-              <th className={classes.th}>School </th>
-              <th className={classes.th}>Grade </th>
-              <th className={classes.th}>Contact </th>
-              <th className={classes.th}>Emergency </th>
-            </tr>
-          </thead>
-
-          <tbody className={classes.tbody}>
-            {studentList.map((entry, index) => (
-              <tr key={index} className={classes.tr}>
-                <td scope="col">{entry.firstName + entry.lastName}</td>
-                <td scope="col">{entry.school}</td>
-                <td scope="col">{entry.grade}</td>
-                <td scope="col">None</td>
-                <td scope="col">None</td>
-              </tr>
-            ))}
-          </tbody>
-          {/* <tbody className={classes.tbody}>
-                                
-            <tr className={classes.tr}>
-              <td scope="col">Donuts</td>
-              <td scope="col">Dheeraj</td>
-              <td scope="col">Donuts</td>
-              <td scope="col">Dheeraj</td>
-              <td scope="col">Donuts</td>
-            </tr>
-
-
-          </tbody> */}
-        </table>
-      </div>
-      <div className={classes.routeTabs}>
-        <ButtonGroup
-          size="large"
-          variant="contained"
-          color="primary"
-          style={{ margin: 10 }}
-        >
-          {routes.map((route) => (
-            <Button
-              onClick={() => {
-                setSelectedRoute(route);
-                updateName(route.name);
-              }}
-            >
-              {route.name}
-            </Button>
-          ))}
-        </ButtonGroup>
-        <Fab style={{ margin: 10 }} color="primary" onClick={addRoute}>
-          <AddIcon />
-        </Fab>
-        <Dialog
-          style={{ padding: 10, margin: 10, minWidth: 600 }}
-          open={modalOpen}
-          onClose={handleClose}
-        >
-          <div
-            style={{
-              textAlign: "right",
-              padding: 5,
-              marginRight: 5,
-              cursor: "pointer",
-            }}
-            onClick={handleClose}
-          >
-            x
-          </div>
-          <DialogTitle style={{ fontSize: 18 }}>
-            Creating New Bus Route
-          </DialogTitle>
-          <DialogContent>
-            <div>
-              <label className={classes.label}>Bus Route Name:</label>
-              <input
-                id="ModalName"
-                className={classes.textField}
-                placeholder="Type name here..."
-                required
-              />
-              <div hidden={!routeNameError} className={classes.error}>
-                Name cannot be blank.
-              </div>
-            </div>
-            <div>
-              <label className={classes.label}>
-                Upload Student Data (.csv):
-              </label>
-              <Button
-                className={classes.textField}
-                variant="contained"
-                color="secondary"
-                size="small"
-              >
-                Select File
-              </Button>
-            </div>
-          </DialogContent>
-          <div hidden={!newRouteError} className={classes.error}>
-            Sorry, an error occurred. Cannot create new route.
-          </div>
-          <DialogActions>
-            <Button
-              style={{ margin: 5 }}
-              variant="contained"
-              color="primary"
-              size="large"
-              onClick={() => {
-                modalName = document.getElementById("ModalName").value;
-                handleCreate(modalName);
-              }}
-            >
-              Create
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </div>
-    </div>
+      ) : (
+        <div />
+      )}
+    </>
   );
 };
 

@@ -1,14 +1,16 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
-import modalStyles from "../components/Modal.module.css"
+import modalStyles from "../components/Modal.module.css";
 import TextField from "@material-ui/core/TextField";
 import styles from "./roster.module.css";
 import ModalComponent from "../components/modal";
 import urls from "../../utils/urls";
 import { useSession } from "next-auth/client";
+import { getUserType } from "./login";
+import Router from "next/router";
 
 const fetch = require("node-fetch");
 
@@ -93,117 +95,137 @@ function getNumberCheckedIn(school) {
 
 function Roster({ schools }) {
   const classes = useStyles();
-  const [student, setStudent] = React.useState({});
-  const [firstName, setFirstName] = React.useState("");
-  const [lastName, setLastName] = React.useState("");
-  const [studentSchool, setStudentSchool] = React.useState("");
+  const [student, setStudent] = useState({});
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [studentSchool, setStudentSchool] = useState("");
   const [session, loading] = useSession();
+  const [userType, setUserType] = useState("");
+
+  useEffect(() => {
+    async function validateUserType() {
+      if (session) {
+        const type = await getUserType(session);
+        if (type === "BusDriver") {
+          //arbitrary non-route url
+          Router.push("/not_authorized");
+        }
+        setUserType(type);
+      }
+    }
+    validateUserType();
+  }, [session]);
 
   const handleSubmit = () => {
     setStudent({ firstName, lastName, studentSchool });
     // add to database
   };
-  console.log("session", session);
-
   return (
-    <div id="main">
-      <h1>{`${ClubName} Boys and Girls Club`}</h1>
-      <div className={styles.roster}>
-        <div>
-          {schools.map((school) => (
-            <table className={styles.table}>
-              <thead>
-                <tr className={styles.tr}>
-                  <th className={styles.busth}>
-                    Bus A Cap
-                    {getNumberCheckedIn(school)}
-                  </th>
-                </tr>
-                <tr style={{ height: "10px" }} />
-                <tr className={styles.tr}>
-                  <th className={styles.th}>{school.name}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {school.students.map((student) => (
-                  <tr className={classes.tr}>
-                    <div className={classes.students}>
-                      <td
-                        className={styles.td}
-                        color={student.checkedIn ? "success" : ""}
+    <>
+      {session && (userType === "Admin" || userType === "ClubDirector") ? (
+        <div id="main">
+          {" "}
+          <h1>{`${ClubName} Boys and Girls Club`}</h1>
+          <div className={styles.roster}>
+            <div>
+              {schools.map((school) => (
+                <table className={styles.table}>
+                  <thead>
+                    <tr className={styles.tr}>
+                      <th className={styles.busth}>
+                        Bus A Cap
+                        {getNumberCheckedIn(school)}
+                      </th>
+                    </tr>
+                    <tr style={{ height: "10px" }} />
+                    <tr className={styles.tr}>
+                      <th className={styles.th}>{school.name}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {school.students.map((student) => (
+                      <tr className={classes.tr}>
+                        <div className={classes.students}>
+                          <td
+                            className={styles.td}
+                            color={student.checkedIn ? "success" : ""}
+                          >
+                            {student.name}
+                            {student.checkedIn && (
+                              <CheckCircleIcon
+                                style={{
+                                  alignSelf: "flex-end",
+                                  marginLeft: "auto",
+                                  fill: "white",
+                                }}
+                              />
+                            )}
+                          </td>
+                        </div>
+                      </tr>
+                    ))}
+                    <tr>
+                      <ModalComponent
+                        setStudent={setStudent}
+                        button={
+                          <>
+                            Manually Add Entry
+                            <AddCircleIcon className={classes.icon} />
+                          </>
+                        }
+                        buttonStyle={classes.button}
                       >
-                        {student.name}
-                        {student.checkedIn && (
-                          <CheckCircleIcon
-                            style={{
-                              alignSelf: "flex-end",
-                              marginLeft: "auto",
-                              fill: "white",
-                            }}
+                        <form className={classes.form} onSubmit={handleSubmit}>
+                          <h1 className={classes.formHeading}>
+                            Manually Add Entry
+                          </h1>
+                          <TextField
+                            className={classes.formInput}
+                            id="firstName"
+                            name="firstName"
+                            type="text"
+                            label="First Name"
+                            value={firstName}
+                            variant="filled"
+                            onChange={(e) => setFirstName(e.target.value)}
                           />
-                        )}
-                      </td>
-                    </div>
-                  </tr>
-                ))}
-                <tr>
-                  <ModalComponent
-                    setStudent={setStudent}
-                    button={
-                      <>
-                        Manually Add Entry
-                        <AddCircleIcon className={classes.icon} />
-                      </>
-                    }
-                    buttonStyle={classes.button}
-                  >
-                    <form className={classes.form} onSubmit={handleSubmit}>
-                      <h1 className={classes.formHeading}>
-                        Manually Add Entry
-                      </h1>
-                      <TextField
-                        className={classes.formInput}
-                        id="firstName"
-                        name="firstName"
-                        type="text"
-                        label="First Name"
-                        value={firstName}
-                        variant="filled"
-                        onChange={(e) => setFirstName(e.target.value)}
-                      />
-                      <TextField
-                        className={classes.formInput}
-                        id="lastName"
-                        type="text"
-                        label="Last Name"
-                        value={lastName}
-                        variant="filled"
-                        onChange={(e) => setLastName(e.target.value)}
-                      />
-                      <TextField
-                        className={classes.formInput}
-                        id="school"
-                        type="text"
-                        label="School/Pickup Location"
-                        value={studentSchool}
-                        variant="filled"
-                        onChange={(e) => setStudentSchool(e.target.value)}
-                      />
-                      <button
-                        type="submit"
-                        className={`btn btn-success ${classes.formButton}`}
-                      >
-                        Add Student
-                      </button>
-                    </form>
-                  </ModalComponent>
-                </tr>
-              </tbody>
-            </table>
-          ))}
+                          <TextField
+                            className={classes.formInput}
+                            id="lastName"
+                            type="text"
+                            label="Last Name"
+                            value={lastName}
+                            variant="filled"
+                            onChange={(e) => setLastName(e.target.value)}
+                          />
+                          <TextField
+                            className={classes.formInput}
+                            id="school"
+                            type="text"
+                            label="School/Pickup Location"
+                            value={studentSchool}
+                            variant="filled"
+                            onChange={(e) => setStudentSchool(e.target.value)}
+                          />
+                          <button
+                            type="submit"
+                            className={`btn btn-success ${classes.formButton}`}
+                          >
+                            Add Student
+                          </button>
+                        </form>
+                      </ModalComponent>
+                    </tr>
+                  </tbody>
+                </table>
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      ) : (
+        <div />
+      )}
+    </>
   );
 }
 

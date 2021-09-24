@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { spacing } from "@material-ui/system";
 import Box from "@material-ui/core/Box";
@@ -6,6 +6,9 @@ import Collapse from "@material-ui/core/Collapse";
 import IconButton from "@material-ui/core/IconButton";
 import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
+import { useSession } from "next-auth/client";
+import { getUserType } from "./login";
+import Router from "next/router";
 
 import {
   Button,
@@ -104,10 +107,12 @@ const createTable = async (
 
 const createdAccounts = () => {
   const classes = useStyles();
-  const [filterType, setType] = React.useState("All");
-  const [dataItems, setDataItems] = React.useState([]);
-  const [expanded, setExpanded] = React.useState(false);
-  const [isEditable, setEditable] = React.useState("false");
+  const [session, loading] = useSession();
+  const [filterType, setType] = useState("All");
+  const [dataItems, setDataItems] = useState([]);
+  const [expanded, setExpanded] = useState(false);
+  const [isEditable, setEditable] = useState("false");
+  const [userType, setUserType] = useState("");
 
   const handleExpansion = () => {
     if (expanded == true) {
@@ -121,127 +126,198 @@ const createdAccounts = () => {
     setEditable("true");
   };
 
+  useEffect(() => {
+    async function validateUserType() {
+      if (session) {
+        const type = await getUserType(session);
+        if (type !== "Admin") {
+          //arbitrary non-route url
+          Router.push("/not_authorized");
+        }
+        setUserType(type);
+      }
+    }
+    validateUserType();
+  }, [session]);
+
   return (
-    <div>
-      <div className={classes.pageHead}>
-        <h1>Accounts</h1>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => {
-            // Implement later to move to create account page
-          }}
-          p={10}
-          style={{ margin: 20 }}
-        >
-          + Create an Account
-        </Button>
-      </div>
-      <div className={classes.filterDiv}>
-        <Box m={1}>
-          <Button
-            variant={filterType !== "All" ? "outlined" : "contained"}
-            color="primary"
-            onClick={() => {
-              setType("All");
-            }}
-            p={10}
-          >
-            All
-          </Button>
-        </Box>
-        <Box m={1}>
-          <Button
-            variant={filterType !== "BusDriver" ? "outlined" : "contained"}
-            color="primary"
-            onClick={() => {
-              setType("BusDriver");
-            }}
-            p={10}
-          >
-            Bus Driver
-          </Button>
-        </Box>
-        <Box m={1}>
-          <Button
-            variant={
-              filterType !== "ExecutiveDirector" ? "outlined" : "contained"
-            }
-            color="primary"
-            onClick={() => {
-              setType("ExecutiveDirector");
-            }}
-            p={10}
-          >
-            Executive Director
-          </Button>
-        </Box>
-        <Box m={1}>
-          <Button
-            variant={
-              filterType !== "RegionalDirector" ? "outlined" : "contained"
-            }
-            color="primary"
-            onClick={() => {
-              setType("RegionalDirector");
-            }}
-            p={10}
-          >
-            Regional Director
-          </Button>
-        </Box>
-        <Box m={1}>
-          <Button
-            variant={
-              filterType !== "MembershipClerk" ? "outlined" : "contained"
-            }
-            color="primary"
-            onClick={() => {
-              setType("MembershipClerk");
-            }}
-            p={10}
-          >
-            Membership Clerk
-          </Button>
-        </Box>
-        <TextField
-          required
-          id="search-bar"
-          label="PLACEHOLDER FOR SEARCH BAR"
-          defaultValue=" "
-          style={{ margin: 10 }}
-        />
-      </div>
-      <table className={classes.table}>
-        <thead
-          style={{ backgroundColor: "#E0E0E0", width: "calc( 100% - 1em )" }}
-        >
-          <tr>
-            <th scope="col" className={classes.th}>
-              {" "}
-              Number
-            </th>
-            <th scope="col" className={classes.th}>
-              {" "}
-              Name{" "}
-            </th>
-            <th scope="col" className={classes.th}>
-              {" "}
-              Account Type
-            </th>
-            <th scope="col" className={classes.th}>
-              {" "}
-              Email{" "}
-            </th>
-            <th scope="col" className={classes.th}>
-              {" "}
-              Created by{" "}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {dataItems.map((data, index) => (
-            <tr key={index}>
+    <>
+      {session && userType === "Admin" ? (
+        <div>
+          <div className={classes.pageHead}>
+            <h1>Accounts</h1>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                // Implement later to move to create account page
+              }}
+              p={10}
+              style={{ margin: 20 }}
+            >
+              + Create an Account
+            </Button>
+          </div>
+          <div className={classes.filterDiv}>
+            <Box m={1}>
+              <Button
+                variant={filterType !== "All" ? "outlined" : "contained"}
+                color="primary"
+                onClick={() => {
+                  setType("All");
+                }}
+                p={10}
+              >
+                All
+              </Button>
+            </Box>
+            <Box m={1}>
+              <Button
+                variant={filterType !== "BusDriver" ? "outlined" : "contained"}
+                color="primary"
+                onClick={() => {
+                  setType("BusDriver");
+                }}
+                p={10}
+              >
+                Bus Driver
+              </Button>
+            </Box>
+            <Box m={1}>
+              <Button
+                variant={
+                  filterType !== "ExecutiveDirector" ? "outlined" : "contained"
+                }
+                color="primary"
+                onClick={() => {
+                  setType("ExecutiveDirector");
+                }}
+                p={10}
+              >
+                Executive Director
+              </Button>
+            </Box>
+            <Box m={1}>
+              <Button
+                variant={
+                  filterType !== "RegionalDirector" ? "outlined" : "contained"
+                }
+                color="primary"
+                onClick={() => {
+                  setType("RegionalDirector");
+                }}
+                p={10}
+              >
+                Regional Director
+              </Button>
+            </Box>
+            <Box m={1}>
+              <Button
+                variant={
+                  filterType !== "MembershipClerk" ? "outlined" : "contained"
+                }
+                color="primary"
+                onClick={() => {
+                  setType("MembershipClerk");
+                }}
+                p={10}
+              >
+                Membership Clerk
+              </Button>
+            </Box>
+            <TextField
+              required
+              id="search-bar"
+              label="PLACEHOLDER FOR SEARCH BAR"
+              defaultValue=" "
+              style={{ margin: 10 }}
+            />
+          </div>
+          <table className={classes.table}>
+            <thead
+              style={{
+                backgroundColor: "#E0E0E0",
+                width: "calc( 100% - 1em )",
+              }}
+            >
+              <tr>
+                <th scope="col" className={classes.th}>
+                  {" "}
+                  Number
+                </th>
+                <th scope="col" className={classes.th}>
+                  {" "}
+                  Name{" "}
+                </th>
+                <th scope="col" className={classes.th}>
+                  {" "}
+                  Account Type
+                </th>
+                <th scope="col" className={classes.th}>
+                  {" "}
+                  Email{" "}
+                </th>
+                <th scope="col" className={classes.th}>
+                  {" "}
+                  Created by{" "}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {dataItems.map((data, index) => (
+                <tr key={index}>
+                  <td scope="row">
+                    <IconButton
+                      className={classes.tcell}
+                      onClick={handleExpansion}
+                    >
+                      {" "}
+                      {expanded ? (
+                        <KeyboardArrowUpIcon />
+                      ) : (
+                        <KeyboardArrowDownIcon />
+                      )}{" "}
+                      {data.index}{" "}
+                    </IconButton>
+                  </td>
+                  <td contenteditable={isEditable} className={classes.tcell}>
+                    {" "}
+                    {data.name}{" "}
+                  </td>
+                  <td contenteditable={isEditable} className={classes.tcell}>
+                    {" "}
+                    {data.type}{" "}
+                  </td>
+                  <td contenteditable={isEditable} className={classes.tcell}>
+                    {" "}
+                    {data.email}{" "}
+                  </td>
+                  <td contenteditable={isEditable} className={classes.tcell}>
+                    {" "}
+                    {data.createdBy}{" "}
+                  </td>
+                  <Collapse in={expanded} timeout="auto" unmountOnExit>
+                    <div className={classes.paper}>
+                      <h1> Name: {data.name} </h1>
+                      <h1> Account Type: {data.type} </h1>
+                      <h1> Email: {data.email} </h1>
+                      <h1> Location: {data.location} </h1>
+                      <h1> Password: {data.password} </h1>
+                      <Box m={1}>
+                        <Button
+                          onClick={tableEditable}
+                          variant="contained"
+                          color="primary"
+                        >
+                          Edit
+                        </Button>
+                      </Box>
+                    </div>
+                  </Collapse>
+                </tr>
+              ))}
+            </tbody>
+            <tr>
               <td scope="row">
                 <IconButton className={classes.tcell} onClick={handleExpansion}>
                   {" "}
@@ -250,94 +326,50 @@ const createdAccounts = () => {
                   ) : (
                     <KeyboardArrowDownIcon />
                   )}{" "}
-                  {data.index}{" "}
+                  1{" "}
                 </IconButton>
               </td>
               <td contenteditable={isEditable} className={classes.tcell}>
                 {" "}
-                {data.name}{" "}
+                Test Person{" "}
               </td>
               <td contenteditable={isEditable} className={classes.tcell}>
                 {" "}
-                {data.type}{" "}
+                Test Type{" "}
               </td>
               <td contenteditable={isEditable} className={classes.tcell}>
                 {" "}
-                {data.email}{" "}
+                test000@gmail.com{" "}
               </td>
               <td contenteditable={isEditable} className={classes.tcell}>
                 {" "}
-                {data.createdBy}{" "}
+                CreatedbyTest{" "}
               </td>
-              <Collapse in={expanded} timeout="auto" unmountOnExit>
-                <div className={classes.paper}>
-                  <h1> Name: {data.name} </h1>
-                  <h1> Account Type: {data.type} </h1>
-                  <h1> Email: {data.email} </h1>
-                  <h1> Location: {data.location} </h1>
-                  <h1> Password: {data.password} </h1>
-                  <Box m={1}>
-                    <Button
-                      onClick={tableEditable}
-                      variant="contained"
-                      color="primary"
-                    >
-                      Edit
-                    </Button>
-                  </Box>
-                </div>
-              </Collapse>
             </tr>
-          ))}
-        </tbody>
-        <tr>
-          <td scope="row">
-            <IconButton className={classes.tcell} onClick={handleExpansion}>
-              {" "}
-              {expanded ? (
-                <KeyboardArrowUpIcon />
-              ) : (
-                <KeyboardArrowDownIcon />
-              )} 1{" "}
-            </IconButton>
-          </td>
-          <td contenteditable={isEditable} className={classes.tcell}>
-            {" "}
-            Test Person{" "}
-          </td>
-          <td contenteditable={isEditable} className={classes.tcell}>
-            {" "}
-            Test Type{" "}
-          </td>
-          <td contenteditable={isEditable} className={classes.tcell}>
-            {" "}
-            test000@gmail.com{" "}
-          </td>
-          <td contenteditable={isEditable} className={classes.tcell}>
-            {" "}
-            CreatedbyTest{" "}
-          </td>
-        </tr>
-        <Collapse in={expanded} timeout="auto" unmountOnExit>
-          <div className={classes.paper}>
-            <p> Name: </p>
-            <p> Account Type: </p>
-            <p> Email: </p>
-            <p> Location: </p>
-            <p> Password: </p>
-            <Box m={1}>
-              <Button
-                onClick={tableEditable}
-                variant="contained"
-                color="primary"
-              >
-                Edit
-              </Button>
-            </Box>
-          </div>
-        </Collapse>
-      </table>
-    </div>
+            <Collapse in={expanded} timeout="auto" unmountOnExit>
+              <div className={classes.paper}>
+                <p> Name: </p>
+                <p> Account Type: </p>
+                <p> Email: </p>
+                <p> Location: </p>
+                <p> Password: </p>
+                <Box m={1}>
+                  <Button
+                    onClick={tableEditable}
+                    variant="contained"
+                    color="primary"
+                  >
+                    Edit
+                  </Button>
+                </Box>
+              </div>
+            </Collapse>
+          </table>
+        </div>
+      ) : (
+        <div />
+      )}
+    </>
   );
 };
 
