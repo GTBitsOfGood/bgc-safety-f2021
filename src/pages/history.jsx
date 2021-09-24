@@ -407,7 +407,7 @@ function History({ students }) {
 
   return (
     <>
-      {session && userType !== "BusDriver" && userType !== "" ? (
+      {session && (userType === "Admin" || userType === "ClubDirector") ? (
         <div className={styles.container}>
           <p style={{ fontSize: "200", margin: "0" }}>Bus Attendance Matrix</p>
           <h2 style={{ marginTop: "5px", marginBottom: "20px" }}>

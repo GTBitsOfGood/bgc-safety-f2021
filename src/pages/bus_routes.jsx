@@ -293,7 +293,7 @@ const BusRoutes = ({ savedRoutes }) => {
 
   return (
     <>
-      {session && userType === "Admin" && userType === "ClubDirector" ? (
+      {session && (userType === "Admin" || userType === "ClubDirector") ? (
         <div>
           <div className={classes.container}>
             <div className={classes.pagehead}>
