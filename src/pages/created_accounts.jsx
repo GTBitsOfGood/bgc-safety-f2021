@@ -9,7 +9,6 @@ import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import { useSession } from "next-auth/client";
 import { getUserType } from "./login";
-import Router from "next/router";
 
 import {
   Button,
