@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import axios from "axios";
 import Router from "next/router";
 import { Button, Typography, InputBase } from "@material-ui/core";
@@ -61,6 +61,12 @@ const Login = () => {
   function gotoLanding() {
     Router.replace("/history");
   }
+
+  useEffect(() => {
+    if (session) {
+      Router.replace("/history");
+    }
+  }, [session]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -141,8 +147,8 @@ const Login = () => {
           </Button>
         </>
       )}
-      {session && (
-        <>
+      {session && (null)
+        /*<>
           Signed in as {session.user.email} <br />
           <Button
             onClick={signOut}
@@ -158,8 +164,8 @@ const Login = () => {
           >
             Go to Landing page (to happen automatically)
           </Button>
-        </>
-      )}
+        </>*/
+      }
     </div>
   );
 };
