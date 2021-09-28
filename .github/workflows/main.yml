@@ -32,7 +32,7 @@ jobs:
           repo: ${{ github.repository }}
           ref: ${{ github.ref }}
           auto_merge: false
-          required_contexts: []
+          required_contexts: "[]"
           environment: ${{ github.ref == 'refs/heads/production' && 'Production' || (github.ref == 'refs/heads/main' && 'Preview' || 'Development') }}
 
       # Checkout
