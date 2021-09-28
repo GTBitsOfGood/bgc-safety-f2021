@@ -21,10 +21,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Set env vars
-      - name: Set Environment Variables
-        run: |
-          echo "GIT_BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
+      # List Branches
+      - name: List Branches
+        id: list_branches
+        uses: octokit/request-action@v2.x
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        with:
+          route: GET /repos/{repo}/branches
+          repo: ${{ github.repository }}
+
+      - name: Test
+        env:
+          DATA: "${{ steps.list_branches.outputs.data }}"
+        run: echo $DATA
 
       # Create deployment
       - name: Create GitHub Deployment
