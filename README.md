@@ -11,8 +11,7 @@
 
 ### Pulling Secrets
 
-- Run `npm run secrets` to sync development secrets from Bitwarden and save them to a local `.env` file. Contact a leadership member for the Bitwarden password.
-  - **Note**: If you are using Windows, enter `npm run secrets:login` and then `npm run secrets:sync` instead of the above script.
+- Run `npm run secrets-dev` to sync development secrets from Bitwarden and save them to a local `.env` file. Contact a leadership member for the Bitwarden password.
 
 **NEVER** commit any secrets or your `.env` file.
 
@@ -23,7 +22,6 @@ A MongoDB server is required for this project. Pulling secrets will point your l
 - [Download MongoDB Community Server](https://www.mongodb.com/download-center/community)
 - Go through the installation instructions.
   - Leave the port at default 27017
-- Set the `MONGO_DB` environment variable in your `.env` file to `mongodb://localhost:27017`
 - (Optional but recommended) Run `npm run seed` to insert testing data into your database.
   - **Note**: the `seed` command will nuke your database!
 

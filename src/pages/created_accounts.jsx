@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import Router from "next/router";
 import { makeStyles } from "@material-ui/core/styles";
 import { spacing } from "@material-ui/system";
 import Box from "@material-ui/core/Box";
@@ -122,6 +123,10 @@ const createdAccounts = () => {
     }
   };
 
+  const goToAccountCreationPage = () => {
+    Router.replace("/account_creation");
+  };
+
   const tableEditable = () => {
     setEditable("true");
   };
@@ -149,9 +154,7 @@ const createdAccounts = () => {
             <Button
               variant="contained"
               color="primary"
-              onClick={() => {
-                // Implement later to move to create account page
-              }}
+              onClick={goToAccountCreationPage}
               p={10}
               style={{ margin: 20 }}
             >
