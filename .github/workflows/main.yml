@@ -56,7 +56,7 @@ jobs:
         uses: thollander/actions-comment-pull-request@v1
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          message: ${{ format('[Deployment live]({0})', steps.deploy.outputs.DEPLOY_LINK) }}
+          message: ${{ format('### ⚡ [Deployment live]({0}) :zap:', steps.deploy.outputs.DEPLOY_LINK) }}
 
       # Link deployment to GitHub Preview Environment (for main branch only)
       - name: Create GitHub Deployment for Preview
