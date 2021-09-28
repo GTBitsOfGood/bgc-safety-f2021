@@ -21,21 +21,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # List Branches
-      - name: List Branches
-        id: list_branches
-        uses: octokit/request-action@v2.x
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-        with:
-          route: GET /repos/{repo}/branches
-          repo: ${{ github.repository }}
-
-      - name: Test
-        env:
-          DATA: "${{ steps.list_branches.outputs.data }}"
-        run: echo $DATA
-
       # Create deployment
       - name: Create GitHub Deployment
         id: create_deployment
@@ -45,8 +30,9 @@ jobs:
         with:
           route: POST /repos/{repo}/deployments
           repo: ${{ github.repository }}
-          ref: "kavin/link-pt2"
+          ref: ${{ github.ref }}
           auto_merge: false
+          required_contexts: []
           environment: ${{ github.ref == 'refs/heads/production' && 'Production' || (github.ref == 'refs/heads/main' && 'Preview' || 'Development') }}
 
       # Checkout
