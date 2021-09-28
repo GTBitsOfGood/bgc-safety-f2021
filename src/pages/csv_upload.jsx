@@ -3,8 +3,8 @@ import axios from "axios";
 import urls from "../../utils/urls";
 import FileUploader from "../components/file_uploader";
 import { useSession } from "next-auth/client";
-import { getUserType } from "./login";
 import Router from "next/router";
+import { verifyUserType } from "../../utils/userType";
 
 const CSVUpload = () => {
   const [uploadedFile, setUploadedFile] = useState(false);
@@ -14,17 +14,7 @@ const CSVUpload = () => {
   const [userType, setUserType] = useState("");
 
   useEffect(() => {
-    async function validateUserType() {
-      if (session) {
-        const type = await getUserType(session);
-        if (type !== "BusDriver") {
-          //arbitrary non-route url
-          Router.push("/not_authorized");
-        }
-        setUserType(type);
-      }
-    }
-    validateUserType();
+    session && verifyUserType(session, urls.pages.csv_upload, setUserType);
   }, [session]);
 
   const handleUpload = (files) => {
@@ -63,7 +53,7 @@ const CSVUpload = () => {
 
   return (
     <>
-      {session && (userType === "Admin" || userType === "ClubDirector") ? (
+      {session && userType === "Admin" ? (
         <div className="container">
           <div>
             <div>

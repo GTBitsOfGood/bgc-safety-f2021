@@ -53,7 +53,7 @@ const routes = [
   {
     name: "Created Accounts",
     link: urls.pages.created_accounts,
-    type: "All",
+    type: "Admin",
   },
 ];
 

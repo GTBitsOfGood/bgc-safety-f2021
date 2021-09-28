@@ -15,8 +15,8 @@ import AddIcon from "@material-ui/icons/Add";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import urls from "../../utils/urls";
 import { useSession } from "next-auth/client";
-import { getUserType } from "./login";
 import Router from "next/router";
+import { verifyUserType } from "../../utils/userType";
 // import {getStudentsByName, changeStudentRoute} from "../pages/api/student";
 
 const fetch = require("node-fetch");
@@ -145,17 +145,7 @@ const BusRoutes = ({ savedRoutes }) => {
   const [userType, setUserType] = useState("");
 
   useEffect(() => {
-    async function validateUserType() {
-      if (session) {
-        const type = await getUserType(session);
-        if (type === "BusDriver") {
-          //arbitrary non-route url
-          Router.push("/not_authorized");
-        }
-        setUserType(type);
-      }
-    }
-    validateUserType();
+    session && verifyUserType(session, urls.pages.bus_routes, setUserType);
   }, [session]);
 
   const addRoute = () => {

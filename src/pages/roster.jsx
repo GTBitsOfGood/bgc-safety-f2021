@@ -9,8 +9,8 @@ import styles from "./roster.module.css";
 import ModalComponent from "../components/modal";
 import urls from "../../utils/urls";
 import { useSession } from "next-auth/client";
-import { getUserType } from "./login";
 import Router from "next/router";
+import { verifyUserType } from "../../utils/userType";
 
 const fetch = require("node-fetch");
 
@@ -103,17 +103,7 @@ function Roster({ schools }) {
   const [userType, setUserType] = useState("");
 
   useEffect(() => {
-    async function validateUserType() {
-      if (session) {
-        const type = await getUserType(session);
-        if (type === "BusDriver") {
-          //arbitrary non-route url
-          Router.push("/not_authorized");
-        }
-        setUserType(type);
-      }
-    }
-    validateUserType();
+    session && verifyUserType(session, urls.pages.roster, setUserType);
   }, [session]);
 
   const handleSubmit = () => {

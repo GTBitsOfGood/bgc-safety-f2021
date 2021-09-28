@@ -8,7 +8,8 @@ import IconButton from "@material-ui/core/IconButton";
 import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import { useSession } from "next-auth/client";
-import { getUserType } from "./login";
+import urls from "../../utils/urls";
+import { verifyUserType } from "../../utils/userType";
 
 import {
   Button,
@@ -20,9 +21,6 @@ import {
   Backdrop,
   Fade,
 } from "@material-ui/core";
-
-import Link from "next/link";
-import urls from "../../utils/urls";
 
 const fetch = require("node-fetch");
 
@@ -131,17 +129,8 @@ const createdAccounts = () => {
   };
 
   useEffect(() => {
-    async function validateUserType() {
-      if (session) {
-        const type = await getUserType(session);
-        if (type !== "Admin") {
-          //arbitrary non-route url
-          Router.push("/not_authorized");
-        }
-        setUserType(type);
-      }
-    }
-    validateUserType();
+    session &&
+      verifyUserType(session, urls.pages.created_accounts, setUserType);
   }, [session]);
 
   return (

@@ -20,6 +20,7 @@ import routes from "../../utils/routes";
 import Axios from "axios";
 import { lightgray } from "color-name";
 import { getSession, useSession } from "next-auth/client";
+import { filterRoutes } from "../../utils/userType";
 // import { Route } from 'react-router-dom';
 
 const getDate = () => {
@@ -123,32 +124,6 @@ const Header = (props) => {
   // let filteredRoutes = [];
   // const [filteredRoutes, setFilteredRoutes] = React.useState([]);
 
-  const filterRoutes = (currentUser) => {
-    let fRoutes = [];
-    if (currentUser.type == "Admin") {
-      fRoutes = routes.filter(
-        (item) => item.type == "Admin" || item.type == "All"
-      );
-    } else if (currentUser.type == "BusDriver") {
-      fRoutes = routes.filter(
-        (item) => item.type == "BusDriver" || item.type == "All"
-      );
-    } else if (currentUser.type == "ClubDirector") {
-      fRoutes = routes.filter(
-        (item) =>
-          item.type == "ClubDirectorAttendanceClerk" || item.type == "All"
-      );
-    } else if (currentUser.type == "AttendanceClerk") {
-      fRoutes = routes.filter(
-        (item) =>
-          item.type == "ClubDirectorAttendanceClerk" || item.type == "All"
-      );
-    } else {
-      fRoutes = routes.filter((item) => item.type == "All");
-    }
-
-    return fRoutes;
-  };
   const queryUser = async () => {
     const res = await fetch(`/api/user?email=${session.user.email}`);
     return await res.json();
@@ -259,4 +234,5 @@ Header.defaultProps = {
   router: null,
 };
 
+export { filterRoutes };
 export default withRouter(Header);

@@ -4,8 +4,7 @@ import Link from "next/link";
 const fetch = require("node-fetch");
 import urls from "../../utils/urls";
 import { useSession } from "next-auth/client";
-import { getUserType } from "./login";
-import Router from "next/router";
+import { verifyUserType } from "../../utils/userType";
 
 const ClubName = "Harland"; // TODO: Allow user to select a club
 
@@ -41,17 +40,7 @@ const RouteSelection = ({ schools }) => {
   const [userType, setUserType] = useState("");
 
   useEffect(() => {
-    async function validateUserType() {
-      if (session) {
-        const type = await getUserType(session);
-        if (type !== "BusDriver") {
-          //arbitrary non-route url
-          Router.push("/not_authorized");
-        }
-        setUserType(type);
-      }
-    }
-    validateUserType();
+    session && verifyUserType(session, urls.pages.route_selection, setUserType);
   }, [session]);
 
   useEffect(() => {

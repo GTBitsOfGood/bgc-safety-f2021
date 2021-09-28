@@ -12,11 +12,11 @@ import {
   Backdrop,
   Fade,
 } from "@material-ui/core";
-import { getUserType } from "./login";
 import Router from "next/router";
 import { useSession } from "next-auth/client";
 import Link from "next/link";
 import urls from "../../utils/urls";
+import { verifyUserType } from "../../utils/userType";
 
 const fetch = require("node-fetch");
 
@@ -120,17 +120,8 @@ const AccountCreation = () => {
   };
 
   useEffect(() => {
-    async function validateUserType() {
-      if (session) {
-        const type = await getUserType(session);
-        if (type !== "Admin") {
-          //arbitrary non-route url
-          Router.push("/not_authorized");
-        }
-        setUserType(type);
-      }
-    }
-    validateUserType();
+    session &&
+      verifyUserType(session, urls.pages.account_creation, setUserType);
   }, [session]);
 
   return (

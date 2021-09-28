@@ -4,6 +4,7 @@ import Router from "next/router";
 import { Button, Typography, InputBase } from "@material-ui/core";
 import { makeStyles, withStyles } from "@material-ui/core/styles";
 import urls from "../../utils/urls";
+import { fetchUserData } from "../../utils/userType";
 import { signIn, signOut, useSession } from "next-auth/client";
 
 const useStyles = makeStyles({
@@ -50,12 +51,6 @@ const LoginField = withStyles({
   },
 })(InputBase);
 
-const getUserType = async (session) => {
-  const res = await fetch(`/api/user?email=${session.user.email}`);
-  const userData = await res.json();
-  return userData[0].type;
-};
-
 const Login = () => {
   const [error, setError] = useState(null);
   const [username, setUsername] = useState(null);
@@ -66,13 +61,10 @@ const Login = () => {
   // console.log(process.env.NEXTAUTH_URL);
   const classes = useStyles();
 
-  useEffect(() => {
-    async function checkUserType() {
-      const type = await getUserType(session);
-      setUserType(type);
-    }
+  useEffect(async () => {
     if (session) {
-      checkUserType();
+      const userData = await fetchUserData(session);
+      setUserType(userData.type);
     }
   }, [session]);
 
@@ -84,11 +76,11 @@ const Login = () => {
       - Admin: roster (ideally "Overview of Clubs" - Figma)
     */
     if (userType === "BusDriver") {
-      Router.replace("/route_selection");
-    } else if (userType === "ClubDirector") {
-      Router.replace("/roster");
+      Router.replace(urls.pages.route_selection);
+    } else if (userType === "ClubDirector" || userType === "AttendanceClerk") {
+      Router.replace(urls.pages.roster);
     } else if (userType === "Admin") {
-      Router.replace("/roster");
+      Router.replace(urls.pages.roster);
     }
   };
 
@@ -170,5 +162,4 @@ const Login = () => {
   );
 };
 
-export { getUserType };
 export default Login;
