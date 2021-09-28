@@ -31,7 +31,7 @@ jobs:
         with:
           route: POST /repos/{repo}/deployments
           repo: ${{ github.repository }}
-          ref: "kavin/deploy-environments"
+          ref: ${{ github.ref }}
           auto_merge: false
           environment: ${{ github.event_name == 'pull_request' && 'Development' || (github.head_ref == 'main' && 'Preview' || 'Production') }}
 
