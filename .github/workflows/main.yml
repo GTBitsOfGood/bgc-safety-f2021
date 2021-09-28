@@ -38,6 +38,7 @@ jobs:
 
       # Deploy using Vercel CLI
       - name: Vercel Deployment
+        id: deploy
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
@@ -48,13 +49,29 @@ jobs:
             )\
           "
           echo "::set-output name=DEPLOY_TIMESTAMP::$(date +'%Y-%m-%dT%H:%M:%S')"
-        id: deploy
 
-      - name: Pull Request Updater GitHub Action
+      # Comment deployment link on PRs
+      - name: Comment Deployment on PR
         if: github.event_name == 'pull_request'
+        uses: thollander/actions-comment-pull-request@v1
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          base-branch-regex: main
-          body-update-action: suffix
-          body-template: ${{ format('[Deployment ({0})]({1})', steps.deploy.outputs.DEPLOY_TIMESTAMP, steps.deploy.outputs.DEPLOY_LINK) }}
-        uses: tzkhan/pr-update-action@v2
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          target_url: ${{ format('[Deployment live]({0})', steps.deploy.outputs.DEPLOY_LINK) }}
+
+      # Link deployment to GitHub Preview Environment (for main branch only)
+      - name: Create GitHub Deployment for Preview
+        if: github.event_name == 'push' && github.head_ref == 'main'
+        uses: chrnorm/deployment-action@releases/v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          target_url: ${{ steps.deploy.outputs.DEPLOY_LINK }}
+          environment: preview
+
+      # Link deployment to GitHub Production Environment (for production branch only)
+      - name: Create GitHub Deployment for Production
+        if: github.event_name == 'push' && github.head_ref == 'main'
+        uses: chrnorm/deployment-action@releases/v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          target_url: ${{ steps.deploy.outputs.DEPLOY_LINK }}
+          environment: Production
