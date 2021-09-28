@@ -58,6 +58,30 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           message: ${{ format('### ⚡ [Deployment live]({0}) :zap:', steps.deploy.outputs.DEPLOY_LINK) }}
 
+      # Output is used in the next step
+      - name: Get PR Reference
+        id: get_pull_request_ref
+        uses: octokit/request-action@v2.x
+        with:
+          route: GET /repos/:repository/pulls/:issue_id
+          repository: ${{ github.repository }}
+          issue_id: ${{ github.event.issue.number }}
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      # Link deployment to GitHub Development Environment (for PRs only)
+      - name: Create GItHub Deployment for Development
+        id: create_deployment
+        uses: octokit/request-action@v2.x
+        with:
+          route: POST /repos/:repository/deployments
+          repository: ${{ github.repository }}
+          ref: ${{ fromJson(steps.get_pull_request_ref.outputs.data).head.ref }}
+          environment: Development
+          auto_merge: false
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
       # Link deployment to GitHub Preview Environment (for main branch only)
       - name: Create GitHub Deployment for Preview
         if: github.event_name == 'push' && github.head_ref == 'main'
