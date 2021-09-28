@@ -6,8 +6,9 @@ name: CD
 on:
   # Triggers the workflow on all pushes
   push:
-    branches:
-      - "**"
+    branches: [main, production]
+    pull_request:
+      branches: [main]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -62,6 +63,14 @@ jobs:
         #     cat out.log | egrep -o 'https:\/\/bgc-safety-f2021-.+-bitsofgood.vercel.app' \
         #   )\
         # "
+
+      # Comment deployment link on PRs
+      - name: Comment Deployment on PR
+        if: github.event_name == 'pull_request'
+        uses: thollander/actions-comment-pull-request@v1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          message: ${{ format('### ⚡ [Deployment Live]({0}) :zap:', steps.vercel_deployment.outputs.DEPLOY_LINK) }}
 
       # Links the Vercel Deployment to the GitHub Deployment
       - name: Link Deployment
