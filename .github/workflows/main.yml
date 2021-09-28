@@ -62,13 +62,12 @@ jobs:
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          echo "::set-output name=DEPLOY_LINK::$(echo 'https://github.com')"
-        # echo "\
-        #   ::set-output name=DEPLOY_LINK::$( \
-        #     (npx vercel --confirm --token $VERCEL_TOKEN >> out.log); \
-        #     cat out.log | egrep -o 'https:\/\/bgc-safety-f2021-.+-bitsofgood.vercel.app' \
-        #   )\
-        # "
+          echo "\
+            ::set-output name=DEPLOY_LINK::$( \
+              (npx vercel --confirm --token $VERCEL_TOKEN >> out.log); \
+              cat out.log | egrep -o 'https:\/\/bgc-safety-f2021-.+-bitsofgood.vercel.app' \
+            )\
+          "
 
       # Comment deployment link on PRs
       - name: Comment Deployment on PR
