@@ -23,17 +23,17 @@ jobs:
 
     steps:
       # Create deployment
-      # - name: Create GitHub Deployment
-      #   id: create_deployment
-      #   uses: octokit/request-action@v2.x
-      #   env:
-      #     GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-      #   with:
-      #     route: POST /repos/{repo}/deployments
-      #     repo: ${{ github.repository }}
-      #     ref: ${{ github.ref }}
-      #     auto_merge: false
-      #     environment: ${{ github.event_name == 'pull_request' && 'Development' || (github.head_ref == 'main' && 'Preview' || 'Production') }}
+      - name: Create GitHub Deployment
+        id: create_deployment
+        uses: octokit/request-action@v2.x
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        with:
+          route: POST /repos/{repo}/deployments
+          repo: ${{ github.repository }}
+          ref: ${{ github.head_ref }}
+          auto_merge: false
+          environment: ${{ github.event_name == 'pull_request' && 'Development' || (github.head_ref == 'main' && 'Preview' || 'Production') }}
 
       # Checkout
       - uses: actions/checkout@v2
@@ -62,18 +62,6 @@ jobs:
             )\
           "
           echo "::set-output name=DEPLOY_TIMESTAMP::$(date +'%Y-%m-%dT%H:%M:%S')"
-
-      # Link deployment to GitHub Development Environment (for PRs only)
-      - name: Create GitHub Deployment for Development
-        uses: octokit/request-action@v2.x
-        with:
-          route: POST /repos/{repo}/deployments
-          repo: ${{ github.repository }}
-          ref: ${{ github.ref }}
-          auto_merge: false
-          environment: Development
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
       # Links the Vercel Deployment to the GitHub Deployment
       - name: Link Deployment
