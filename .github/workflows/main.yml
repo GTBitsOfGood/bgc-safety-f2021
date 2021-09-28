@@ -35,7 +35,7 @@ jobs:
         with:
           route: POST /repos/{repo}/deployments
           repo: ${{ github.repository }}
-          ref: ${{ env.GIT_BRANCH }}
+          ref: "kavin/link-pt2"
           auto_merge: false
           environment: ${{ github.ref == 'refs/heads/production' && 'Production' || (github.ref == 'refs/heads/main' && 'Preview' || 'Development') }}
 
