@@ -50,36 +50,16 @@ jobs:
           "
           echo "::set-output name=DEPLOY_TIMESTAMP::$(date +'%Y-%m-%dT%H:%M:%S')"
 
-      # Comment deployment link on PRs
-      - name: Comment Deployment on PR
-        if: github.event_name == 'pull_request'
-        uses: thollander/actions-comment-pull-request@v1
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          message: ${{ format('### ⚡ [Deployment live]({0}) :zap:', steps.deploy.outputs.DEPLOY_LINK) }}
-
-      # Output is used in the next step
-      - name: Get PR Reference
-        id: get_pull_request_ref
-        uses: octokit/request-action@v2.x
-        with:
-          route: GET /repos/{owner}/{repo}/pulls/{issue_id}
-          owner: GTBitsOfGood
-          repo: ${{ github.repository }}
-          issue_id: ${{ github.event.issue.number }}
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-
       # Link deployment to GitHub Development Environment (for PRs only)
-      - name: Create GItHub Deployment for Development
-        id: create_deployment
+      - name: Create GitHub Deployment for Development
         uses: octokit/request-action@v2.x
         with:
-          route: POST /repos/{repo}/deployments
+          route: POST /repos/{owner}/{repo}/deployments
+          owner: ${{ github.repository_owner }}
           repo: ${{ github.repository }}
-          ref: ${{ fromJson(steps.get_pull_request_ref.outputs.data).head.ref }}
-          environment: Development
+          ref: ${{ github.ref }}
           auto_merge: false
+          environment: Development
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
