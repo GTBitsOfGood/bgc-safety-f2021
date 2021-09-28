@@ -32,7 +32,7 @@ jobs:
           repo: ${{ github.repository }}
           ref: ${{ github.ref }}
           auto_merge: false
-          environment: ${{ github.ref == 'refs/heads/production' && 'Production' (github.ref == 'refs/heads/main' && 'Preview' || 'Development') }}
+          environment: ${{ github.ref == 'refs/heads/production' && 'Production' || (github.ref == 'refs/heads/main' && 'Preview' || 'Development') }}
 
       # Checkout
       - uses: actions/checkout@v2
@@ -73,7 +73,7 @@ jobs:
           deployment_id: ${{ fromJson(steps.create_deployment.outputs.data).id }}
           state: "success"
           target_url: ${{ steps.vercel_deployment.outputs.DEPLOY_LINK }}
-          environment: ${{ github.ref == 'refs/heads/production' && 'Production' (github.ref == 'refs/heads/main' && 'Preview' || 'Development') }}
+          environment: ${{ github.ref == 'refs/heads/production' && 'Production' || (github.ref == 'refs/heads/main' && 'Preview' || 'Development') }}
 
       # Fails deployment if job fails or is cancelled
       - name: Fail Deployment
@@ -86,4 +86,4 @@ jobs:
           repo: ${{ github.repository }}
           deployment_id: ${{ fromJson(steps.create_deployment.outputs.data).id }}
           state: "failure"
-          environment: ${{ github.ref == 'refs/heads/production' && 'Production' (github.ref == 'refs/heads/main' && 'Preview' || 'Development') }}
+          environment: ${{ github.ref == 'refs/heads/production' && 'Production' || (github.ref == 'refs/heads/main' && 'Preview' || 'Development') }}
