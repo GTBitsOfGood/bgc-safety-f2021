@@ -63,8 +63,9 @@ jobs:
         id: get_pull_request_ref
         uses: octokit/request-action@v2.x
         with:
-          route: GET /repos/:repository/pulls/:issue_id
-          repository: ${{ github.repository }}
+          route: GET /repos/{owner}/{repo}/pulls/{issue_id}
+          owner: GTBitsOfGood
+          repo: ${{ github.repository }}
           issue_id: ${{ github.event.issue.number }}
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
@@ -74,8 +75,8 @@ jobs:
         id: create_deployment
         uses: octokit/request-action@v2.x
         with:
-          route: POST /repos/:repository/deployments
-          repository: ${{ github.repository }}
+          route: POST /repos/{repo}/deployments
+          repo: ${{ github.repository }}
           ref: ${{ fromJson(steps.get_pull_request_ref.outputs.data).head.ref }}
           environment: Development
           auto_merge: false
