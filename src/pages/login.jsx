@@ -64,7 +64,7 @@ const Login = () => {
 
   useEffect(() => {
     if (session) {
-      Router.replace("/history");
+      Router.replace(urls.pages.history);
     }
   }, [session]);
 
@@ -147,25 +147,6 @@ const Login = () => {
           </Button>
         </>
       )}
-      {session && (null)
-        /*<>
-          Signed in as {session.user.email} <br />
-          <Button
-            onClick={signOut}
-            className={classes.button}
-            variant="contained"
-          >
-            Click to Sign Out
-          </Button>
-          <Button
-            onClick={gotoLanding}
-            className={classes.button}
-            variant="contained"
-          >
-            Go to Landing page (to happen automatically)
-          </Button>
-        </>*/
-      }
     </div>
   );
 };
