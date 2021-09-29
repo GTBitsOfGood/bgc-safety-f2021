@@ -17,7 +17,7 @@ const HomePage = () => {
     //   setPayload(resp);
     // });
     const { pathname } = Router;
-    if ((pathname == "/") && (!session)) {
+    if (pathname == "/") {
       Router.push("/login");
     }
 
