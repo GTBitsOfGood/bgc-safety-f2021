@@ -149,14 +149,11 @@ const Header = (props) => {
     setAnchorEl(null);
   };
 
-  useEffect(() => {
-    async function performFilters() {
-      if (!loading && session && filteredRoutes.length == 0) {
-        let currentUser = await queryUser();
-        setFilteredRoutes(filterRoutes(currentUser));
-      }
+  useEffect(async () => {
+    if (!loading && session && filteredRoutes.length == 0) {
+      let currentUser = await queryUser();
+      setFilteredRoutes(filterRoutes(currentUser));
     }
-    performFilters();
   }, [loading, session]);
 
   if (loading || !session) {
