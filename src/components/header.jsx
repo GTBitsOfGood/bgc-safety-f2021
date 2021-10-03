@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { withRouter } from "next/router";
 import Link from "next/link";
 import styled from "styled-components";
@@ -8,23 +8,22 @@ import {
   Toolbar,
   MenuItem,
   IconButton,
-  Menu,
   Typography,
-  SwipeableDrawer,
-  Drawer,
+  SwipeableDrawer
 } from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
 import { makeStyles } from "@material-ui/core/styles";
+import fetch from "node-fetch";
 
 import routes from "../../utils/routes";
-import Axios from "axios";
+import urls from "../../utils/urls";
 import { lightgray } from "color-name";
-import { getSession, useSession } from "next-auth/client";
+import { useSession } from "next-auth/client";
 import { filterRoutes } from "../../utils/userType";
-// import { Route } from 'react-router-dom';
 
 const getDate = () => {
   const today = new Date();
+
   const months = [
     "January",
     "February",
@@ -39,6 +38,7 @@ const getDate = () => {
     "November",
     "December",
   ];
+
   const days = [
     "Sunday",
     "Monday",
@@ -48,23 +48,20 @@ const getDate = () => {
     "Friday",
     "Saturday",
   ];
-  return `${days[today.getDay()]}, ${
-    months[today.getMonth()]
-  } ${today.getDate()}, ${today.getFullYear()}`;
+
+  return `${days[today.getDay()]}, ${months[today.getMonth()]
+    } ${today.getDate()}, ${today.getFullYear()}`;
 };
 
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
   },
-
   menu: {
     width: 250,
     flexShrink: 0,
-    color: lightgray,
-    // backgroundColor: 'black'
+    color: lightgray
   },
-
   menuItems: {
     width: 250,
     textDecoration: "none",
@@ -72,7 +69,6 @@ const useStyles = makeStyles((theme) => ({
     fontSize: "20px",
     color: lightgray,
   },
-
   menuFont: {
     fontFamily: "Raleway",
     textDecoration: "none",
@@ -84,7 +80,6 @@ const useStyles = makeStyles((theme) => ({
     left: 32,
     top: 40,
   },
-
   menuButton: {
     marginRight: theme.spacing(2),
   },
@@ -98,6 +93,7 @@ const useStyles = makeStyles((theme) => ({
     textAlign: "center",
   },
 }));
+
 const NavLink = styled.a`
   text-decoration: none;
   &:active {
@@ -112,20 +108,23 @@ const NavLink = styled.a`
   }
 `;
 
-const Header = (props) => {
-  const { defaultSelected, router } = props;
+const Header = ({ defaultSelected, router }) => {
   const classes = useStyles();
+  const [session, loading] = useSession();
+
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [selected, setSelected] = React.useState(defaultSelected);
   const [filteredRoutes, setFilteredRoutes] = React.useState([]);
-  const [session, loading] = useSession();
 
-  // console.log(currentUser);
-  // let filteredRoutes = [];
-  // const [filteredRoutes, setFilteredRoutes] = React.useState([]);
+  React.useEffect(() => async () => {
+    if (!loading && session && filteredRoutes.length == 0) {
+      const json = await queryUser();
+      setFilteredRoutes(filterRoutes(json.payload));
+    }
+  });
 
   const queryUser = async () => {
-    const res = await fetch(`/api/user?email=${session.user.email}`);
+    const res = await fetch(`${urls.api.user}?email=${session.user.email}`);
     return await res.json();
   };
 
@@ -157,8 +156,6 @@ const Header = (props) => {
   }, [loading, session]);
 
   if (loading || !session) {
-    // console.log(loading)
-    // console.log(session)
     return null;
   }
 
