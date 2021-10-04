@@ -10,7 +10,7 @@ import ModalComponent from "../../components/modal";
 import urls from "../../../utils/urls";
 import { useSession } from "next-auth/client";
 import Router from "next/router";
-import { verifyUserType } from "../../../utils/userType";
+import { useUserAuthorized } from "../../../utils/userType";
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -129,12 +129,7 @@ const Roster = () => {
   const [session, loading] = useSession();
   const { route } = router.query;
   const [students, setStudents] = useState([]);
-  const [userType, setUserType] = useState("");
-
-  useEffect(() => {
-    session &&
-      verifyUserType(session, urls.pages.bus_checkin_roster, setUserType);
-  }, [session]);
+  const userAuthorized = useUserAuthorized(session, urls.pages.bus_checkin_roster)
 
   const submitAttendance = async (index) => {
     // show modal
@@ -345,58 +340,55 @@ const Roster = () => {
     getInitialStudents();
   }
 
+  if (!session || !userAuthorized) {
+    return <div />
+  }
+
   return (
-    <>
-      {session && userType === "BusDriver" ? (
-        <div className={classes.container}>
-          {" "}
-          <div className={classes.header}>
-            <Link href="/route_selection">
-              <button className={classes.backbtn}>
-                <ArrowBackIosIcon />
-                <h1 className={classes.text}>Back </h1>
-              </button>
-            </Link>
-            <h1>{route}</h1>
-          </div>
-          <table style={{ width: "100%" }}>
-            <thead>
-              <tr className={classes.tr}>
-                <th className={classes.th} style={{ width: "25%" }}>
-                  Name
-                </th>
-                <th className={classes.th}>Status</th>
-              </tr>
-            </thead>
-            <tbody className={classes.tbody}>
-              {students.map((student, index) => (
-                <tr className={classes.tr} key={index}>
-                  <td className={classes.td} style={{ width: "25%" }}>
-                    {student.name}
-                  </td>
-                  {student.checkedIn ? (
-                    <StudentCheckedIn
-                      justCheckedIn={student.note == ""}
-                      index={index}
-                    />
-                  ) : (
-                    <StudentNotCheckedIn index={index} />
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <ModalComponent
-            button={<h1 style={{ margin: "0px" }}>Submit</h1>}
-            buttonStyle={classes.mainSubmitBtn}
-          >
-            <SubmitModalContent />
-          </ModalComponent>
-        </div>
-      ) : (
-        <div />
-      )}
-    </>
+    <div className={classes.container}>
+      <div className={classes.header}>
+        <Link href="/route_selection">
+          <button className={classes.backbtn}>
+            <ArrowBackIosIcon />
+            <h1 className={classes.text}>Back </h1>
+          </button>
+        </Link>
+        <h1>{route}</h1>
+      </div>
+      <table style={{ width: "100%" }}>
+        <thead>
+          <tr className={classes.tr}>
+            <th className={classes.th} style={{ width: "25%" }}>
+              Name
+            </th>
+            <th className={classes.th}>Status</th>
+          </tr>
+        </thead>
+        <tbody className={classes.tbody}>
+          {students.map((student, index) => (
+            <tr className={classes.tr} key={index}>
+              <td className={classes.td} style={{ width: "25%" }}>
+                {student.name}
+              </td>
+              {student.checkedIn ? (
+                <StudentCheckedIn
+                  justCheckedIn={student.note == ""}
+                  index={index}
+                />
+              ) : (
+                <StudentNotCheckedIn index={index} />
+              )}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <ModalComponent
+        button={<h1 style={{ margin: "0px" }}>Submit</h1>}
+        buttonStyle={classes.mainSubmitBtn}
+      >
+        <SubmitModalContent />
+      </ModalComponent>
+    </div>
   );
 };
 

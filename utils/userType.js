@@ -1,15 +1,35 @@
-import urls from "./urls";
-import router from "next/router";
 import routes from "./routes";
+import { useEffect, useState } from "react";
 
-const verifyUserType = async (session, requestedRoute, setUserType) => {
+const useUserType = (session) => {
+  const [userType, setUserType] = useState(null);
+  useEffect(async () => {
+    if (session) {
+      const userData = await fetchUserData(session);
+      setUserType(userData.type);
+    }
+  }, [session]);
+  return userType;
+};
+
+const useUserAuthorized = (session, requestedRoute) => {
+  const [userAuthorized, setUserAuthorized] = useState(false);
+
+  useEffect(async () => {
+    if (session) {
+      setUserAuthorized(await verifyUserType(session, requestedRoute));
+    }
+  }, [session]);
+  return userAuthorized;
+};
+
+const verifyUserType = async (session, requestedRoute) => {
   const userData = await fetchUserData(session);
-  setUserType(userData.type);
   const userAllowedRoutes = filterRoutes(userData);
   const requestedRouteInAllowed = userAllowedRoutes.some(
     (route) => requestedRoute === route.link
   );
-  !requestedRouteInAllowed && router.replace(urls.pages.not_authorized);
+  return requestedRouteInAllowed;
 };
 
 const fetchUserData = async (session) => {
@@ -20,23 +40,21 @@ const fetchUserData = async (session) => {
 
 const filterRoutes = (currentUser) => {
   let fRoutes = [];
-  if (currentUser.type === "Admin") {
+  if (currentUser.type === userTypes.admin) {
     fRoutes = routes.filter(
       (item) =>
         item.type === "Admin" ||
         item.type === "ClubDirectorAttendanceClerk" ||
         item.type === "All"
     );
-  } else if (currentUser.type === "BusDriver") {
+  } else if (currentUser.type === userTypes.busDriver) {
     fRoutes = routes.filter(
       (item) => item.type === "BusDriver" || item.type === "All"
     );
-  } else if (currentUser.type === "ClubDirector") {
-    fRoutes = routes.filter(
-      (item) =>
-        item.type === "ClubDirectorAttendanceClerk" || item.type === "All"
-    );
-  } else if (currentUser.type === "AttendanceClerk") {
+  } else if (
+    currentUser.type === userTypes.clubDirector ||
+    currentUser.type === userTypes.attendanceClerk
+  ) {
     fRoutes = routes.filter(
       (item) =>
         item.type === "ClubDirectorAttendanceClerk" || item.type === "All"
@@ -47,4 +65,19 @@ const filterRoutes = (currentUser) => {
   return fRoutes;
 };
 
-export { fetchUserData, verifyUserType, filterRoutes };
+const userTypes = {
+  admin: "Admin",
+  attendanceClerk: "AttendanceClerk",
+  clubDirector: "ClubDirector",
+  busDriver: "BusDriver",
+};
+
+export {
+  useUserType,
+  useUserAuthorized,
+  fetchUserData,
+  verifyUserType,
+  filterRoutes,
+};
+
+export default userTypes;

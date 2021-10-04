@@ -4,7 +4,7 @@ import Link from "next/link";
 const fetch = require("node-fetch");
 import urls from "../../utils/urls";
 import { useSession } from "next-auth/client";
-import { verifyUserType } from "../../utils/userType";
+import { useUserAuthorized } from "../../utils/userType";
 
 const ClubName = "Harland"; // TODO: Allow user to select a club
 
@@ -37,11 +37,8 @@ const RouteSelection = ({ schools }) => {
   const [selectedSchool, setselectedSchool] = useState("");
   const classes = useStyles();
   const [session, loading] = useSession();
-  const [userType, setUserType] = useState("");
+  const userAuthorized = useUserAuthorized(session, urls.pages.route_selection)
 
-  useEffect(() => {
-    session && verifyUserType(session, urls.pages.route_selection, setUserType);
-  }, [session]);
 
   useEffect(() => {
     // render/link to bus checkin page passing in selected school as props
@@ -52,36 +49,34 @@ const RouteSelection = ({ schools }) => {
     setselectedSchool(e.target.innerHTML);
   };
 
+  if (!session || !userAuthorized) {
+    return <div />
+  }
+
   return (
-    <>
-      {session && userType === "BusDriver" ? (
-        <div className={classes.container}>
-          <h1 className={classes.text}>Select a Bus Route:</h1>
-          <div className={classes.btnContainer}>
-            {schools.map((school) => {
-              return (
-                <Link
-                  href="/bus_checkin_roster/[route]"
-                  as={`bus_checkin_roster/${school.name}`}
-                >
-                  <a
-                    className={classes.btn}
-                    style={{
-                      backgroundColor: school.complete ? "#6FCF97" : "#C4C4C4",
-                    }}
-                  >
-                    {school.name} -
-                    {school.complete ? " Complete" : " Incomplete"}
-                  </a>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      ) : (
-        <div />
-      )}
-    </>
+    <div className={classes.container}>
+      <h1 className={classes.text}>Select a Bus Route:</h1>
+      <div className={classes.btnContainer}>
+        {schools.map((school) => {
+          return (
+            <Link
+              href="/bus_checkin_roster/[route]"
+              as={`bus_checkin_roster/${school.name}`}
+            >
+              <a
+                className={classes.btn}
+                style={{
+                  backgroundColor: school.complete ? "#6FCF97" : "#C4C4C4",
+                }}
+              >
+                {school.name} -
+                {school.complete ? " Complete" : " Incomplete"}
+              </a>
+            </Link>
+          );
+        })}
+      </div>
+    </div>
   );
 };
 

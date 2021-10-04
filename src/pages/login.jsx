@@ -4,7 +4,7 @@ import Router from "next/router";
 import { Button, Typography, InputBase } from "@material-ui/core";
 import { makeStyles, withStyles } from "@material-ui/core/styles";
 import urls from "../../utils/urls";
-import { fetchUserData } from "../../utils/userType";
+import userTypes, { useUserType } from "../../utils/userType";
 import { signIn, signOut, useSession } from "next-auth/client";
 
 const useStyles = makeStyles({
@@ -56,30 +56,23 @@ const Login = () => {
   const [username, setUsername] = useState(null);
   const [password, setPassword] = useState(null);
   const [session, loading] = useSession();
-  const [userType, setUserType] = useState("");
+  const userType = useUserType(session)
   // console.log("heyo");
   // console.log(process.env.NEXTAUTH_URL);
   const classes = useStyles();
 
-  useEffect(async () => {
-    if (session) {
-      const userData = await fetchUserData(session);
-      setUserType(userData.type);
-    }
-  }, [session]);
-
   const gotoLanding = async () => {
     /*
-    Default landing page (open to discussion): 
+    Default landing page:
       - Bus Driver: route_selection
       - Attendance Clerk/Club Director: roster
       - Admin: roster (ideally "Overview of Clubs" - Figma)
     */
-    if (userType === "BusDriver") {
+    if (userType === userTypes.busDriver) {
       Router.replace(urls.pages.route_selection);
-    } else if (userType === "ClubDirector" || userType === "AttendanceClerk") {
+    } else if (userType === userTypes.clubDirector || userType === userTypes.attendanceClerk) {
       Router.replace(urls.pages.roster);
-    } else if (userType === "Admin") {
+    } else if (userType === userTypes.admin) {
       Router.replace(urls.pages.roster);
     }
   };

@@ -4,18 +4,14 @@ import urls from "../../utils/urls";
 import FileUploader from "../components/file_uploader";
 import { useSession } from "next-auth/client";
 import Router from "next/router";
-import { verifyUserType } from "../../utils/userType";
+import { useUserAuthorized } from "../../utils/userType";
 
 const CSVUpload = () => {
   const [uploadedFile, setUploadedFile] = useState(false);
   const [selectedFile, setSelectedFile] = useState("");
   const [sentFile, setSentFile] = useState(false);
   const [session, loading] = useSession();
-  const [userType, setUserType] = useState("");
-
-  useEffect(() => {
-    session && verifyUserType(session, urls.pages.csv_upload, setUserType);
-  }, [session]);
+  const userAuthorized = useUserAuthorized(session, urls.pages.csv_upload);
 
   const handleUpload = (files) => {
     let fileName = files[0].name;
@@ -51,55 +47,53 @@ const CSVUpload = () => {
     setUploadedFile(false);
   };
 
+  if (!session || !userAuthorized) {
+    return <div />
+  }
+
   return (
-    <>
-      {session && userType === "Admin" ? (
-        <div className="container">
-          <div>
-            <div>
-              <bold className="label">Title:</bold>
-              <input className="text-field" placeholder="Type here" />
-            </div>
-            <div>
-              <bold className="label">Upload:</bold>
-              {!(uploadedFile || sentFile) && (
-                <FileUploader onChange={(files) => handleUpload(files)} />
-              )}
-              {uploadedFile && (
-                <div className="uploaded-container">
-                  <div className="file-upload">
-                    <i className="fa fa-check" />
-                    Received File! Click "Upload" to submit
-                  </div>
-                </div>
-              )}
-              {sentFile && (
-                <div className="uploaded-container">
-                  <div className="file-upload">
-                    <i className="fa fa-check" />
-                    File Uploaded!
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="button-container">
-            <button
-              type="button"
-              className="btn btn-danger"
-              onClick={clearFile}
-            >
-              Cancel
-            </button>
-            <button type="button" className="btn btn-success" onClick={sendCsv}>
-              Upload
-            </button>
-          </div>
+    <div className="container">
+      <div>
+        <div>
+          <bold className="label">Title:</bold>
+          <input className="text-field" placeholder="Type here" />
         </div>
-      ) : (
-        <div />
-      )}
-    </>
+        <div>
+          <bold className="label">Upload:</bold>
+          {!(uploadedFile || sentFile) && (
+            <FileUploader onChange={(files) => handleUpload(files)} />
+          )}
+          {uploadedFile && (
+            <div className="uploaded-container">
+              <div className="file-upload">
+                <i className="fa fa-check" />
+                Received File! Click "Upload" to submit
+              </div>
+            </div>
+          )}
+          {sentFile && (
+            <div className="uploaded-container">
+              <div className="file-upload">
+                <i className="fa fa-check" />
+                File Uploaded!
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="button-container">
+        <button
+          type="button"
+          className="btn btn-danger"
+          onClick={clearFile}
+        >
+          Cancel
+        </button>
+        <button type="button" className="btn btn-success" onClick={sendCsv}>
+          Upload
+        </button>
+      </div>
+    </div>
   );
 };
 

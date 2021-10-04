@@ -10,7 +10,7 @@ import ModalComponent from "../components/modal";
 import urls from "../../utils/urls";
 import { useSession } from "next-auth/client";
 import Router from "next/router";
-import { verifyUserType } from "../../utils/userType";
+import { useUserAuthorized } from "../../utils/userType";
 
 const fetch = require("node-fetch");
 
@@ -100,122 +100,116 @@ function Roster({ schools }) {
   const [lastName, setLastName] = useState("");
   const [studentSchool, setStudentSchool] = useState("");
   const [session, loading] = useSession();
-  const [userType, setUserType] = useState("");
-
-  useEffect(() => {
-    session && verifyUserType(session, urls.pages.roster, setUserType);
-  }, [session]);
+  const userAuthorized = useUserAuthorized(session, urls.pages.roster);
 
   const handleSubmit = () => {
     setStudent({ firstName, lastName, studentSchool });
     // add to database
   };
+
+  if (!session || !userAuthorized) {
+    return <div />
+  }
+
   return (
-    <>
-      {session && (userType === "Admin" || userType === "ClubDirector") ? (
-        <div id="main">
-          {" "}
-          <h1>{`${ClubName} Boys and Girls Club`}</h1>
-          <div className={styles.roster}>
-            <div>
-              {schools.map((school) => (
-                <table className={styles.table}>
-                  <thead>
-                    <tr className={styles.tr}>
-                      <th className={styles.busth}>
-                        Bus A Cap
-                        {getNumberCheckedIn(school)}
-                      </th>
-                    </tr>
-                    <tr style={{ height: "10px" }} />
-                    <tr className={styles.tr}>
-                      <th className={styles.th}>{school.name}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {school.students.map((student) => (
-                      <tr className={classes.tr}>
-                        <div className={classes.students}>
-                          <td
-                            className={styles.td}
-                            color={student.checkedIn ? "success" : ""}
-                          >
-                            {student.name}
-                            {student.checkedIn && (
-                              <CheckCircleIcon
-                                style={{
-                                  alignSelf: "flex-end",
-                                  marginLeft: "auto",
-                                  fill: "white",
-                                }}
-                              />
-                            )}
-                          </td>
-                        </div>
-                      </tr>
-                    ))}
-                    <tr>
-                      <ModalComponent
-                        setStudent={setStudent}
-                        button={
-                          <>
-                            Manually Add Entry
-                            <AddCircleIcon className={classes.icon} />
-                          </>
-                        }
-                        buttonStyle={classes.button}
+    <div id="main">
+      <h1>{`${ClubName} Boys and Girls Club`}</h1>
+      <div className={styles.roster}>
+        <div>
+          {schools.map((school) => (
+            <table className={styles.table}>
+              <thead>
+                <tr className={styles.tr}>
+                  <th className={styles.busth}>
+                    Bus A Cap
+                    {getNumberCheckedIn(school)}
+                  </th>
+                </tr>
+                <tr style={{ height: "10px" }} />
+                <tr className={styles.tr}>
+                  <th className={styles.th}>{school.name}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {school.students.map((student) => (
+                  <tr className={classes.tr}>
+                    <div className={classes.students}>
+                      <td
+                        className={styles.td}
+                        color={student.checkedIn ? "success" : ""}
                       >
-                        <form className={classes.form} onSubmit={handleSubmit}>
-                          <h1 className={classes.formHeading}>
-                            Manually Add Entry
-                          </h1>
-                          <TextField
-                            className={classes.formInput}
-                            id="firstName"
-                            name="firstName"
-                            type="text"
-                            label="First Name"
-                            value={firstName}
-                            variant="filled"
-                            onChange={(e) => setFirstName(e.target.value)}
+                        {student.name}
+                        {student.checkedIn && (
+                          <CheckCircleIcon
+                            style={{
+                              alignSelf: "flex-end",
+                              marginLeft: "auto",
+                              fill: "white",
+                            }}
                           />
-                          <TextField
-                            className={classes.formInput}
-                            id="lastName"
-                            type="text"
-                            label="Last Name"
-                            value={lastName}
-                            variant="filled"
-                            onChange={(e) => setLastName(e.target.value)}
-                          />
-                          <TextField
-                            className={classes.formInput}
-                            id="school"
-                            type="text"
-                            label="School/Pickup Location"
-                            value={studentSchool}
-                            variant="filled"
-                            onChange={(e) => setStudentSchool(e.target.value)}
-                          />
-                          <button
-                            type="submit"
-                            className={`btn btn-success ${classes.formButton}`}
-                          >
-                            Add Student
-                          </button>
-                        </form>
-                      </ModalComponent>
-                    </tr>
-                  </tbody>
-                </table>
-              ))}
-            </div>
-          </div>
+                        )}
+                      </td>
+                    </div>
+                  </tr>
+                ))}
+                <tr>
+                  <ModalComponent
+                    setStudent={setStudent}
+                    button={
+                      <>
+                        Manually Add Entry
+                        <AddCircleIcon className={classes.icon} />
+                      </>
+                    }
+                    buttonStyle={classes.button}
+                  >
+                    <form className={classes.form} onSubmit={handleSubmit}>
+                      <h1 className={classes.formHeading}>
+                        Manually Add Entry
+                      </h1>
+                      <TextField
+                        className={classes.formInput}
+                        id="firstName"
+                        name="firstName"
+                        type="text"
+                        label="First Name"
+                        value={firstName}
+                        variant="filled"
+                        onChange={(e) => setFirstName(e.target.value)}
+                      />
+                      <TextField
+                        className={classes.formInput}
+                        id="lastName"
+                        type="text"
+                        label="Last Name"
+                        value={lastName}
+                        variant="filled"
+                        onChange={(e) => setLastName(e.target.value)}
+                      />
+                      <TextField
+                        className={classes.formInput}
+                        id="school"
+                        type="text"
+                        label="School/Pickup Location"
+                        value={studentSchool}
+                        variant="filled"
+                        onChange={(e) => setStudentSchool(e.target.value)}
+                      />
+                      <button
+                        type="submit"
+                        className={`btn btn-success ${classes.formButton}`}
+                      >
+                        Add Student
+                      </button>
+                    </form>
+                  </ModalComponent>
+                </tr>
+              </tbody>
+            </table>
+          ))}
         </div>
-      ) : (
-        <div />
-      )}
-    </>
+      </div>
+    </div>
   );
 }
 
