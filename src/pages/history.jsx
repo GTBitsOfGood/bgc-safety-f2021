@@ -391,6 +391,10 @@ function History({ students }) {
     </div>
   );
 
+  if (!session || !userAuthorized) {
+    return <div />
+  }
+
   return (
     <div className={styles.container}>
       <p style={{ fontSize: "200", margin: "0" }}>Bus Attendance Matrix</p>
