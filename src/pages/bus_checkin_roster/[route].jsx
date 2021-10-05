@@ -141,15 +141,31 @@ const Roster = () => {
     const d = await res.json();
   };
 
-  const submitNote = (index, note) => {
+  const submitNote = async (index, note) => {
+    const tempStudent = {};
+
     setStudents(
       students.map((student, i) => {
         if (index == i) {
+          tempStudent.id = student.id;
+          tempStudent.note = student.note;
           return { name: student.name, id: student.id, checkedIn: true, note };
         }
         return student;
       })
     );
+
+    const res = await fetch(`${urls.baseUrl}/api/notes?id=${tempStudent.id}`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        note: tempStudent.note,
+      }),
+    });
+    console.log(res);
   };
 
   const checkInStudent = (index) => {
@@ -160,7 +176,7 @@ const Roster = () => {
             name: student.name,
             id: student.id,
             checkedIn: true,
-            note: "",
+            note: student.note,
           };
         }
         return student;
@@ -235,7 +251,7 @@ const Roster = () => {
         className={classes.ModalContent}
         onSubmit={() => {
           submitNote(props.index, studentNote);
-          setStudentNote("");
+          // setStudentNote("");
         }}
       >
         <h1 style={{ margin: "0" }}>Add/Edit Note</h1>
@@ -325,7 +341,7 @@ const Roster = () => {
           name: `${student.firstName} ${student.lastName}`,
           id: student.studentID,
           checkedIn: student.checkInTimes.includes(today),
-          note: "",
+          note: student.notes,
         });
       }
     }

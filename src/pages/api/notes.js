@@ -23,6 +23,8 @@ function addNote(req, res) {
   const { id } = req.query;
   const { note } = req.body;
 
+  console.log("adding");
+
   Student.findOneAndUpdate(
     {
       studentID: id,
