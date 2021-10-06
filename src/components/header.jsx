@@ -20,7 +20,11 @@ import routes from "../../utils/routes";
 import Axios from "axios";
 import { lightgray } from "color-name";
 import { getSession, useSession } from "next-auth/client";
-import { filterRoutes } from "../../utils/userType";
+import userTypes, {
+  filterRoutes,
+  fetchUserData,
+  useUserType,
+} from "../../utils/userType";
 // import { Route } from 'react-router-dom';
 
 const getDate = () => {
@@ -119,15 +123,7 @@ const Header = (props) => {
   const [selected, setSelected] = React.useState(defaultSelected);
   const [filteredRoutes, setFilteredRoutes] = React.useState([]);
   const [session, loading] = useSession();
-
-  // console.log(currentUser);
-  // let filteredRoutes = [];
-  // const [filteredRoutes, setFilteredRoutes] = React.useState([]);
-
-  const queryUser = async () => {
-    const res = await fetch(`/api/user?email=${session.user.email}`);
-    return await res.json();
-  };
+  const userType = useUserType(session);
 
   const open = Boolean(anchorEl);
 
@@ -150,8 +146,8 @@ const Header = (props) => {
   };
 
   useEffect(async () => {
-    if (!loading && session && filteredRoutes.length == 0) {
-      let currentUser = await queryUser();
+    if (!loading && session && filteredRoutes.length === 0) {
+      const currentUser = await fetchUserData(session);
       setFilteredRoutes(filterRoutes(currentUser));
     }
   }, [loading, session]);
@@ -163,52 +159,58 @@ const Header = (props) => {
   }
 
   return (
-    router.pathname !== "/login" &&
-    !router.pathname.includes("/bus_checkin_roster/") && (
+    router.pathname !== "/login" && (
       <AppBar position="static" className={classes.header}>
         <Toolbar variant="dense">
-          <IconButton
-            edge="start"
-            className={classes.menuButton}
-            color="inherit"
-            aria-label="menu"
-            onClick={handleMenu}
-          >
-            <MenuIcon />
-          </IconButton>
-          <SwipeableDrawer
-            elevation
-            id="menu-appbar"
-            className="menu"
-            classes={{ paper: classes.menuItems }}
-            anchorEl={anchorEl}
-            anchorOrigin={{
-              vertical: "top",
-              horizontal: "right",
-            }}
-            keepMounted
-            transformOrigin={{
-              vertical: "top",
-              horizontal: "right",
-            }}
-            open={open}
-            onClose={handleClose}
-          >
-            {filteredRoutes.map((route, index) => (
-              <MenuItem
-                className={classes.menuFont}
-                onClick={handleClose}
-                key={index}
+          {userType !== userTypes.busDriver ? (
+            <>
+              <IconButton
+                edge="start"
+                className={classes.menuButton}
+                color="inherit"
+                aria-label="menu"
+                onClick={handleMenu}
               >
-                <Link href={route.link} passHref>
-                  <NavLink>{route.name}</NavLink>
-                </Link>
-              </MenuItem>
-            ))}
-            <MenuItem className={classes.menuFont} onClick={handleClose}>
-              My profile
-            </MenuItem>
-          </SwipeableDrawer>
+                <MenuIcon />
+              </IconButton>
+
+              <SwipeableDrawer
+                elevation
+                id="menu-appbar"
+                className="menu"
+                classes={{ paper: classes.menuItems }}
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+                open={open}
+                onClose={handleClose}
+              >
+                {filteredRoutes.map((route, index) => (
+                  <MenuItem
+                    className={classes.menuFont}
+                    onClick={handleClose}
+                    key={index}
+                  >
+                    <Link href={route.link} passHref>
+                      <NavLink>{route.name}</NavLink>
+                    </Link>
+                  </MenuItem>
+                ))}
+                <MenuItem className={classes.menuFont} onClick={handleClose}>
+                  My profile
+                </MenuItem>
+              </SwipeableDrawer>
+            </>
+          ) : (
+            <div />
+          )}
           <Typography variant="h6" className={classes.title}>
             {selected}
           </Typography>
