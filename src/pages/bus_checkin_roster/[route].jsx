@@ -21,7 +21,9 @@ const useStyles = makeStyles(() => ({
     outline: "none",
     border: "none",
     marginRight: "auto",
-    background: "white",
+    backgroundColor: "#C4C4C4",
+    borderRadius: "20px",
+    padding: "5px",
     "&:hover": {
       cursor: "pointer",
     },
@@ -29,8 +31,6 @@ const useStyles = makeStyles(() => ({
   header: {
     display: "grid",
     width: "100%",
-    gridTemplateColumns: "1fr repeat(3, auto) 1fr",
-    gridColumnGap: "5px",
     justifyItems: "center",
     alignItems: "center",
   },
@@ -38,6 +38,13 @@ const useStyles = makeStyles(() => ({
     borderRadius: "20px",
     margin: "5px",
     border: "none",
+  },
+  btnContainer: {
+    justifyContent: "left",
+    width: "100%",
+  },
+  btnText: {
+    fontSize: "medium",
   },
   text: {
     margin: "5px",
@@ -339,13 +346,15 @@ const Roster = () => {
 
   return (
     <div className={classes.container}>
-      <div className={classes.header}>
-        <Link href="/route_selection">
+      <div className={classes.btnContainer}>
+       <Link href="/route_selection">
           <button className={classes.backbtn}>
             <ArrowBackIosIcon />
-            <h1 className={classes.text}>Back </h1>
+            <h1 className={classes.btnText}>Back </h1>
           </button>
         </Link>
+      </div>
+      <div className={classes.header}>
         <h1>{route}</h1>
       </div>
       <table style={{ width: "100%" }}>
