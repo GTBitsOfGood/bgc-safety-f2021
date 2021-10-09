@@ -93,15 +93,26 @@ const useStyles = makeStyles(() => ({
     alignItems: "center",
     backgroundColor: "#6FCF97",
   },
-  ModalButton: {
+  addBtn: {
+    display: "flex",
+    alignItems: "center",
+    borderRadius: "40px",
+    marginLeft: "auto",
+    backgroundColor: "white",
+    opacity: "80%",
+    borderStyle: "black",
+    "&:hover": {
+      cursor: "pointer",
+    },
+  },
+  editBtn: {
     display: "flex",
     alignItems: "center",
     borderRadius: "40px",
     marginLeft: "auto",
     backgroundColor: "white",
     opacity: "60%",
-    border: "none",
-    boxShadow: "none",
+    borderStyle: "white",
     "&:hover": {
       cursor: "pointer",
     },
@@ -290,7 +301,7 @@ const Roster = () => {
           <ModalComponent
             button={props.justCheckedIn ? <AddButton /> : <EditButton />}
             style={{ marginLeft: "auto" }}
-            buttonStyle={classes.ModalButton}
+            buttonStyle={props.justCheckedIn ? classes.addBtn : classes.editBtn}
           >
             <NoteModalContent index={props.index} />
           </ModalComponent>
