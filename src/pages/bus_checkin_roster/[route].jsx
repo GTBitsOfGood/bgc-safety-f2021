@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useMemo } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Button } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
@@ -119,7 +119,6 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-let initial = false;
 const Roster = () => {
   const router = useRouter();
   const classes = useStyles();
@@ -142,30 +141,27 @@ const Roster = () => {
   };
 
   const submitNote = (index, note) => {
-    setStudents(
-      students.map((student, i) => {
-        if (index == i) {
-          return { name: student.name, id: student.id, checkedIn: true, note };
-        }
-        return student;
-      })
-    );
+    let modifiedStudents = [...students];
+    const { name, id, checkedIn } = students[index];
+    modifiedStudents[index] = {
+      name: name,
+      id: id,
+      checkedIn: checkedIn,
+      note,
+    };
+    setStudents(modifiedStudents);
   };
 
   const checkInStudent = (index) => {
-    setStudents(
-      students.map((student, i) => {
-        if (index == i) {
-          return {
-            name: student.name,
-            id: student.id,
-            checkedIn: true,
-            note: "",
-          };
-        }
-        return student;
-      })
-    );
+    let modifiedStudents = [...students];
+    const { name, id } = students[index];
+    modifiedStudents[index] = {
+      name: name,
+      id: id,
+      checkedIn: true,
+      note: "",
+    };
+    setStudents(modifiedStudents);
   };
 
   const SubmitModalContent = () => {
@@ -332,10 +328,9 @@ const Roster = () => {
     setStudents(data);
   };
 
-  if (!initial && router.query.route !== undefined) {
-    initial = true;
-    getInitialStudents();
-  }
+  useEffect(async () => {
+    await getInitialStudents();
+  }, []);
 
   return (
     <div className={classes.container}>
