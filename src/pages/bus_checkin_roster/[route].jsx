@@ -53,12 +53,12 @@ const useStyles = makeStyles(() => ({
     display: "block",
     height: "500px",
     overflowY: "scroll",
-    overflowX: "hidden",
+    overflowX: "hidden"
   },
   th: {
-    width: "calc( 100% - 1em )",
+    width: "calc( 100% - 1em)",
     backgroundColor: "#828282",
-    padding: "10px",
+    padding: "5px",
   },
   td: {
     textAlign: "center",
@@ -371,7 +371,7 @@ const Roster = () => {
       <table style={{ width: "100%" }}>
         <thead>
           <tr className={classes.tr}>
-            <th className={classes.th} style={{ width: "24.2%" }}>
+            <th className={classes.th} style={{ width: "25%" }}>
               Name
             </th>
             <th className={classes.th}>Status</th>
