@@ -99,7 +99,7 @@ const useStyles = makeStyles(() => ({
     borderRadius: "40px",
     marginLeft: "auto",
     backgroundColor: "white",
-    opacity: "80%",
+    opacity: "90%",
     borderStyle: "black",
     "&:hover": {
       cursor: "pointer",
@@ -111,7 +111,7 @@ const useStyles = makeStyles(() => ({
     borderRadius: "40px",
     marginLeft: "auto",
     backgroundColor: "white",
-    opacity: "60%",
+    opacity: "65%",
     borderStyle: "white",
     "&:hover": {
       cursor: "pointer",
@@ -196,9 +196,9 @@ const Roster = () => {
         className={classes.ModalContent}
         onSubmit={submitAttendance}
         style={{
-          width: "750px",
+          width: "550px",
           height: "350px",
-          marginLeft: "-375px",
+          marginLeft: "-275px",
           marginTop: "-175px",
         }}
       >
@@ -212,7 +212,7 @@ const Roster = () => {
           name="note"
           type="text"
           placeholder="Type your note here"
-          style={{ width: "600px", height: "100x" }}
+          style={{ width: "400px", height: "100x" }}
           value={note}
           onChange={(e) => {
             setNote(e.target.value);
@@ -371,7 +371,7 @@ const Roster = () => {
       <table style={{ width: "100%" }}>
         <thead>
           <tr className={classes.tr}>
-            <th className={classes.th} style={{ width: "25%" }}>
+            <th className={classes.th} style={{ width: "24.2%" }}>
               Name
             </th>
             <th className={classes.th}>Status</th>
