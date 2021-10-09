@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Button } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
@@ -119,15 +119,30 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
+const getCurrentDate = () => {
+      const dateObj = new Date();
+      const day = String(dateObj.getDate()).padStart(2, "0");
+      const today = `${dateObj.getMonth() + 1}/${day}/${dateObj.getFullYear()}`;
+      return today
+}
+
+const getRouteId = async (route) => {
+    const idRes = await fetch(`${urls.baseUrl}/api/routes?name=${route}`);
+    const routeMeta = await idRes.json();
+    return routeMeta.payload[0]._id
+}
+
 const Roster = () => {
   const router = useRouter();
   const classes = useStyles();
   const { route } = router.query;
+  const [routeId, setRouteId] = useState(null);
   const [students, setStudents] = React.useState([]);
 
-  const submitAttendance = async (index) => {
-    // show modal
-    const res = await fetch(`${urls.baseUrl}/api/checkIn`, {
+
+  const submitAttendance = async (curDate, submissionNotes) => {
+    // update student checkIn
+    await fetch(`${urls.baseUrl}/api/checkIn`, {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -137,7 +152,23 @@ const Roster = () => {
         studentIDs: students.filter((s) => s.checkedIn).map((s, i) => s.id),
       }),
     });
-    const d = await res.json();
+
+    //update routes
+    await fetch(`${urls.baseUrl}/api/routes?id=${routeId}`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        submissionDetails: {
+          date: curDate,
+          notes: submissionNotes,
+        },
+      }),
+    });
+
+    router.replace(urls.pages.route_selection)
   };
 
   const submitNote = (index, note) => {
@@ -152,7 +183,7 @@ const Roster = () => {
     setStudents(modifiedStudents);
   };
 
-  const checkInStudent = (index) => {
+  const checkInStudent = async (index) => {
     let modifiedStudents = [...students];
     const { name, id } = students[index];
     modifiedStudents[index] = {
@@ -162,6 +193,17 @@ const Roster = () => {
       note: "",
     };
     setStudents(modifiedStudents);
+
+    // await fetch(`${urls.baseUrl}/api/checkIn?id=${id}`, {
+    //   method: "POST",
+    //   headers: {
+    //     Accept: "application/json",
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify({
+    //     time: getCurrentDate()
+    //   }),
+    // })
   };
 
   const SubmitModalContent = () => {
@@ -172,7 +214,10 @@ const Roster = () => {
     return (
       <form
         className={classes.ModalContent}
-        onSubmit={submitAttendance}
+        onSubmit={(e) => {
+          e.preventDefault();
+          submitAttendance(date, note);
+        }}
         style={{
           width: "750px",
           height: "350px",
@@ -304,14 +349,13 @@ const Roster = () => {
   };
 
   const getInitialStudents = async () => {
-    let schoolName = route;
+    const selectedRoute = await getRouteId(route);
+    setRouteId(selectedRoute)
+    const studentRes = await fetch(`${urls.baseUrl}/api/student?route=${selectedRoute}`);
+    const d = await studentRes.json()
+
+
     let data = [];
-
-    const res1 = await fetch(
-      `${urls.baseUrl}/api/school?schoolName=${schoolName}`
-    );
-    const d = await res1.json();
-
     if (d.success) {
       const dateObj = new Date();
       const day = String(dateObj.getDate()).padStart(2, "0");
@@ -329,8 +373,8 @@ const Roster = () => {
   };
 
   useEffect(async () => {
-    await getInitialStudents();
-  }, []);
+    route && await getInitialStudents();
+  }, [route]);
 
   return (
     <div className={classes.container}>

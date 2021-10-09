@@ -31,7 +31,7 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const RouteSelection = ({ schools }) => {
+const RouteSelection = ({ routes }) => {
   const [selectedSchool, setselectedSchool] = React.useState("");
   const classes = useStyles();
 
@@ -48,20 +48,21 @@ const RouteSelection = ({ schools }) => {
     <div className={classes.container}>
       <h1 className={classes.text}>Select a Bus Route:</h1>
       <div className={classes.btnContainer}>
-        {schools.map((school) => {
+        {routes.map(({name}) => {
           return (
             <Link
               href="/bus_checkin_roster/[route]"
-              as={`bus_checkin_roster/${school.name}`}
+              as={`bus_checkin_roster/${name}`}
             >
-              <a
+              <a>{name}</a>
+              {/* <a
                 className={classes.btn}
                 style={{
                   backgroundColor: school.complete ? "#6FCF97" : "#C4C4C4",
                 }}
               >
                 {school.name} -{school.complete ? " Complete" : " Incomplete"}
-              </a>
+              </a> */}
             </Link>
           );
         })}
@@ -71,23 +72,28 @@ const RouteSelection = ({ schools }) => {
 };
 
 RouteSelection.getInitialProps = async () => {
-  const res = await fetch(`${urls.baseUrl}/api/club?ClubName=${ClubName}`);
-  const schools_data = await res.json();
-  let schools_list = [];
-  if (schools_data.success && schools_data.payload.length > 0) {
-    schools_list = schools_data.payload[0].SchoolNames;
-  }
+  //currently no functionality to assign busDriver users to specific routes
+  const res = await fetch(`${urls.baseUrl}/api/routes`)
+  const routes = await res.json()
+  return {routes: routes.payload}
+  
+  // const res = await fetch(`${urls.baseUrl}/api/club?ClubName=${ClubName}`);
+  // const schools_data = await res.json();
+  // let schools_list = [];
+  // if (schools_data.success && schools_data.payload.length > 0) {
+  //   schools_list = schools_data.payload[0].SchoolNames;
+  // }
 
-  let data = [];
+  // let data = [];
 
-  for (let s of schools_list) {
-    data.push({
-      name: s,
-      complete: false,
-    });
-  }
+  // for (let s of schools_list) {
+  //   data.push({
+  //     name: s,
+  //     complete: false,
+  //   });
+  // }
 
-  return { schools: data };
+  // return { schools: data };
 };
 
 export default RouteSelection;

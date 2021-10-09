@@ -50,7 +50,7 @@ function createClub(req, res) {
     SchoolNames: SchoolNames,
   })
     .then((club) =>
-      res.status(201).send({
+      res.status(200).send({
         success: true,
         payload: club,
       })
