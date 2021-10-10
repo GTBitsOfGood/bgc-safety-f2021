@@ -14,7 +14,7 @@ const ModalComponent = (props) => {
 
   return (
     <div>
-      <button type="button" onClick={handleOpen} className={props.buttonStyle}>
+      <button type="button" onClick={handleOpen} className={props.buttonStyle} disabled = {props.disabled}>
         {props.button}
       </button>
       <Modal open={open} onClose={handleClose}>

@@ -4,7 +4,6 @@ import mongoDB from "../index";
 export async function getStudentsByRoute(route) {
   await mongoDB();
 
-  console.log(route);
   return Student.find({ route })
     .then((students) => {
       return Promise.resolve(students);

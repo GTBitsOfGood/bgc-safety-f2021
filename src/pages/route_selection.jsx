@@ -55,15 +55,13 @@ const RouteSelection = ({ routes }) => {
         {markedRoutes.map(({ name, checkInComplete }) => {
           return (
             <Link
-              href="/bus_checkin_roster/[route]"
+              href={`${urls.pages.bus_checkin_roster}/[route]`}
               as={`bus_checkin_roster/${name}`}
             >
               <a
                 className={classes.btn}
                 style={{
                   backgroundColor: checkInComplete ? "#6FCF97" : "#C4C4C4",
-                  pointerEvents: checkInComplete ? "none" : "auto",
-                  cursor: checkInComplete ? "default" : "pointer",
                 }}
               >
                 {name} -{checkInComplete ? " Complete" : " Incomplete"}

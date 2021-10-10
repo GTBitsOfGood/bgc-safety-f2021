@@ -126,10 +126,10 @@ const getCurrentDate = () => {
   return today;
 };
 
-const getRouteId = async (route) => {
+const getRouteMeta = async (route) => {
   const idRes = await fetch(`${urls.baseUrl}${urls.api.routes}?name=${route}`);
   const routeMeta = await idRes.json();
-  return routeMeta.payload[0]._id;
+  return routeMeta.payload[0];
 };
 
 const Roster = () => {
@@ -137,7 +137,8 @@ const Roster = () => {
   const classes = useStyles();
   const { route } = router.query;
   const [routeId, setRouteId] = useState(null);
-  const [students, setStudents] = React.useState([]);
+  const [students, setStudents] = useState([]);
+  const [complete, setComplete] = useState(true); //defaults to true to prevent changes during render
 
   const submitAttendance = async (curDate, submissionNotes) => {
     // update student checkIn
@@ -200,9 +201,9 @@ const Roster = () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        time: getCurrentDate()
+        time: getCurrentDate(),
       }),
-    })
+    });
   };
 
   const SubmitModalContent = () => {
@@ -346,10 +347,14 @@ const Roster = () => {
   };
 
   const getInitialStudents = async () => {
-    const selectedRoute = await getRouteId(route);
-    setRouteId(selectedRoute);
+    const curDate = getCurrentDate();
+    const selectedRoute = await getRouteMeta(route);
+    setRouteId(selectedRoute._id);
+    setComplete(
+      selectedRoute.checkIns.some((checkIn) => checkIn.date === curDate)
+    );
     const studentRes = await fetch(
-      `${urls.baseUrl}${urls.api.student}?route=${selectedRoute}`
+      `${urls.baseUrl}${urls.api.student}?route=${selectedRoute._id}`
     );
     const d = await studentRes.json();
 
@@ -363,7 +368,10 @@ const Roster = () => {
           name: `${student.firstName} ${student.lastName}`,
           id: student.studentID,
           //new to old
-          checkedIn: student.checkInTimes.sort((a, b) => Date.parse(b) - Date.parse(a))[0] === today,
+          checkedIn:
+            student.checkInTimes.sort(
+              (a, b) => Date.parse(b) - Date.parse(a)
+            )[0] === today,
           note: "",
         });
       }
@@ -386,7 +394,13 @@ const Roster = () => {
         </Link>
         <h1>{route}</h1>
       </div>
-      <table style={{ width: "100%" }}>
+      <table
+        style={{
+          width: "100%",
+          opacity: complete ? 0.5 : 1,
+          pointerEvents: complete ? "none" : "auto",
+        }}
+      >
         <thead>
           <tr className={classes.tr}>
             <th className={classes.th} style={{ width: "25%" }}>
@@ -416,6 +430,7 @@ const Roster = () => {
       <ModalComponent
         button={<h1 style={{ margin: "0px" }}>Submit</h1>}
         buttonStyle={classes.mainSubmitBtn}
+        disabled={complete}
       >
         <SubmitModalContent />
       </ModalComponent>
