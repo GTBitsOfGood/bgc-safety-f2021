@@ -123,14 +123,16 @@ const useStyles = makeStyles(() => ({
   },
   ModalContent: {
     position: "absolute",
-    width: "500px",
-    height: " 300px",
+    width: "30rem",
+    height: " 20rem",
+    maxWidth: "fit-content",
     backgroundColor: "white",
     left: "50%",
-    marginLeft: "-250px",
     top: "50%",
-    marginTop: "-150px",
+    marginLeft: "-15rem",
+    marginTop: "-10rem",
     display: "flex",
+    padding: "1rem",
     flexFlow: "column wrap",
     justifyContent: "space-around",
     alignItems: "center",
@@ -251,6 +253,12 @@ const Roster = () => {
     return (
       <form
         className={classes.ModalContent}
+        style={{
+          width: "550px",
+          height: "350px",
+          marginLeft: "-275px",
+          marginTop: "-175px",
+        }}
         onSubmit={() => {
           submitNote(props.index, studentNote);
           setStudentNote("");
