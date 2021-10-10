@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Button } from "@material-ui/core";
+import { Alert, Snackbar } from "@mui/material";
 import AddIcon from "@material-ui/icons/Add";
 import ArrowBackIosIcon from "@material-ui/icons/ArrowBackIos";
 import EditIcon from "@material-ui/icons/Edit";
@@ -139,10 +140,12 @@ const Roster = () => {
   const [routeId, setRouteId] = useState(null);
   const [students, setStudents] = useState([]);
   const [complete, setComplete] = useState(true); //defaults to true to prevent changes during render
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [errorOpen, setErrorOpen] = useState(false);
 
   const submitAttendance = async (curDate, submissionNotes) => {
     // update student checkIn
-    await fetch(`${urls.baseUrl}${urls.api.checkIn}`, {
+    const studentRes = await fetch(`${urls.baseUrl}${urls.api.checkIn}`, {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -154,21 +157,29 @@ const Roster = () => {
     });
 
     //update routes
-    await fetch(`${urls.baseUrl}${urls.api.routes}?id=${routeId}`, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        submissionDetails: {
-          date: curDate,
-          notes: submissionNotes,
+    const routeRes = await fetch(
+      `${urls.baseUrl}${urls.api.routes}?id=${routeId}`,
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
         },
-      }),
-    });
+        body: JSON.stringify({
+          submissionDetails: {
+            date: curDate,
+            notes: submissionNotes,
+          },
+        }),
+      }
+    );
 
-    router.replace(urls.pages.route_selection);
+    if (routeRes.ok && studentRes.ok) {
+      setSuccessOpen(true);
+      await getStudents();
+    } else {
+      setErrorOpen(true);
+    }
   };
 
   const submitNote = (index, note) => {
@@ -247,7 +258,6 @@ const Roster = () => {
           }}
         >
           <Button
-            onClick={() => console.log("clicked!")}
             className={classes.submitBtn}
             style={{ backgroundColor: "#EB5757" }}
           >
@@ -346,7 +356,7 @@ const Roster = () => {
     );
   };
 
-  const getInitialStudents = async () => {
+  const getStudents = async () => {
     const curDate = getCurrentDate();
     const selectedRoute = await getRouteMeta(route);
     setRouteId(selectedRoute._id);
@@ -380,11 +390,34 @@ const Roster = () => {
   };
 
   useEffect(async () => {
-    route && (await getInitialStudents());
+    route && (await getStudents());
   }, [route]);
 
   return (
     <div className={classes.container}>
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        open={successOpen}
+        autoHideDuration={5000}
+        onClose={(e, r) => r !== "clickaway" && setSuccessOpen(false)}
+      >
+        <Alert severity="success" onClose={() => setSuccessOpen(false)}>
+          Changes successfully saved.
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        open={errorOpen}
+        autoHideDuration={5000}
+        onClose={() => setErrorOpen(false)}
+      >
+        <Alert
+          severity="error"
+          onClose={(e, r) => r !== "clickaway" && setErrorOpen(false)}
+        >
+          Error saving changes.
+        </Alert>
+      </Snackbar>
       <div className={classes.header}>
         <Link href={urls.pages.route_selection}>
           <button className={classes.backbtn}>
