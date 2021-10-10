@@ -33,7 +33,6 @@ const useStyles = makeStyles(() => ({
 }));
 
 const RouteSelection = ({ routes }) => {
-  // const [selectedSchool, setselectedSchool] = React.useState("");
   const classes = useStyles();
 
   // marks routes as complete or incomplete based on checkIn time
@@ -48,11 +47,6 @@ const RouteSelection = ({ routes }) => {
       };
     });
   }, [routes]);
-
-  // const handleClick = (e) => {
-  //   console.log(e.target.innerHTML);
-  //   setselectedSchool(e.target.innerHTML);
-  // };
 
   return (
     <div className={classes.container}>
@@ -87,24 +81,6 @@ RouteSelection.getInitialProps = async () => {
   const res = await fetch(`${urls.baseUrl}/api/routes`);
   const routes = await res.json();
   return { routes: routes.payload };
-
-  // const res = await fetch(`${urls.baseUrl}/api/club?ClubName=${ClubName}`);
-  // const schools_data = await res.json();
-  // let schools_list = [];
-  // if (schools_data.success && schools_data.payload.length > 0) {
-  //   schools_list = schools_data.payload[0].SchoolNames;
-  // }
-
-  // let data = [];
-
-  // for (let s of schools_list) {
-  //   data.push({
-  //     name: s,
-  //     complete: false,
-  //   });
-  // }
-
-  // return { schools: data };
 };
 
 export default RouteSelection;

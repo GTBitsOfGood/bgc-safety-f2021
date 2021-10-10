@@ -32,5 +32,6 @@ export default {
     uploadCsv: "/api/upload_csv",
     user: "/api/user",
     login: "/api/login",
+    routes: "/api/routes",
   },
 };

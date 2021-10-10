@@ -127,7 +127,7 @@ const getCurrentDate = () => {
 };
 
 const getRouteId = async (route) => {
-  const idRes = await fetch(`${urls.baseUrl}/api/routes?name=${route}`);
+  const idRes = await fetch(`${urls.baseUrl}${urls.api.routes}?name=${route}`);
   const routeMeta = await idRes.json();
   return routeMeta.payload[0]._id;
 };
@@ -141,7 +141,7 @@ const Roster = () => {
 
   const submitAttendance = async (curDate, submissionNotes) => {
     // update student checkIn
-    await fetch(`${urls.baseUrl}/api/checkIn`, {
+    await fetch(`${urls.baseUrl}${urls.api.checkIn}`, {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -153,7 +153,7 @@ const Roster = () => {
     });
 
     //update routes
-    await fetch(`${urls.baseUrl}/api/routes?id=${routeId}`, {
+    await fetch(`${urls.baseUrl}${urls.api.routes}?id=${routeId}`, {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -193,7 +193,7 @@ const Roster = () => {
     };
     setStudents(modifiedStudents);
 
-    await fetch(`${urls.baseUrl}/api/checkIn?id=${id}`, {
+    await fetch(`${urls.baseUrl}${urls.api.checkIn}?id=${id}`, {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -349,7 +349,7 @@ const Roster = () => {
     const selectedRoute = await getRouteId(route);
     setRouteId(selectedRoute);
     const studentRes = await fetch(
-      `${urls.baseUrl}/api/student?route=${selectedRoute}`
+      `${urls.baseUrl}${urls.api.student}?route=${selectedRoute}`
     );
     const d = await studentRes.json();
 
@@ -378,7 +378,7 @@ const Roster = () => {
   return (
     <div className={classes.container}>
       <div className={classes.header}>
-        <Link href="/route_selection">
+        <Link href={urls.pages.route_selection}>
           <button className={classes.backbtn}>
             <ArrowBackIosIcon />
             <h1 className={classes.text}>Back </h1>
