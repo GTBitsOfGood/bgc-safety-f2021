@@ -120,17 +120,17 @@ const useStyles = makeStyles(() => ({
 }));
 
 const getCurrentDate = () => {
-      const dateObj = new Date();
-      const day = String(dateObj.getDate()).padStart(2, "0");
-      const today = `${dateObj.getMonth() + 1}/${day}/${dateObj.getFullYear()}`;
-      return today
-}
+  const dateObj = new Date();
+  const day = String(dateObj.getDate()).padStart(2, "0");
+  const today = `${dateObj.getMonth() + 1}/${day}/${dateObj.getFullYear()}`;
+  return today;
+};
 
 const getRouteId = async (route) => {
-    const idRes = await fetch(`${urls.baseUrl}/api/routes?name=${route}`);
-    const routeMeta = await idRes.json();
-    return routeMeta.payload[0]._id
-}
+  const idRes = await fetch(`${urls.baseUrl}/api/routes?name=${route}`);
+  const routeMeta = await idRes.json();
+  return routeMeta.payload[0]._id;
+};
 
 const Roster = () => {
   const router = useRouter();
@@ -138,7 +138,6 @@ const Roster = () => {
   const { route } = router.query;
   const [routeId, setRouteId] = useState(null);
   const [students, setStudents] = React.useState([]);
-
 
   const submitAttendance = async (curDate, submissionNotes) => {
     // update student checkIn
@@ -168,7 +167,7 @@ const Roster = () => {
       }),
     });
 
-    router.replace(urls.pages.route_selection)
+    router.replace(urls.pages.route_selection);
   };
 
   const submitNote = (index, note) => {
@@ -194,21 +193,19 @@ const Roster = () => {
     };
     setStudents(modifiedStudents);
 
-    // await fetch(`${urls.baseUrl}/api/checkIn?id=${id}`, {
-    //   method: "POST",
-    //   headers: {
-    //     Accept: "application/json",
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({
-    //     time: getCurrentDate()
-    //   }),
-    // })
+    await fetch(`${urls.baseUrl}/api/checkIn?id=${id}`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        time: getCurrentDate()
+      }),
+    })
   };
 
   const SubmitModalContent = () => {
-    let date = new Date();
-    date = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
     const [note, setNote] = React.useState("");
 
     return (
@@ -216,7 +213,7 @@ const Roster = () => {
         className={classes.ModalContent}
         onSubmit={(e) => {
           e.preventDefault();
-          submitAttendance(date, note);
+          submitAttendance(getCurrentDate(), note);
         }}
         style={{
           width: "750px",
@@ -227,7 +224,7 @@ const Roster = () => {
       >
         <h1 style={{ margin: "0" }}>Submission Notice</h1>
         <p style={{ margin: "0" }}>
-          You are about to submit attendance for {date}
+          You are about to submit attendance for {getCurrentDate()}
         </p>
         <textarea
           rows="10"
@@ -350,10 +347,11 @@ const Roster = () => {
 
   const getInitialStudents = async () => {
     const selectedRoute = await getRouteId(route);
-    setRouteId(selectedRoute)
-    const studentRes = await fetch(`${urls.baseUrl}/api/student?route=${selectedRoute}`);
-    const d = await studentRes.json()
-
+    setRouteId(selectedRoute);
+    const studentRes = await fetch(
+      `${urls.baseUrl}/api/student?route=${selectedRoute}`
+    );
+    const d = await studentRes.json();
 
     let data = [];
     if (d.success) {
@@ -373,7 +371,7 @@ const Roster = () => {
   };
 
   useEffect(async () => {
-    route && await getInitialStudents();
+    route && (await getInitialStudents());
   }, [route]);
 
   return (
@@ -424,4 +422,5 @@ const Roster = () => {
   );
 };
 
+export { getCurrentDate };
 export default Roster;
