@@ -362,7 +362,8 @@ const Roster = () => {
         data.push({
           name: `${student.firstName} ${student.lastName}`,
           id: student.studentID,
-          checkedIn: student.checkInTimes.includes(today),
+          //new to old
+          checkedIn: student.checkInTimes.sort((a, b) => Date.parse(b) - Date.parse(a))[0] === today,
           note: "",
         });
       }
