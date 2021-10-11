@@ -13,13 +13,11 @@ import {
 } from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
 import { makeStyles } from "@material-ui/core/styles";
-import fetch from "node-fetch";
 
 import routes from "../../utils/routes";
-import urls from "../../utils/urls";
 import { lightgray } from "color-name";
 import { useSession } from "next-auth/client";
-import { filterRoutes } from "../../utils/userType";
+import { useUserType, filterRoutes } from "../../utils/userType";
 
 const getDate = () => {
   const today = new Date();
@@ -111,6 +109,7 @@ const NavLink = styled.a`
 const Header = ({ defaultSelected, router }) => {
   const classes = useStyles();
   const [session, loading] = useSession();
+  const userType = useUserType(session);
 
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [selected, setSelected] = React.useState(defaultSelected);
@@ -118,15 +117,9 @@ const Header = ({ defaultSelected, router }) => {
 
   React.useEffect(() => async () => {
     if (!loading && session && filteredRoutes.length == 0) {
-      const json = await queryUser();
-      setFilteredRoutes(filterRoutes(json.payload));
+      setFilteredRoutes(filterRoutes(userType));
     }
   });
-
-  const queryUser = async () => {
-    const res = await fetch(`${urls.api.user}?email=${session.user.email}`);
-    return await res.json();
-  };
 
   const open = Boolean(anchorEl);
 
@@ -147,13 +140,6 @@ const Header = ({ defaultSelected, router }) => {
   const handleClose = () => {
     setAnchorEl(null);
   };
-
-  useEffect(async () => {
-    if (!loading && session && filteredRoutes.length == 0) {
-      let currentUser = await queryUser();
-      setFilteredRoutes(filterRoutes(currentUser));
-    }
-  }, [loading, session]);
 
   if (loading || !session) {
     return null;
