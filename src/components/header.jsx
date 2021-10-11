@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { If, Then, Else } from "react-if";
 import { withRouter } from "next/router";
 import Link from "next/link";
 import styled from "styled-components";
@@ -25,6 +26,7 @@ import userTypes, {
   fetchUserData,
   useUserType,
 } from "../../utils/userType";
+import urls from "../../utils/urls";
 // import { Route } from 'react-router-dom';
 
 const getDate = () => {
@@ -159,64 +161,72 @@ const Header = (props) => {
   }
 
   return (
-    router.pathname !== "/login" && (
-      <AppBar position="static" className={classes.header}>
-        <Toolbar variant="dense">
-          {userType !== userTypes.busDriver ? (
-            <>
-              <IconButton
-                edge="start"
-                className={classes.menuButton}
-                color="inherit"
-                aria-label="menu"
-                onClick={handleMenu}
-              >
-                <MenuIcon />
-              </IconButton>
-
-              <SwipeableDrawer
-                elevation
-                id="menu-appbar"
-                className="menu"
-                classes={{ paper: classes.menuItems }}
-                anchorEl={anchorEl}
-                anchorOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-                open={open}
-                onClose={handleClose}
-              >
-                {filteredRoutes.map((route, index) => (
-                  <MenuItem
-                    className={classes.menuFont}
-                    onClick={handleClose}
-                    key={index}
+    <If condition={router.pathname !== urls.pages.login}>
+      <Then>
+        <AppBar position="static" className={classes.header}>
+          <Toolbar variant="dense">
+            <If condition={userType !== userTypes.busDriver}>
+              <Then>
+                <>
+                  <IconButton
+                    edge="start"
+                    className={classes.menuButton}
+                    color="inherit"
+                    aria-label="menu"
+                    onClick={handleMenu}
                   >
-                    <Link href={route.link} passHref>
-                      <NavLink>{route.name}</NavLink>
-                    </Link>
-                  </MenuItem>
-                ))}
-                <MenuItem className={classes.menuFont} onClick={handleClose}>
-                  My profile
-                </MenuItem>
-              </SwipeableDrawer>
-            </>
-          ) : (
-            <div />
-          )}
-          <Typography variant="h6" className={classes.title}>
-            {selected}
-          </Typography>
-        </Toolbar>
-      </AppBar>
-    )
+                    <MenuIcon />
+                  </IconButton>
+
+                  <SwipeableDrawer
+                    elevation
+                    id="menu-appbar"
+                    className="menu"
+                    classes={{ paper: classes.menuItems }}
+                    anchorEl={anchorEl}
+                    anchorOrigin={{
+                      vertical: "top",
+                      horizontal: "right",
+                    }}
+                    keepMounted
+                    transformOrigin={{
+                      vertical: "top",
+                      horizontal: "right",
+                    }}
+                    open={open}
+                    onClose={handleClose}
+                  >
+                    {filteredRoutes.map((route, index) => (
+                      <MenuItem
+                        className={classes.menuFont}
+                        onClick={handleClose}
+                        key={index}
+                      >
+                        <Link href={route.link} passHref>
+                          <NavLink>{route.name}</NavLink>
+                        </Link>
+                      </MenuItem>
+                    ))}
+                    <MenuItem
+                      className={classes.menuFont}
+                      onClick={handleClose}
+                    >
+                      My profile
+                    </MenuItem>
+                  </SwipeableDrawer>
+                </>
+              </Then>
+              <Else>
+                <div />
+              </Else>
+            </If>
+            <Typography variant="h6" className={classes.title}>
+              {selected}
+            </Typography>
+          </Toolbar>
+        </AppBar>
+      </Then>
+    </If>
   );
 };
 
