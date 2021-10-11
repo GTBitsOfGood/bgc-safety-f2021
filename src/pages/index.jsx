@@ -1,37 +1,25 @@
-// import React from "react";
+import React, { useEffect, useState } from "react";
 import { helloWorld } from "../actions/api";
 import axios from "axios";
 // import { Login } from '../pages/login.jsx';
-import React, { useEffect } from "react";
-import Router from "next/router";
+import router from "next/router";
 import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/client";
 import urls from "../../utils/urls";
 
 const HomePage = () => {
-  const [payload, setPayload] = React.useState("");
+  const [payload, setPayload] = useState("");
   const [session, loading] = useSession();
-  React.useEffect(() => {
+
+  useEffect(() => {
     // Example how to create page without ssr
     // helloWorld().then(resp => {
     //   setPayload(resp);
     // });
-    const { pathname } = Router;
+    const { pathname } = router;
     if (pathname == "/") {
-      Router.push("/login");
+      router.push("/login");
     }
-
-    // Testing to see current user
-    const getUser = async () => {
-      const url = `/api/user`;
-      if (session) {
-        console.log("SESSION", session);
-        const currentUser = await fetch(
-          `${urls.baseUrl}/api/user?email=${session.user.email}`
-        );
-        console.log("CURRENT USER", currentUser);
-      }
-    };
 
     // const currentUser = {
     //   BGCMA_email: "sahya",
@@ -39,8 +27,6 @@ const HomePage = () => {
     //   type: "BusDriver",
     //   club: "All"
     // }
-
-    getUser();
   }, []);
 
   return (

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { spacing } from "@material-ui/system";
 import Box from "@material-ui/core/Box";
@@ -12,9 +12,11 @@ import {
   Backdrop,
   Fade,
 } from "@material-ui/core";
-
+import Router from "next/router";
+import { useSession } from "next-auth/client";
 import Link from "next/link";
 import urls from "../../utils/urls";
+import { useUserAuthorized } from "../../utils/userType";
 
 const fetch = require("node-fetch");
 
@@ -57,16 +59,18 @@ const useStyles = makeStyles((theme) => ({
 
 const AccountCreation = () => {
   const classes = useStyles();
-  const [type, setType] = React.useState("Admin");
-  const [open, setOpen] = React.useState(false);
-  const [confirm, setConfirm] = React.useState(false);
+  const [type, setType] = useState("Admin");
+  const [open, setOpen] = useState(false);
+  const [confirm, setConfirm] = useState(false);
 
-  const [first, setFirst] = React.useState("");
-  const [last, setLast] = React.useState("");
-  const [location, setLocation] = React.useState("");
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [selectText, setSelectText] = React.useState("Assigned Bus Routes");
+  const [first, setFirst] = useState("");
+  const [last, setLast] = useState("");
+  const [location, setLocation] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [selectText, setSelectText] = useState("Assigned Bus Routes");
+  const [session, loading] = useSession();
+  const userAuthorized = useUserAuthorized(session, urls.pages.account_creation);
 
   const handleOpen = () => {
     setOpen(true);
@@ -115,6 +119,10 @@ const AccountCreation = () => {
     setPassword(e.target.value);
   };
 
+  if (!session || !userAuthorized) {
+    return <div />
+  }
+
   return (
     <div className={classes.container}>
       <h1 className={classes.pageTitle}>Create an account</h1>
@@ -147,7 +155,9 @@ const AccountCreation = () => {
         </Box>
         <Box m={1}>
           <Button
-            variant={type !== "Executive Director" ? "outlined" : "contained"}
+            variant={
+              type !== "Executive Director" ? "outlined" : "contained"
+            }
             color="primary"
             onClick={() => {
               setType("Executive Director");
@@ -159,7 +169,9 @@ const AccountCreation = () => {
         </Box>
         <Box m={1}>
           <Button
-            variant={type !== "Regional Director" ? "outlined" : "contained"}
+            variant={
+              type !== "Regional Director" ? "outlined" : "contained"
+            }
             color="primary"
             onClick={() => {
               setType("Regional Director");
