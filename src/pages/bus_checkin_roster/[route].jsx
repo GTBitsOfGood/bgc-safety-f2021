@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import ModalComponent from "../../components/modal";
 import urls from "../../../utils/urls";
+import ModalButton from "../../components/ModalButton";
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -140,6 +141,8 @@ const Roster = () => {
   const [routeId, setRouteId] = useState(null);
   const [students, setStudents] = useState([]);
   const [complete, setComplete] = useState(true); //defaults to true to prevent changes during render
+  const [studentNoteModalOpen, setStudentNoteModalOpen] = useState(false);
+  const [submissionModalOpen, setSubmissionModalOpen] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
   const [errorOpen, setErrorOpen] = useState(false);
 
@@ -218,14 +221,15 @@ const Roster = () => {
   };
 
   const SubmitModalContent = () => {
-    const [note, setNote] = React.useState("");
+    const [submissionNote, setSubmissionNote] = useState("");
 
     return (
       <form
         className={classes.ModalContent}
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
-          submitAttendance(getCurrentDate(), note);
+          await submitAttendance(getCurrentDate(), submissionNote);
+          setSubmissionModalOpen(false);
         }}
         style={{
           width: "750px",
@@ -245,9 +249,9 @@ const Roster = () => {
           type="text"
           placeholder="Type your note here"
           style={{ width: "600px", height: "100x" }}
-          value={note}
+          value={submissionNote}
           onChange={(e) => {
-            setNote(e.target.value);
+            setSubmissionNote(e.target.value);
           }}
         />
         <div
@@ -282,9 +286,11 @@ const Roster = () => {
     return (
       <form
         className={classes.ModalContent}
-        onSubmit={() => {
+        onSubmit={(e) => {
+          e.preventDefault();
           submitNote(props.index, studentNote);
           setStudentNote("");
+          setStudentNoteModalOpen(false);
         }}
       >
         <h1 style={{ margin: "0" }}>Add/Edit Note</h1>
@@ -329,10 +335,25 @@ const Roster = () => {
       <td className={classes.checkedIn}>
         <p style={{ gridColumnStart: "4" }}>Checked In</p>
         <div style={{ marginLeft: "auto", marginRight: "5px" }}>
+          {props.justCheckedIn ? (
+            <ModalButton
+              setOpen={() => setStudentNoteModalOpen(true)}
+              buttonStyle={classes.ModalButton}
+            >
+              <AddButton />
+            </ModalButton>
+          ) : (
+            <ModalButton
+              setOpen={() => setStudentNoteModalOpen(true)}
+              buttonStyle={classes.ModalButton}
+            >
+              <EditButton />
+            </ModalButton>
+          )}
           <ModalComponent
-            button={props.justCheckedIn ? <AddButton /> : <EditButton />}
+            open={studentNoteModalOpen}
+            setOpen={setStudentNoteModalOpen}
             style={{ marginLeft: "auto" }}
-            buttonStyle={classes.ModalButton}
           >
             <NoteModalContent index={props.index} />
           </ModalComponent>
@@ -398,7 +419,7 @@ const Roster = () => {
       <Snackbar
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
         open={successOpen}
-        autoHideDuration={5000}
+        autoHideDuration={3000}
         onClose={(e, r) => r !== "clickaway" && setSuccessOpen(false)}
       >
         <Alert severity="success" onClose={() => setSuccessOpen(false)}>
@@ -408,7 +429,7 @@ const Roster = () => {
       <Snackbar
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
         open={errorOpen}
-        autoHideDuration={5000}
+        autoHideDuration={3000}
         onClose={() => setErrorOpen(false)}
       >
         <Alert
@@ -460,10 +481,16 @@ const Roster = () => {
           ))}
         </tbody>
       </table>
-      <ModalComponent
-        button={<h1 style={{ margin: "0px" }}>Submit</h1>}
+      <ModalButton
+        setOpen={() => setSubmissionModalOpen(true)}
         buttonStyle={classes.mainSubmitBtn}
         disabled={complete}
+      >
+        <h1 style={{ margin: "0px" }}>Submit</h1>
+      </ModalButton>
+      <ModalComponent
+        open={submissionModalOpen}
+        setOpen={setSubmissionModalOpen}
       >
         <SubmitModalContent />
       </ModalComponent>

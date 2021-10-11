@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -13,6 +13,7 @@ import Calendar from "../components/calendar";
 import ModalComponent from "../components/modal";
 import styles from "./history.module.css";
 import urls from "../../utils/urls";
+import ModalButton from "../components/ModalButton";
 
 const fetch = require("node-fetch");
 
@@ -233,6 +234,8 @@ function History({ students }) {
   const sortingLabels = ["Alphabetical", "Grade", "Low Attendance"];
   const [sort, setSort] = React.useState("");
   const [date, setDate] = React.useState(new Date(startDate));
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
 
   // fetching date data from api
   React.useEffect(
@@ -398,6 +401,30 @@ function History({ students }) {
 
       <DateSelect date={date} setDate={setDate} />
 
+      {selectedStudent ? (
+        <ModalComponent open={modalOpen} setOpen={setModalOpen}>
+          <div className={classes.ModalComponent}>
+            <div className={classes.content}>
+              <div className={classes.info}>
+                <h1>{`${selectedStudent.firstName} ${selectedStudent.lastName}`}</h1>
+                <p>{`School: ${selectedStudent.schoolName}`}</p>
+                <p>{`Grade: ${selectedStudent.grade}`}</p>
+                <p>{`Status: ${selectedStudent.status}`}</p>
+                <p>{`Contact: ${selectedStudent.contact}`}</p>
+                <p>{`Emergency: ${selectedStudent.emergency}`}</p>
+              </div>
+              <div className={classes.calendar}>
+                <Calendar
+                  defaultMonth={date.getMonth()}
+                  defaultYear={date.getFullYear()}
+                  getDatesAttended={() => selectedStudent.datesAttended}
+                />
+              </div>
+            </div>
+          </div>
+        </ModalComponent>
+      ) : null}
+
       <table className={classes.table}>
         <thead
           style={{ backgroundColor: "#E0E0E0", width: "calc( 100% - 1em )" }}
@@ -424,30 +451,15 @@ function History({ students }) {
                   width: "25%",
                 }}
               >
-                <ModalComponent
-                  button={<>{`${student.lastName}, ${student.firstName}`}</>}
+                <ModalButton
                   buttonStyle={classes.ModalComponentButton}
+                  setOpen={() => {
+                    setSelectedStudent(student);
+                    setModalOpen(true);
+                  }}
                 >
-                  <div className={classes.ModalComponent}>
-                    <div className={classes.content}>
-                      <div className={classes.info}>
-                        <h1>{`${student.firstName} ${student.lastName}`}</h1>
-                        <p>{`School: ${student.schoolName}`}</p>
-                        <p>{`Grade: ${student.grade}`}</p>
-                        <p>{`Status: ${student.status}`}</p>
-                        <p>{`Contact: ${student.contact}`}</p>
-                        <p>{`Emergency: ${student.emergency}`}</p>
-                      </div>
-                      <div className={classes.calendar}>
-                        <Calendar
-                          defaultMonth={date.getMonth()}
-                          defaultYear={date.getFullYear()}
-                          getDatesAttended={() => student.datesAttended}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </ModalComponent>
+                  <>{`${student.lastName}, ${student.firstName}`}</>
+                </ModalButton>
               </td>
               <td className={classes.td}>
                 <div style={{ display: "flex", flexDirection: "row" }}>

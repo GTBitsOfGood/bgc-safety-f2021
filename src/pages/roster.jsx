@@ -1,14 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
-import modalStyles from "../components/Modal.module.css"
+import modalStyles from "../components/Modal.module.css";
 import TextField from "@material-ui/core/TextField";
 import styles from "./roster.module.css";
 import ModalComponent from "../components/modal";
 import urls from "../../utils/urls";
 import { useSession } from "next-auth/client";
+import ModalButton from "../components/ModalButton";
 
 const fetch = require("node-fetch");
 
@@ -97,13 +98,14 @@ function Roster({ schools }) {
   const [firstName, setFirstName] = React.useState("");
   const [lastName, setLastName] = React.useState("");
   const [studentSchool, setStudentSchool] = React.useState("");
+  const [modalOpen, setModalOpen] = useState(false);
   const [session, loading] = useSession();
 
   const handleSubmit = () => {
     setStudent({ firstName, lastName, studentSchool });
+    setModalOpen(false);
     // add to database
   };
-  console.log("session", session);
 
   return (
     <div id="main">
@@ -147,16 +149,16 @@ function Roster({ schools }) {
                   </tr>
                 ))}
                 <tr>
-                  <ModalComponent
-                    setStudent={setStudent}
-                    button={
-                      <>
-                        Manually Add Entry
-                        <AddCircleIcon className={classes.icon} />
-                      </>
-                    }
+                  <ModalButton
+                    setOpen={() => setModalOpen(true)}
                     buttonStyle={classes.button}
                   >
+                    <>
+                      Manually Add Entry
+                      <AddCircleIcon className={classes.icon} />
+                    </>
+                  </ModalButton>
+                  <ModalComponent open={modalOpen} setStudent={setStudent}>
                     <form className={classes.form} onSubmit={handleSubmit}>
                       <h1 className={classes.formHeading}>
                         Manually Add Entry
