@@ -24,7 +24,9 @@
     "secrets": "npm run secrets:logout && cross-env-shell BW_SESSION=`npx bw login product@bitsofgood.org --raw` \"npm run secrets:sync\"",
     "secrets:logout": "(npx bw logout || exit 0)",
     "secrets:login": "npx bw login product@bitsofgood.org",
-    "secrets:sync": "npx bw sync && npx bw get item e141fcfd-c713-4043-8b82-acc3013c6b38 | npx fx .notes > \".env\""
+    "secrets:sync": "npx bw sync && npx bw get item $BW_ITEM | npx fx .notes > \".env\"",
+    "secrets-dev": "BW_ITEM=e141fcfd-c713-4043-8b82-acc3013c6b38 npm run secrets",
+    "secrets-staging": "BW_ITEM=219c2c01-06a1-4527-9bfd-adaa0114838b npm run secrets"
   },
   "husky": {
     "hooks": {

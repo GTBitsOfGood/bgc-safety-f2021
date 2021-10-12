@@ -49,19 +49,11 @@ function createUser(req, res) {
 }
 
 function getUser(req, res) {
-  console.log("QUERY", req.query);
-  // const reqUser = req.user
-  // console.log(reqUser)
-  User.find({ username: req.query.email })
+  User.find({ BGCMA_email: req.query.email })
     .then((user) => {
-      console.log("TEST", req.query.email);
-      console.log("USER", user);
       res.send(user);
     })
     .catch((err) => console.log(err));
-
-  // console.log(user)
-  // return res.send(user)
 }
 
 function deleteUser(req, res) {
