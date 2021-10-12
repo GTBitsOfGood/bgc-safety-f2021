@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, useEffect } from "react";
 import Router from "next/router";
 import { makeStyles } from "@material-ui/core/styles";
 import { spacing } from "@material-ui/system";
@@ -7,6 +7,9 @@ import Collapse from "@material-ui/core/Collapse";
 import IconButton from "@material-ui/core/IconButton";
 import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
+import { useSession } from "next-auth/client";
+import urls from "../../utils/urls";
+import { useUserAuthorized } from "../../utils/userType";
 
 import {
   Button,
@@ -18,9 +21,6 @@ import {
   Backdrop,
   Fade,
 } from "@material-ui/core";
-
-import Link from "next/link";
-import urls from "../../utils/urls";
 
 const fetch = require("node-fetch");
 
@@ -105,10 +105,12 @@ const createTable = async (
 
 const createdAccounts = () => {
   const classes = useStyles();
-  const [filterType, setType] = React.useState("All");
-  const [dataItems, setDataItems] = React.useState([]);
-  const [expanded, setExpanded] = React.useState(false);
-  const [isEditable, setEditable] = React.useState("false");
+  const [session, loading] = useSession();
+  const [filterType, setType] = useState("All");
+  const [dataItems, setDataItems] = useState([]);
+  const [expanded, setExpanded] = useState(false);
+  const [isEditable, setEditable] = useState("false");
+  const userAuthorized = useUserAuthorized(session, urls.pages.created_accounts);
 
   const handleExpansion = () => {
     if (expanded == true) {
@@ -118,13 +120,17 @@ const createdAccounts = () => {
     }
   };
 
+  const goToAccountCreationPage = () => {
+    Router.replace("/account_creation");
+  };
+
   const tableEditable = () => {
     setEditable("true");
   };
 
-  const goToAccountCreationPage = () => {
-    Router.replace("/account_creation");
-  };
+  if (!session || !userAuthorized) {
+    return <div />
+  }
 
   return (
     <div>
@@ -217,7 +223,10 @@ const createdAccounts = () => {
       </div>
       <table className={classes.table}>
         <thead
-          style={{ backgroundColor: "#E0E0E0", width: "calc( 100% - 1em )" }}
+          style={{
+            backgroundColor: "#E0E0E0",
+            width: "calc( 100% - 1em )",
+          }}
         >
           <tr>
             <th scope="col" className={classes.th}>
@@ -246,7 +255,10 @@ const createdAccounts = () => {
           {dataItems.map((data, index) => (
             <tr key={index}>
               <td scope="row">
-                <IconButton className={classes.tcell} onClick={handleExpansion}>
+                <IconButton
+                  className={classes.tcell}
+                  onClick={handleExpansion}
+                >
                   {" "}
                   {expanded ? (
                     <KeyboardArrowUpIcon />
@@ -301,7 +313,8 @@ const createdAccounts = () => {
                 <KeyboardArrowUpIcon />
               ) : (
                 <KeyboardArrowDownIcon />
-              )} 1{" "}
+              )}{" "}
+              1{" "}
             </IconButton>
           </td>
           <td contenteditable={isEditable} className={classes.tcell}>

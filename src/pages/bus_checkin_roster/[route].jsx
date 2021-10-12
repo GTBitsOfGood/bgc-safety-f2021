@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Button } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
@@ -8,6 +8,9 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import ModalComponent from "../../components/modal";
 import urls from "../../../utils/urls";
+import { useSession } from "next-auth/client";
+import Router from "next/router";
+import { useUserAuthorized } from "../../../utils/userType";
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -123,8 +126,10 @@ let initial = false;
 const Roster = () => {
   const router = useRouter();
   const classes = useStyles();
+  const [session, loading] = useSession();
   const { route } = router.query;
-  const [students, setStudents] = React.useState([]);
+  const [students, setStudents] = useState([]);
+  const userAuthorized = useUserAuthorized(session, urls.pages.bus_checkin_roster)
 
   const submitAttendance = async (index) => {
     // show modal
@@ -171,7 +176,7 @@ const Roster = () => {
   const SubmitModalContent = () => {
     let date = new Date();
     date = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
-    const [note, setNote] = React.useState("");
+    const [note, setNote] = useState("");
 
     return (
       <form
@@ -227,9 +232,7 @@ const Roster = () => {
   };
 
   const NoteModalContent = (props) => {
-    const [studentNote, setStudentNote] = React.useState(
-      students[props.index].note
-    );
+    const [studentNote, setStudentNote] = useState(students[props.index].note);
     return (
       <form
         className={classes.ModalContent}
@@ -335,6 +338,10 @@ const Roster = () => {
   if (!initial && router.query.route !== undefined) {
     initial = true;
     getInitialStudents();
+  }
+
+  if (!session || !userAuthorized) {
+    return <div />
   }
 
   return (
