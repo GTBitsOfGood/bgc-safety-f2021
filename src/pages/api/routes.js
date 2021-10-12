@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define */
 import {
   getAllRoutes,
   addRoute,
@@ -12,7 +13,7 @@ export default async (req, res) => {
   await useCors(req, res);
 
   const { method } = req;
-  if (method == "GET") {
+  if (method === "GET") {
     getRoutes(req, res);
   } else if (method === "POST") {
     addNewRoute(req, res);

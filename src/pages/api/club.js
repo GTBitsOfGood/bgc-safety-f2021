@@ -46,8 +46,8 @@ function createClub(req, res) {
   const { ClubName, SchoolNames } = req.body;
 
   Club.create({
-    ClubName: ClubName,
-    SchoolNames: SchoolNames,
+    ClubName,
+    SchoolNames,
   })
     .then((club) =>
       res.status(201).send({
