@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
+import {Button} from "@material-ui/core";
 import SelectDropdown from "../components/select";
 import urls from "../../utils/urls";
 import Input from "../components/input";
+import Unfold from "@material-ui/icons/UnfoldMore";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -16,6 +18,14 @@ const useStyles = makeStyles((theme) => ({
   dropdown: {
     width: "30%",
     borderRadius: "50px",
+  },
+  btn: {
+    textDecoration: "none",
+    color: "#1594D0",
+    borderRadius: "20px",
+    width: "80%",
+    margin: "5%",
+    border: "2px solid #1594D0"
   },
   table: {
     borderCollapse: "collapse"
@@ -40,6 +50,11 @@ const useStyles = makeStyles((theme) => ({
   },
   tdClub: {
     fontWeight: "bold",
+    padding: 15
+  },
+  headerMenu: {
+    display: "flex",
+    alignItems: "center",
     padding: 15
   }
 }));
@@ -83,11 +98,14 @@ const ClubOverview = () => {
               className={classes.th}
             >
               
-              <th className={classes.td}>Club</th>
+              <th className={classes.headerMenu}>
+                <div>Club</div>
+                <div ><Unfold /></div>
+              </th>
               <th className={classes.td}>Region</th>
               <th className={classes.td}>Executive Director</th>
               <th className={classes.td}>Summary</th>
-              
+              <th></th>
               
              </tr>
           </thead>
@@ -102,6 +120,11 @@ const ClubOverview = () => {
                     <td className={classes.td}>{club[3]}</td>
                     <td className={classes.td}>{club[4]}</td>
                   </div>
+                  <td>
+                    <Button className={classes.btn}>
+                      View more
+                    </Button>
+                  </td>
               </tr>
              ))}
           </tbody>
