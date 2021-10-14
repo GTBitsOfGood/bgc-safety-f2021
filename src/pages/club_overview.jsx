@@ -16,7 +16,7 @@ const useStyles = makeStyles((theme) => ({
     paddingRight: "10%"
   },
   dropdown: {
-    width: "30%",
+    width: "80%",
     borderRadius: "50px",
   },
   btn: {
@@ -89,9 +89,10 @@ const ClubOverview = () => {
   return (
     <div className={classes.container}>
       <h2>Overview of Clubs</h2>
-      <SelectDropdown options={routes} className={classes.dropdown} />
-      <Input />
-      
+      <div>
+        <SelectDropdown options={routes} className={classes.dropdown} />
+        <Input />
+      </div>
         <table className={classes.table}>
           <thead>
             <tr
