@@ -10,10 +10,15 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
+    paddingLeft: "10%",
+    paddingRight: "10%"
   },
   dropdown: {
     width: "30%",
     borderRadius: "50px",
+  },
+  table: {
+    borderCollapse: "collapse"
   },
   tr: {
     "&:nth-child(even)": {
@@ -21,7 +26,21 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   th: {
-    backgroundColor: "#4da6ff",
+    backgroundColor: "#1594D0",
+    padding: 10,
+    paddingLeft: 15,
+    fontSize: 15,
+    borderRadius: "3px",
+    color: "white", 
+    textAlign: "left"
+     
+  },
+  td: {
+    padding:15
+  },
+  tdClub: {
+    fontWeight: "bold",
+    padding: 15
   }
 }));
 
@@ -58,26 +77,31 @@ const ClubOverview = () => {
       <SelectDropdown options={routes} className={classes.dropdown} />
       <Input />
       
-        <table>
+        <table className={classes.table}>
           <thead>
-            <th
+            <tr
               className={classes.th}
             >
-              Club
-              Executive Director
-              Summary
-             </th>
+              
+              <th className={classes.td}>Club</th>
+              <th className={classes.td}>Region</th>
+              <th className={classes.td}>Executive Director</th>
+              <th className={classes.td}>Summary</th>
+              
+              
+             </tr>
           </thead>
           <tbody>
             {clubList.map((club) => (
               <tr className={classes.tr}>
-                <td>
-                  {club[0]}
-                  {club[1]}
-                  {club[2]}
-                  {club[3]}
-                  {club[4]}
-                </td>
+                
+                  <td className={classes.tdClub}>{club[0]}</td>
+                  <td className={classes.td}>{club[1]}</td>
+                  <td className={classes.td}>{club[2]}</td>
+                  <div>
+                    <td className={classes.td}>{club[3]}</td>
+                    <td className={classes.td}>{club[4]}</td>
+                  </div>
               </tr>
              ))}
           </tbody>
