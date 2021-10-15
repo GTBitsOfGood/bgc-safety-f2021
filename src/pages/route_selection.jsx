@@ -1,9 +1,11 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Link from "next/link";
 const fetch = require("node-fetch");
 import urls from "../../utils/urls";
 import { getCurrentDate } from "./bus_checkin_roster/[route]";
+import { useSession } from "next-auth/client";
+import { useUserAuthorized } from "../../utils/userType";
 
 const ClubName = "Harland"; // TODO: Allow user to select a club
 
@@ -33,13 +35,16 @@ const useStyles = makeStyles(() => ({
 }));
 
 const RouteSelection = ({ routes }) => {
+  const [selectedSchool, setselectedSchool] = useState("");
   const classes = useStyles();
+  const [session, loading] = useSession();
+  const userAuthorized = useUserAuthorized(session, urls.pages.route_selection);
 
   // marks routes as complete or incomplete based on checkIn time
   const markedRoutes = useMemo(() => {
     const curDate = getCurrentDate();
     return routes.map(({ _id, name, checkIns }) => {
-      const checkedIn = checkIns.some((checkIn) => checkIn.date === curDate)
+      const checkedIn = checkIns.some((checkIn) => checkIn.date === curDate);
       return {
         id: _id,
         name,
@@ -47,6 +52,10 @@ const RouteSelection = ({ routes }) => {
       };
     });
   }, [routes]);
+
+  if (!session || !userAuthorized) {
+    return <div />;
+  }
 
   return (
     <div className={classes.container}>

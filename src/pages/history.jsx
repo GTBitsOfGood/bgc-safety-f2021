@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -14,6 +14,9 @@ import ModalComponent from "../components/modal";
 import styles from "./history.module.css";
 import urls from "../../utils/urls";
 import ModalButton from "../components/ModalButton";
+import Router from "next/router";
+import { useSession } from "next-auth/client";
+import { useUserAuthorized } from "../../utils/userType";
 
 const fetch = require("node-fetch");
 
@@ -227,18 +230,20 @@ const DateSelect = (props) => {
 
 function History({ students }) {
   const classes = useStyles();
-  const [visibleStudents, setVisibleStudents] = React.useState([]);
-  const [filters, setFilters] = React.useState(["", "", ""]);
+  const [visibleStudents, setVisibleStudents] = useState([]);
+  const [filters, setFilters] = useState(["", "", ""]);
   const filterLabels = ["schoolName", "grade", "attendance"];
-  const [filteredStudents, setFilteredStudents] = React.useState([]);
+  const [filteredStudents, setFilteredStudents] = useState([]);
   const sortingLabels = ["Alphabetical", "Grade", "Low Attendance"];
-  const [sort, setSort] = React.useState("");
-  const [date, setDate] = React.useState(new Date(startDate));
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [sort, setSort] = useState("");
+  const [date, setDate] = useState(new Date(startDate));
+  const [session, loading] = useSession();
+  const userAuthorized = useUserAuthorized(session, urls.pages.history);
 
   // fetching date data from api
-  React.useEffect(
+  useEffect(
     () => async () => {
       students = await updateStudents(date, students);
       filterStudents();
@@ -267,7 +272,7 @@ function History({ students }) {
   }
 
   // sorting
-  React.useEffect(() => {
+  useEffect(() => {
     const sortedStudents = [...visibleStudents];
     if (sort == "") {
       setVisibleStudents(filteredStudents);
@@ -290,7 +295,7 @@ function History({ students }) {
   }, [sort]);
 
   // filtering
-  React.useEffect(() => {
+  useEffect(() => {
     filterStudents();
   }, [filters]);
 
@@ -389,6 +394,10 @@ function History({ students }) {
     </div>
   );
 
+  if (!session || !userAuthorized) {
+    return <div />;
+  }
+
   return (
     <div className={styles.container}>
       <p style={{ fontSize: "200", margin: "0" }}>Bus Attendance Matrix</p>
@@ -427,7 +436,10 @@ function History({ students }) {
 
       <table className={classes.table}>
         <thead
-          style={{ backgroundColor: "#E0E0E0", width: "calc( 100% - 1em )" }}
+          style={{
+            backgroundColor: "#E0E0E0",
+            width: "calc( 100% - 1em )",
+          }}
         >
           <tr className={classes.tr}>
             <th className={classes.th} style={{ width: "25%" }}>

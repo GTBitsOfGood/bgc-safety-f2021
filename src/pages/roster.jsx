@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
@@ -10,6 +10,8 @@ import ModalComponent from "../components/modal";
 import urls from "../../utils/urls";
 import { useSession } from "next-auth/client";
 import ModalButton from "../components/ModalButton";
+import Router from "next/router";
+import { useUserAuthorized } from "../../utils/userType";
 
 const fetch = require("node-fetch");
 
@@ -94,18 +96,23 @@ function getNumberCheckedIn(school) {
 
 function Roster({ schools }) {
   const classes = useStyles();
-  const [student, setStudent] = React.useState({});
-  const [firstName, setFirstName] = React.useState("");
-  const [lastName, setLastName] = React.useState("");
-  const [studentSchool, setStudentSchool] = React.useState("");
   const [modalOpen, setModalOpen] = useState(false);
+  const [student, setStudent] = useState({});
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [studentSchool, setStudentSchool] = useState("");
   const [session, loading] = useSession();
+  const userAuthorized = useUserAuthorized(session, urls.pages.roster);
 
   const handleSubmit = () => {
     setStudent({ firstName, lastName, studentSchool });
     setModalOpen(false);
     // add to database
   };
+
+  if (!session || !userAuthorized) {
+    return <div />;
+  }
 
   return (
     <div id="main">

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { withRouter } from "next/router";
 import Link from "next/link";
 import styled from "styled-components";
@@ -20,6 +20,7 @@ import routes from "../../utils/routes";
 import Axios from "axios";
 import { lightgray } from "color-name";
 import { getSession, useSession } from "next-auth/client";
+import { filterRoutes } from "../../utils/userType";
 // import { Route } from 'react-router-dom';
 
 const getDate = () => {
@@ -123,35 +124,8 @@ const Header = (props) => {
   // let filteredRoutes = [];
   // const [filteredRoutes, setFilteredRoutes] = React.useState([]);
 
-  const filterRoutes = (currentUser) => {
-    let fRoutes = [];
-    if (currentUser.type == "Admin") {
-      fRoutes = routes.filter(
-        (item) => item.type == "Admin" || item.type == "All"
-      );
-    } else if (currentUser.type == "BusDriver") {
-      fRoutes = routes.filter(
-        (item) => item.type == "BusDriver" || item.type == "All"
-      );
-    } else if (currentUser.type == "ClubDirector") {
-      fRoutes = routes.filter(
-        (item) =>
-          item.type == "ClubDirectorAttendanceClerk" || item.type == "All"
-      );
-    } else if (currentUser.type == "AttendanceClerk") {
-      fRoutes = routes.filter(
-        (item) =>
-          item.type == "ClubDirectorAttendanceClerk" || item.type == "All"
-      );
-    } else {
-      fRoutes = routes.filter((item) => item.type == "All");
-    }
-
-    return fRoutes;
-  };
   const queryUser = async () => {
-    console.log("QUERY USER", session.user.email);
-    const res = await fetch(`/api/user?email=${session.user}`);
+    const res = await fetch(`/api/user?email=${session.user.email}`);
     return await res.json();
   };
 
@@ -175,12 +149,12 @@ const Header = (props) => {
     setAnchorEl(null);
   };
 
-  React.useEffect(() => async () => {
+  useEffect(async () => {
     if (!loading && session && filteredRoutes.length == 0) {
       let currentUser = await queryUser();
       setFilteredRoutes(filterRoutes(currentUser));
     }
-  });
+  }, [loading, session]);
 
   if (loading || !session) {
     // console.log(loading)
@@ -220,7 +194,6 @@ const Header = (props) => {
             open={open}
             onClose={handleClose}
           >
-            {/* {filterRoutes(currentUser)} */}
             {filteredRoutes.map((route, index) => (
               <MenuItem
                 className={classes.menuFont}
@@ -232,7 +205,6 @@ const Header = (props) => {
                 </Link>
               </MenuItem>
             ))}
-
             <MenuItem className={classes.menuFont} onClick={handleClose}>
               My profile
             </MenuItem>
@@ -259,4 +231,5 @@ Header.defaultProps = {
   router: null,
 };
 
+export { filterRoutes };
 export default withRouter(Header);

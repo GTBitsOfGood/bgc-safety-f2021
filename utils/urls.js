@@ -20,6 +20,7 @@ export default {
     bus_routes: "/bus_routes",
     account_creation: "/account_creation",
     created_accounts: "/created_accounts",
+    not_authorized: "/not_authorized",
   },
   api: {
     example: "/api/example",

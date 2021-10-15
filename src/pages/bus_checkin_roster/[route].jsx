@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Button } from "@material-ui/core";
 import { Alert, Snackbar } from "@mui/material";
@@ -10,6 +10,9 @@ import { useRouter } from "next/router";
 import ModalComponent from "../../components/modal";
 import urls from "../../../utils/urls";
 import ModalButton from "../../components/ModalButton";
+import { useSession } from "next-auth/client";
+import Router from "next/router";
+import { useUserAuthorized } from "../../../utils/userType";
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -137,6 +140,7 @@ const getRouteMeta = async (route) => {
 const Roster = () => {
   const router = useRouter();
   const classes = useStyles();
+  const [session, loading] = useSession();
   const { route } = router.query;
   const [routeId, setRouteId] = useState(null);
   const [students, setStudents] = useState([]);
@@ -145,6 +149,10 @@ const Roster = () => {
   const [submissionModalOpen, setSubmissionModalOpen] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
   const [errorOpen, setErrorOpen] = useState(false);
+  const userAuthorized = useUserAuthorized(
+    session,
+    urls.pages.bus_checkin_roster
+  );
 
   const submitAttendance = async (curDate, submissionNotes) => {
     // update student checkIn
@@ -280,9 +288,7 @@ const Roster = () => {
   };
 
   const NoteModalContent = (props) => {
-    const [studentNote, setStudentNote] = React.useState(
-      students[props.index].note
-    );
+    const [studentNote, setStudentNote] = useState(students[props.index].note);
     return (
       <form
         className={classes.ModalContent}
@@ -413,6 +419,10 @@ const Roster = () => {
   useEffect(async () => {
     route && (await getStudents());
   }, [route]);
+
+  if (!session || !userAuthorized) {
+    return <div />;
+  }
 
   return (
     <div className={classes.container}>
