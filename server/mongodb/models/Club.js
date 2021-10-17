@@ -22,6 +22,13 @@ const ClubSchema = new Schema({
       },
     ],
   },
+  Routes: {
+    type: [
+      {
+        type: Schema.Types.ObjectId,
+      },
+    ],
+  },
 });
 
 export default mongoose.models.Club || mongoose.model("Club", ClubSchema);

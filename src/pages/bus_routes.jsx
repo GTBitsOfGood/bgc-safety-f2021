@@ -144,7 +144,6 @@ const BusRoutes = ({ savedRoutes }) => {
   const [studentList, setStudentList] = useState([]);
   const userAuthorized = useUserAuthorized(session, urls.pages.bus_routes);
 
-
   const addRoute = () => {
     setModalOpen(true);
   };
@@ -279,7 +278,7 @@ const BusRoutes = ({ savedRoutes }) => {
   let modalName = "";
 
   if (!session || !userAuthorized) {
-    return <div />
+    return <div />;
   }
 
   return (
@@ -300,9 +299,7 @@ const BusRoutes = ({ savedRoutes }) => {
               </div>
             </div>
             <EditIcon
-              className={
-                routeEditable ? classes.hideIcon : classes.editIcon
-              }
+              className={routeEditable ? classes.hideIcon : classes.editIcon}
               onClick={() => {
                 setEditable(true);
                 setEditedRoute(selectedRoute.name);
@@ -311,9 +308,7 @@ const BusRoutes = ({ savedRoutes }) => {
               }}
             />
             <CheckCircleIcon
-              className={
-                routeEditable ? classes.checkIcon : classes.hideIcon
-              }
+              className={routeEditable ? classes.checkIcon : classes.hideIcon}
               onClick={() => {
                 setEditable(false);
                 updateRouteName(editedRoute);
@@ -346,9 +341,7 @@ const BusRoutes = ({ savedRoutes }) => {
               </DialogTitle>
               <DialogContent>
                 <div>
-                  <label className={classes.label}>
-                    Student First Name:
-                  </label>
+                  <label className={classes.label}>Student First Name:</label>
                   <input
                     id="FirstName"
                     className={classes.textField}
@@ -360,9 +353,7 @@ const BusRoutes = ({ savedRoutes }) => {
                   </div>
                 </div>
                 <div>
-                  <label className={classes.label}>
-                    Student Last Name:
-                  </label>
+                  <label className={classes.label}>Student Last Name:</label>
                   <input
                     id="LastName"
                     className={classes.textField}
@@ -435,8 +426,7 @@ const BusRoutes = ({ savedRoutes }) => {
                 </div>
               </DialogContent>
               <div hidden={!newRouteError} className={classes.error}>
-                Sorry, an error occurred. Cannot create new student in
-                route.
+                Sorry, an error occurred. Cannot create new student in route.
               </div>
               <DialogActions>
                 <Button
@@ -449,11 +439,9 @@ const BusRoutes = ({ savedRoutes }) => {
                       document.getElementById("FirstName").value;
                     let studentLastName =
                       document.getElementById("LastName").value;
-                    let studentId =
-                      document.getElementById("studentID").value;
+                    let studentId = document.getElementById("studentID").value;
                     let grade = document.getElementById("grade").value;
-                    let school =
-                      document.getElementById("schoolName").value;
+                    let school = document.getElementById("schoolName").value;
                     let club = document.getElementById("clubName").value;
                     let notes = document.getElementById("notes").value;
 
@@ -614,18 +602,22 @@ const BusRoutes = ({ savedRoutes }) => {
 };
 
 BusRoutes.getInitialProps = async () => {
-  const res = await fetch(`${urls.baseUrl}/api/routes`);
-  console.log(res);
-  let routes_data = {};
-  if (res) {
-    let routes_data = res;
-  }
+  //parameterize clubName like #45
+  const routes = await fetch(
+    `${urls.baseUrl}${urls.api.club}?clubName=${"Harland"}`
+  );
+  const clubRoutes = await routes.json();
+  return { savedRoutes: clubRoutes.payload };
+  // let routes_data = {};
+  // if (res) {
+  //   let routes_data = res;
+  // }
 
-  if (routes_data.success) {
-    return { savedRoutes: routes_data.payload };
-  } else {
-    return { savedRoutes: [] };
-  }
+  // if (routes_data.success) {
+  //   return { savedRoutes: routes_data.payload };
+  // } else {
+  //   return { savedRoutes: [] };
+  // }
 };
 
 export default BusRoutes;
