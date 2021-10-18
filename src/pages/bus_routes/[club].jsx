@@ -19,8 +19,6 @@ import Router from "next/router";
 import { useUserAuthorized } from "../../../utils/userType";
 // import {getStudentsByName, changeStudentRoute} from "../pages/api/student";
 
-const fetch = require("node-fetch");
-
 const useStyles = makeStyles(() => ({
   container: {
     display: "flex",
@@ -130,6 +128,7 @@ const BusRoutes = ({ savedRoutes }) => {
   const [session, loading] = useSession();
   const [routes, setRoutes] = useState(savedRoutes);
   const [selectedRoute, setSelectedRoute] = useState(routes[0]);
+  const [studentList, setStudentList] = useState([]);
   const [editedRoute, setEditedRoute] = useState(
     routes.length > 0 ? routes[0].name : ""
   );
@@ -141,8 +140,15 @@ const BusRoutes = ({ savedRoutes }) => {
   const [newRouteError, setNewRouteError] = useState(false);
   const [editNameError, setEditNameError] = useState(false);
 
-  const [studentList, setStudentList] = useState([]);
   const userAuthorized = useUserAuthorized(session, urls.pages.bus_routes);
+
+  useEffect(async () => {
+    const res = await fetch(
+      `${urls.baseUrl}${urls.api.student}?route=${selectedRoute._id}`
+    );
+    const routeStudents = await res.json();
+    setStudentList(routeStudents.payload);
+  }, [selectedRoute]);
 
   const addRoute = () => {
     setModalOpen(true);
@@ -489,7 +495,7 @@ const BusRoutes = ({ savedRoutes }) => {
           <tbody className={classes.tbody}>
             {studentList.map((entry, index) => (
               <tr key={index} className={classes.tr}>
-                <td scope="col">{entry.firstName + entry.lastName}</td>
+                <td scope="col">{entry.firstName + " " + entry.lastName}</td>
                 <td scope="col">{entry.school}</td>
                 <td scope="col">{entry.grade}</td>
                 <td scope="col">None</td>
