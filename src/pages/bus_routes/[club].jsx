@@ -13,10 +13,10 @@ import {
 import EditIcon from "@material-ui/icons/Edit";
 import AddIcon from "@material-ui/icons/Add";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
-import urls from "../../utils/urls";
+import urls from "../../../utils/urls";
 import { useSession } from "next-auth/client";
 import Router from "next/router";
-import { useUserAuthorized } from "../../utils/userType";
+import { useUserAuthorized } from "../../../utils/userType";
 // import {getStudentsByName, changeStudentRoute} from "../pages/api/student";
 
 const fetch = require("node-fetch");
@@ -601,13 +601,12 @@ const BusRoutes = ({ savedRoutes }) => {
   );
 };
 
-BusRoutes.getInitialProps = async () => {
-  //parameterize clubName like #45
+export async function getServerSideProps(context) {
   const routes = await fetch(
-    `${urls.baseUrl}${urls.api.club}?clubName=${"Harland"}`
+    `${urls.baseUrl}${urls.api.club}?clubName=${context.query.club}`
   );
   const clubRoutes = await routes.json();
-  return { savedRoutes: clubRoutes.payload };
+  return { props: { savedRoutes: clubRoutes.payload } };
   // let routes_data = {};
   // if (res) {
   //   let routes_data = res;
@@ -618,6 +617,6 @@ BusRoutes.getInitialProps = async () => {
   // } else {
   //   return { savedRoutes: [] };
   // }
-};
+}
 
 export default BusRoutes;
