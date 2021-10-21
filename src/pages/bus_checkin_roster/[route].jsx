@@ -134,7 +134,7 @@ const getCurrentDate = () => {
 const getRouteMeta = async (route) => {
   const idRes = await fetch(`${urls.baseUrl}${urls.api.routes}?name=${route}`);
   const routeMeta = await idRes.json();
-  return routeMeta.payload[0];
+  return routeMeta.payload;
 };
 
 const Roster = () => {

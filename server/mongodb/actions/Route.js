@@ -12,7 +12,7 @@ export async function getAllRoutes() {
 }
 
 export async function getRouteByName(name) {
-  return Route.find({ name })
+  return Route.findOne({ name })
     .then((route) => Promise.resolve(route))
     .catch((err) =>
       Promise.reject(new Error("Error finding route by name: " + err))
