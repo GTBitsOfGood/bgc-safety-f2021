@@ -244,13 +244,14 @@ Roster.getInitialProps = async () => {
     const res1 = await fetch(`${urls.baseUrl}/api/attendance?schoolName=${s}`);
     const d = await res1.json();
 
+    console.log(d.payload);
     if (d.success) {
       const students = [];
 
       for (const student of d.payload) {
         students.push({
           name: `${student.firstName} ${student.lastName}`,
-          checkedIn: student.checkInTimes.includes(today),
+          checkedIn: student.checkIns.some((checkIn) => checkIn.date === today),
         });
       }
 
