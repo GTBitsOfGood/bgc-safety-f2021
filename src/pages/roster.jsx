@@ -244,7 +244,6 @@ Roster.getInitialProps = async () => {
     const res1 = await fetch(`${urls.baseUrl}/api/attendance?schoolName=${s}`);
     const d = await res1.json();
 
-    console.log(d.payload);
     if (d.success) {
       const students = [];
 
