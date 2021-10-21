@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Fragment } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Button } from "@material-ui/core";
 import { Alert, Snackbar } from "@mui/material";
@@ -145,6 +145,7 @@ const Roster = () => {
   const [routeId, setRouteId] = useState(null);
   const [students, setStudents] = useState([]);
   const [complete, setComplete] = useState(true); //defaults to true to prevent changes during render
+  const [studentIndex, setStudentIndex] = useState(0);
   const [studentNoteModalOpen, setStudentNoteModalOpen] = useState(false);
   const [submissionModalOpen, setSubmissionModalOpen] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
@@ -155,18 +156,6 @@ const Roster = () => {
   );
 
   const submitAttendance = async (curDate, submissionNotes) => {
-    // update student checkIn
-    const studentRes = await fetch(`${urls.baseUrl}${urls.api.checkIn}`, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        studentIDs: students.filter((s) => s.checkedIn).map((s, i) => s.id),
-      }),
-    });
-
     //update routes
     const routeRes = await fetch(
       `${urls.baseUrl}${urls.api.routes}?id=${routeId}`,
@@ -185,7 +174,7 @@ const Roster = () => {
       }
     );
 
-    if (routeRes.ok && studentRes.ok) {
+    if (routeRes.ok) {
       setSuccessOpen(true);
       await getStudents();
     } else {
@@ -193,37 +182,49 @@ const Roster = () => {
     }
   };
 
-  const submitNote = (index, note) => {
+  const submitNote = async (index, note) => {
     let modifiedStudents = [...students];
-    const { name, id, checkedIn } = students[index];
+    const { name, _id, checkedIn } = students[index];
     modifiedStudents[index] = {
       name: name,
-      id: id,
+      _id: _id,
       checkedIn: checkedIn,
       note,
     };
     setStudents(modifiedStudents);
-  };
 
-  const checkInStudent = async (index) => {
-    let modifiedStudents = [...students];
-    const { name, id } = students[index];
-    modifiedStudents[index] = {
-      name: name,
-      id: id,
-      checkedIn: true,
-      note: "",
-    };
-    setStudents(modifiedStudents);
-
-    await fetch(`${urls.baseUrl}${urls.api.checkIn}?id=${id}`, {
+    await fetch(`${urls.baseUrl}${urls.api.notes}?id=${_id}`, {
       method: "POST",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        time: getCurrentDate(),
+        date: getCurrentDate(),
+        note,
+      }),
+    });
+  };
+
+  const checkInStudent = async (index) => {
+    let modifiedStudents = [...students];
+    const { name, _id } = students[index];
+    modifiedStudents[index] = {
+      name: name,
+      _id,
+      checkedIn: true,
+      note: "",
+    };
+    setStudents(modifiedStudents);
+
+    await fetch(`${urls.baseUrl}${urls.api.checkIn}?id=${_id}`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        date: getCurrentDate(),
       }),
     });
   };
@@ -287,15 +288,16 @@ const Roster = () => {
     );
   };
 
-  const NoteModalContent = (props) => {
-    const [studentNote, setStudentNote] = useState(students[props.index].note);
+  const NoteModalContent = () => {
+    const [studentNoteInput, setStudentNoteInput] = useState(
+      students[studentIndex].note
+    );
     return (
       <form
         className={classes.ModalContent}
         onSubmit={(e) => {
           e.preventDefault();
-          submitNote(props.index, studentNote);
-          setStudentNote("");
+          submitNote(studentIndex, studentNoteInput);
           setStudentNoteModalOpen(false);
         }}
       >
@@ -307,9 +309,9 @@ const Roster = () => {
           type="text"
           placeholder="Type your note here"
           style={{ width: "450px", height: "150x" }}
-          value={studentNote}
+          value={studentNoteInput}
           onChange={(e) => {
-            setStudentNote(e.target.value);
+            setStudentNoteInput(e.target.value);
           }}
         />
         <Button
@@ -323,17 +325,18 @@ const Roster = () => {
     );
   };
 
-  const EditButton = () => (
-    <>
-      <EditIcon /> Edit Note
-    </>
+  const EditButton = ({ onClick }) => (
+    <div style={{ display: "flex", alignItems: "center" }} onClick={onClick}>
+      <EditIcon />
+      <span>Edit Note</span>
+    </div>
   );
 
-  const AddButton = () => (
-    <>
+  const AddButton = ({ onClick }) => (
+    <div style={{ display: "flex", alignItems: "center" }} onClick={onClick}>
       <AddIcon />
-      Add Note
-    </>
+      <span>Add Note</span>
+    </div>
   );
 
   const StudentCheckedIn = (props) => {
@@ -346,23 +349,16 @@ const Roster = () => {
               setOpen={() => setStudentNoteModalOpen(true)}
               buttonStyle={classes.ModalButton}
             >
-              <AddButton />
+              <AddButton onClick={() => setStudentIndex(props.index)} />
             </ModalButton>
           ) : (
             <ModalButton
               setOpen={() => setStudentNoteModalOpen(true)}
               buttonStyle={classes.ModalButton}
             >
-              <EditButton />
+              <EditButton onClick={() => setStudentIndex(props.index)} />
             </ModalButton>
           )}
-          <ModalComponent
-            open={studentNoteModalOpen}
-            setOpen={setStudentNoteModalOpen}
-            style={{ marginLeft: "auto" }}
-          >
-            <NoteModalContent index={props.index} />
-          </ModalComponent>
         </div>
       </td>
     );
@@ -397,19 +393,18 @@ const Roster = () => {
 
     let data = [];
     if (d.success) {
-      const dateObj = new Date();
-      const day = String(dateObj.getDate()).padStart(2, "0");
-      const today = `${dateObj.getMonth() + 1}/${day}/${dateObj.getFullYear()}`;
+      const today = getCurrentDate();
       for (const student of d.payload) {
+        const sortedCheckIns = student.checkIns.sort(
+          (a, b) => Date.parse(b.date) - Date.parse(a.date)
+        );
+        const checkedIn =
+          sortedCheckIns.length > 0 && sortedCheckIns[0].date === today;
         data.push({
           name: `${student.firstName} ${student.lastName}`,
-          id: student.studentID,
-          //new to old
-          checkedIn:
-            student.checkInTimes.sort(
-              (a, b) => Date.parse(b) - Date.parse(a)
-            )[0] === today,
-          note: "",
+          _id: student._id,
+          checkedIn,
+          note: checkedIn ? sortedCheckIns[0].note : "",
         });
       }
     }
@@ -503,6 +498,13 @@ const Roster = () => {
         setOpen={setSubmissionModalOpen}
       >
         <SubmitModalContent />
+      </ModalComponent>
+      <ModalComponent
+        open={studentNoteModalOpen}
+        setOpen={setStudentNoteModalOpen}
+        style={{ marginLeft: "auto" }}
+      >
+        <NoteModalContent />
       </ModalComponent>
     </div>
   );

@@ -9,38 +9,23 @@ export default async (req, res) => {
   await useCors(req, res);
 
   const { method } = req;
-  if (method == "POST" && req.query.id !== undefined) {
-    checkInStudent(req, res);
+  if (method === "GET") {
+    getStudentCheckIns(req, res);
   } else if (method === "POST") {
-    checkInStudentsToday(req, res);
+    checkInStudent(req, res);
   } else {
     res.setHeader("Allow", "POST");
     res.status(405).end(`Method ${method} Not Allowed`);
   }
 };
 
-function checkInStudentsToday(req, res) {
-  const { studentIDs } = req.body;
-
-  const dateObj = new Date();
-  const day = String(dateObj.getDate()).padStart(2, "0");
-  const today = `${dateObj.getMonth() + 1}/${day}/${dateObj.getFullYear()}`;
-
-  Student.updateMany(
-    {
-      studentID: { $in: studentIDs },
-    },
-    {
-      $addToSet: { checkInTimes: today },
-    },
-    {
-      new: true,
-    }
-  )
+function getStudentCheckIns(req, res) {
+  const { id } = req.query;
+  Student.findOne({ _id: id })
     .then((student) => {
-      res.status(200).json({
+      res.status(200).send({
         success: true,
-        payload: student.checkInTimes,
+        payload: student.checkIns,
       });
     })
     .catch((err) => {
@@ -53,14 +38,19 @@ function checkInStudentsToday(req, res) {
 
 function checkInStudent(req, res) {
   const { id } = req.query;
-  const { time } = req.body;
+  const { date } = req.body;
 
   Student.findOneAndUpdate(
     {
-      studentID: id,
+      _id: id,
     },
     {
-      $push: { checkInTimes: time },
+      $push: {
+        checkIns: {
+          date,
+          note: "",
+        },
+      },
     },
     {
       new: true,
@@ -69,7 +59,7 @@ function checkInStudent(req, res) {
     .then((student) => {
       res.status(200).send({
         success: true,
-        payload: student.checkInTimes,
+        payload: student.checkIns,
       });
     })
     .catch((err) => {
