@@ -26,6 +26,7 @@ const init = async () => {
   const club = new Club({
     ClubName: "Harland",
     SchoolNames: schools,
+    Routes: [],
   });
   await club.save();
 
