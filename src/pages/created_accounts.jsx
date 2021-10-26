@@ -110,7 +110,10 @@ const createdAccounts = () => {
   const [dataItems, setDataItems] = useState([]);
   const [expanded, setExpanded] = useState(false);
   const [isEditable, setEditable] = useState("false");
-  const userAuthorized = useUserAuthorized(session, urls.pages.created_accounts);
+  const userAuthorized = useUserAuthorized(
+    session,
+    urls.pages.created_accounts
+  );
 
   const handleExpansion = () => {
     if (expanded == true) {
@@ -129,7 +132,7 @@ const createdAccounts = () => {
   };
 
   if (!session || !userAuthorized) {
-    return <div />
+    return <div />;
   }
 
   return (
@@ -255,10 +258,7 @@ const createdAccounts = () => {
           {dataItems.map((data, index) => (
             <tr key={index}>
               <td scope="row">
-                <IconButton
-                  className={classes.tcell}
-                  onClick={handleExpansion}
-                >
+                <IconButton className={classes.tcell} onClick={handleExpansion}>
                   {" "}
                   {expanded ? (
                     <KeyboardArrowUpIcon />
@@ -268,19 +268,19 @@ const createdAccounts = () => {
                   {data.index}{" "}
                 </IconButton>
               </td>
-              <td contenteditable={isEditable} className={classes.tcell}>
+              <td contentEditable={isEditable} className={classes.tcell}>
                 {" "}
                 {data.name}{" "}
               </td>
-              <td contenteditable={isEditable} className={classes.tcell}>
+              <td contentEditable={isEditable} className={classes.tcell}>
                 {" "}
                 {data.type}{" "}
               </td>
-              <td contenteditable={isEditable} className={classes.tcell}>
+              <td contentEditable={isEditable} className={classes.tcell}>
                 {" "}
                 {data.email}{" "}
               </td>
-              <td contenteditable={isEditable} className={classes.tcell}>
+              <td contentEditable={isEditable} className={classes.tcell}>
                 {" "}
                 {data.createdBy}{" "}
               </td>
@@ -313,23 +313,22 @@ const createdAccounts = () => {
                 <KeyboardArrowUpIcon />
               ) : (
                 <KeyboardArrowDownIcon />
-              )}{" "}
-              1{" "}
+              )} 1{" "}
             </IconButton>
           </td>
-          <td contenteditable={isEditable} className={classes.tcell}>
+          <td contentEditable={isEditable} className={classes.tcell}>
             {" "}
             Test Person{" "}
           </td>
-          <td contenteditable={isEditable} className={classes.tcell}>
+          <td contentEditable={isEditable} className={classes.tcell}>
             {" "}
             Test Type{" "}
           </td>
-          <td contenteditable={isEditable} className={classes.tcell}>
+          <td contentEditable={isEditable} className={classes.tcell}>
             {" "}
             test000@gmail.com{" "}
           </td>
-          <td contenteditable={isEditable} className={classes.tcell}>
+          <td contentEditable={isEditable} className={classes.tcell}>
             {" "}
             CreatedbyTest{" "}
           </td>

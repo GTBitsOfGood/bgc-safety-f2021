@@ -56,7 +56,7 @@ const Login = () => {
   const [username, setUsername] = useState(null);
   const [password, setPassword] = useState(null);
   const [session, loading] = useSession();
-  const userType = useUserType(session)
+  const userType = useUserType(session);
   // console.log("heyo");
   // console.log(process.env.NEXTAUTH_URL);
   const classes = useStyles();
@@ -70,7 +70,10 @@ const Login = () => {
     */
     if (userType === userTypes.busDriver) {
       Router.replace(urls.pages.route_selection);
-    } else if (userType === userTypes.clubDirector || userType === userTypes.attendanceClerk) {
+    } else if (
+      userType === userTypes.clubDirector ||
+      userType === userTypes.attendanceClerk
+    ) {
       Router.replace(urls.pages.roster);
     } else if (userType === userTypes.admin) {
       Router.replace(urls.pages.roster);

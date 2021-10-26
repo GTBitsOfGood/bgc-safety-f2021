@@ -25,17 +25,17 @@ export default async (req, res) => {
 function parseCsv(req, res, dat) {
   neatCsv(dat)
     .then((data) => {
-      var dataMap = data[3];
+      const dataMap = data[3];
       console.log("data", data);
       // console.log
-      var ret = {};
-      for (var key in dataMap) {
+      const ret = {};
+      for (const key in dataMap) {
         ret[dataMap[key]] = key;
       }
       // var clubs = {}
 
-      var header = [];
-      var studentsArr = [];
+      const header = [];
+      const studentsArr = [];
 
       for (let i = 3; i < data.length - 1; i++) {
         if (i == 3) {
@@ -69,7 +69,7 @@ function parseCsv(req, res, dat) {
         }
       }
 
-      //rithik stuff
+      // rithik stuff
       // //rithik advice
       // var header = [];
       // // var studentsArr = [{student object1}, {student object2}];
@@ -93,7 +93,7 @@ function parseCsv(req, res, dat) {
       //     }
       // }
 
-      //relevant stuff
+      // relevant stuff
       // // dataMap = ret;
       //     for (let i = 4; i < data.length; i++) {
       //         // if (data[i][0] != null) {
@@ -167,7 +167,7 @@ function parseCsv(req, res, dat) {
       //         //     clubs[currClub] = new Set([currSchool])
       //         // }
       //     }
-      //end relevant stuff
+      // end relevant stuff
 
       // for (var club in clubs) {
       //     const newClub = new Club({

@@ -14,9 +14,7 @@ const ClubSchema = new Schema({
         type: String,
         required: [true],
         validate: {
-          validator: (schoolName) => {
-            return typeof schoolName === "string";
-          },
+          validator: (schoolName) => typeof schoolName === "string",
           message: (props) => `${props.value} is not a valid string.`,
         },
       },

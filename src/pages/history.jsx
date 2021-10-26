@@ -392,7 +392,7 @@ function History({ students }) {
   );
 
   if (!session || !userAuthorized) {
-    return <div />
+    return <div />;
   }
 
   return (
@@ -437,9 +437,7 @@ function History({ students }) {
                 }}
               >
                 <ModalComponent
-                  button={
-                    <>{`${student.lastName}, ${student.firstName}`}</>
-                  }
+                  button={<>{`${student.lastName}, ${student.firstName}`}</>}
                   buttonStyle={classes.ModalComponentButton}
                 >
                   <div className={classes.ModalComponent}>

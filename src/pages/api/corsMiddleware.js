@@ -5,8 +5,8 @@ const cors = Cors({
   origin: true,
 });
 
-const useCors = (req, res) => {
-  return new Promise((resolve, reject) => {
+const useCors = (req, res) =>
+  new Promise((resolve, reject) => {
     cors(req, res, (result) => {
       if (result instanceof Error) {
         return reject(result);
@@ -15,6 +15,5 @@ const useCors = (req, res) => {
       return resolve(result);
     });
   });
-};
 
 export default useCors;

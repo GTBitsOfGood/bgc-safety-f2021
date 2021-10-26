@@ -108,7 +108,7 @@ function Roster({ schools }) {
   };
 
   if (!session || !userAuthorized) {
-    return <div />
+    return <div />;
   }
 
   return (

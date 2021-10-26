@@ -48,7 +48,7 @@ const CSVUpload = () => {
   };
 
   if (!session || !userAuthorized) {
-    return <div />
+    return <div />;
   }
 
   return (
@@ -82,11 +82,7 @@ const CSVUpload = () => {
         </div>
       </div>
       <div className="button-container">
-        <button
-          type="button"
-          className="btn btn-danger"
-          onClick={clearFile}
-        >
+        <button type="button" className="btn btn-danger" onClick={clearFile}>
           Cancel
         </button>
         <button type="button" className="btn btn-success" onClick={sendCsv}>
