@@ -158,7 +158,7 @@ const BusRoutes = ({ savedRoutes }) => {
     setModalOpen2(true);
   };
 
-  const handleCreate = async (name) => {
+  const handleRouteCreate = async (name) => {
     if (name === "") {
       setRouteNameError(true);
     } else {
@@ -169,7 +169,6 @@ const BusRoutes = ({ savedRoutes }) => {
         body: JSON.stringify(body),
         headers: { "Content-Type": "application/json" },
       });
-      // console.log(res);
       const routes_data = await res.json;
 
       if (routes_data.success && routes_data.payload) {
@@ -181,7 +180,7 @@ const BusRoutes = ({ savedRoutes }) => {
     }
   };
 
-  const handleCreate2 = async (
+  const handleStudentCreate = async (
     studentFirstName,
     studentLastName,
     studentSchool,
@@ -191,7 +190,6 @@ const BusRoutes = ({ savedRoutes }) => {
       setRouteNameError(true);
     } else {
       setRouteNameError(false);
-      console.log("here");
       const body = {
         firstName: studentFirstName,
         lastName: studentLastName,
@@ -205,43 +203,13 @@ const BusRoutes = ({ savedRoutes }) => {
     }
   };
 
-  const handleCreate3 = async (studentID) => {
-    if (studentID === "") {
-      setRouteNameError(true);
-    } else {
-      setRouteNameError(false);
-      console.log("here");
-      changeStudentRoute(studentID, selectedRoute._id);
-    }
-  };
-
-  //  function TableCreate(props) {
-  //    const tableDisplay = (
-  //        {studentList.map((entry, index) =>
-  //          <tr key={index} className={classes.tr}>
-  //            <td scope="col">{entry.firstName + entry.lastName}</td>
-  //            <td scope="col">{entry.school}</td>
-  //            <td scope="col">{entry.grade}</td>
-  //            <td scope="col">None</td>
-  //            <td scope="col">None</td>
-  //          </tr>
-  //        )}
-  //    );
-  //   }
-
-  // render() {
-  //    return (
-
-  //    )
-  // };
-
-  const handleClose = () => {
+  const handleRouteModalClose = () => {
     setNewRouteError(false);
     setRouteNameError(false);
     setModalOpen(false);
   };
 
-  const handleClose2 = () => {
+  const handleStudentModalClose = () => {
     setModalOpen2(false);
   };
 
@@ -329,7 +297,7 @@ const BusRoutes = ({ savedRoutes }) => {
             <Dialog
               style={{ padding: 10, margin: 10, minWidth: 600 }}
               open={modalOpen2}
-              onClose={handleClose2}
+              onClose={handleStudentModalClose}
             >
               <div
                 style={{
@@ -338,7 +306,7 @@ const BusRoutes = ({ savedRoutes }) => {
                   marginRight: 5,
                   cursor: "pointer",
                 }}
-                onClick={handleClose}
+                onClick={handleRouteModalClose}
               >
                 x
               </div>
@@ -451,7 +419,7 @@ const BusRoutes = ({ savedRoutes }) => {
                     let club = document.getElementById("clubName").value;
                     let notes = document.getElementById("notes").value;
 
-                    handleCreate2(
+                    handleStudentCreate(
                       studentFirstName,
                       studentLastName,
                       school,
@@ -463,16 +431,6 @@ const BusRoutes = ({ savedRoutes }) => {
                 </Button>
               </DialogActions>
             </Dialog>
-
-            <Button
-              className={classes.btn}
-              onClick={() => {
-                let studentId = document.getElementById("studentID").value;
-                handleCreate3(studentId);
-              }}
-            >
-              Save Changes
-            </Button>
           </div>
         </div>
 
@@ -496,25 +454,13 @@ const BusRoutes = ({ savedRoutes }) => {
             {studentList.map((entry, index) => (
               <tr key={index} className={classes.tr}>
                 <td scope="col">{entry.firstName + " " + entry.lastName}</td>
-                <td scope="col">{entry.school}</td>
+                <td scope="col">{entry.schoolName}</td>
                 <td scope="col">{entry.grade}</td>
                 <td scope="col">None</td>
                 <td scope="col">None</td>
               </tr>
             ))}
           </tbody>
-          {/* <tbody className={classes.tbody}>
-                            
-        <tr className={classes.tr}>
-          <td scope="col">Donuts</td>
-          <td scope="col">Dheeraj</td>
-          <td scope="col">Donuts</td>
-          <td scope="col">Dheeraj</td>
-          <td scope="col">Donuts</td>
-        </tr>
-
-
-      </tbody> */}
         </table>
       </div>
       <div className={classes.routeTabs}>
@@ -541,7 +487,7 @@ const BusRoutes = ({ savedRoutes }) => {
         <Dialog
           style={{ padding: 10, margin: 10, minWidth: 600 }}
           open={modalOpen}
-          onClose={handleClose}
+          onClose={handleRouteModalClose}
         >
           <div
             style={{
@@ -550,7 +496,7 @@ const BusRoutes = ({ savedRoutes }) => {
               marginRight: 5,
               cursor: "pointer",
             }}
-            onClick={handleClose}
+            onClick={handleRouteModalClose}
           >
             x
           </div>
@@ -595,7 +541,7 @@ const BusRoutes = ({ savedRoutes }) => {
               size="large"
               onClick={() => {
                 modalName = document.getElementById("ModalName").value;
-                handleCreate(modalName);
+                handleRouteCreate(modalName);
               }}
             >
               Create
