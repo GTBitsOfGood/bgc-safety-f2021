@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { makeStyles } from "@material-ui/core/styles";
+import ArrowBackIosIcon from "@material-ui/icons/ArrowBackIos";
 import {
   Button,
   ButtonGroup,
@@ -25,6 +27,17 @@ const useStyles = makeStyles(() => ({
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
+  },
+  backbtn: {
+    display: "flex",
+    alignItems: "center",
+    outline: "none",
+    border: "none",
+    marginRight: "auto",
+    background: "white",
+    "&:hover": {
+      cursor: "pointer",
+    },
   },
   routeNameContainer: {
     display: "flex",
@@ -259,6 +272,14 @@ const BusRoutes = ({ savedRoutes }) => {
     <div>
       <div className={classes.container}>
         <div className={classes.pagehead}>
+          <div>
+            <Link href={urls.pages.bus_routes}>
+              <button className={classes.backbtn}>
+                <ArrowBackIosIcon />
+                <h1 className={classes.text}>Back </h1>
+              </button>
+            </Link>
+          </div>
           <div className={classes.routeNameContainer}>
             <div>
               <TextField
