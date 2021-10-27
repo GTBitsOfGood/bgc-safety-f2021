@@ -19,6 +19,7 @@ import urls from "../../../utils/urls";
 import { useSession } from "next-auth/client";
 import Router from "next/router";
 import { useUserAuthorized } from "../../../utils/userType";
+import FileUploader from "../../components/file_uploader";
 // import {getStudentsByName, changeStudentRoute} from "../pages/api/student";
 
 const useStyles = makeStyles(() => ({
@@ -547,7 +548,15 @@ const BusRoutes = ({ savedRoutes }) => {
                 color="secondary"
                 size="small"
               >
-                Select File
+                <label>
+                  Select file
+                  <input
+                    type="file"
+                    id="students-csv"
+                    name="students-csv"
+                    accept="csv"
+                  />
+                </label>
               </Button>
             </div>
           </DialogContent>
