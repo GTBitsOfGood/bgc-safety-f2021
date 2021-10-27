@@ -97,10 +97,10 @@ const useStyles = makeStyles(() => ({
     display: "flex",
     alignItems: "center",
     borderRadius: "40px",
-    marginLeft: "10px",
+    marginLeft: "auto",
     backgroundColor: "white",
     opacity: "90%",
-    border: "none",
+    borderStyle: "black",
     "&:hover": {
       cursor: "pointer",
     },
@@ -109,10 +109,10 @@ const useStyles = makeStyles(() => ({
     display: "flex",
     alignItems: "center",
     borderRadius: "40px",
-    marginLeft: "10px",
+    marginLeft: "auto",
     backgroundColor: "white",
     opacity: "65%",
-    border: "none",
+    borderStyle: "white",
     "&:hover": {
       cursor: "pointer",
     },
@@ -123,16 +123,14 @@ const useStyles = makeStyles(() => ({
   },
   ModalContent: {
     position: "absolute",
-    width: "30rem",
-    height: " 20rem",
-    maxWidth: "fit-content",
+    width: "450px",
+    height: " 350px",
     backgroundColor: "white",
     left: "50%",
+    marginLeft: "-225px",
     top: "50%",
-    marginLeft: "-15rem",
-    marginTop: "-10rem",
+    marginTop: "-150px",
     display: "flex",
-    padding: "1rem",
     flexFlow: "column wrap",
     justifyContent: "space-around",
     alignItems: "center",
@@ -198,9 +196,9 @@ const Roster = () => {
         className={classes.ModalContent}
         onSubmit={submitAttendance}
         style={{
-          width: "550px",
+          width: "450px",
           height: "350px",
-          marginLeft: "-275px",
+          marginLeft: "-225px",
           marginTop: "-175px",
         }}
       >
@@ -253,12 +251,6 @@ const Roster = () => {
     return (
       <form
         className={classes.ModalContent}
-        style={{
-          width: "550px",
-          height: "350px",
-          marginLeft: "-275px",
-          marginTop: "-175px",
-        }}
         onSubmit={() => {
           submitNote(props.index, studentNote);
           setStudentNote("");
@@ -271,7 +263,7 @@ const Roster = () => {
           name="note"
           type="text"
           placeholder="Type your note here"
-          style={{ width: "450px", height: "150x" }}
+          style={{ width: "400px", height: "150x" }}
           value={studentNote}
           onChange={(e) => {
             setStudentNote(e.target.value);
