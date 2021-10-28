@@ -25,7 +25,7 @@ const useUserAuthorized = (session, requestedRoute) => {
 
 const verifyUserType = async (session, requestedRoute) => {
   const userData = await fetchUserData(session);
-  const userAllowedRoutes = filterRoutes(userData);
+  const userAllowedRoutes = filterRoutes(userData.type);
   const requestedRouteInAllowed = userAllowedRoutes.some(
     (route) => requestedRoute === route.link
   );
