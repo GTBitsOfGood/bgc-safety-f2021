@@ -20,6 +20,21 @@ const ClubSchema = new Schema({
       },
     ],
   },
+  Region: {
+    type: String,
+    required: [true],
+    validate: {
+      validator: (region) => typeof region === "string",
+      message: (props) => `${props.value} is not a valid string.`,
+    },
+  },
+  Buses: [
+    {
+      busNumber: Number,
+      maxCapacity: Number,
+      currentCapacity: Number,
+    },
+  ],
 });
 
 export default mongoose.models.Club || mongoose.model("Club", ClubSchema);
