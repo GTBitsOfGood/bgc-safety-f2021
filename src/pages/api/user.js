@@ -49,11 +49,21 @@ function createUser(req, res) {
 }
 
 function getUser(req, res) {
-  User.find({ BGCMA_email: req.query.email })
-    .then((user) => {
-      res.send(user);
-    })
-    .catch((err) => console.log(err));
+  const { email } = req.query;
+
+  User.findOne({ BGCMA_email: email })
+    .then((user) =>
+      res.status(200).send({
+        success: true,
+        payload: user,
+      })
+    )
+    .catch((error) =>
+      res.status(400).send({
+        success: false,
+        message: error,
+      })
+    );
 }
 
 function deleteUser(req, res) {
