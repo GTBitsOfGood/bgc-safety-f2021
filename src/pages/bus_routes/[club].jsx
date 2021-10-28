@@ -11,6 +11,7 @@ import {
   DialogContent,
   DialogActions,
   TextField,
+  IconButton,
 } from "@material-ui/core";
 import EditIcon from "@material-ui/icons/Edit";
 import AddIcon from "@material-ui/icons/Add";
@@ -20,6 +21,8 @@ import { useSession } from "next-auth/client";
 import Router from "next/router";
 import { useUserAuthorized } from "../../../utils/userType";
 import FileUploader from "../../components/file_uploader";
+import { If, Then, Else } from "react-if";
+import { RemoveCircleOutline, RemoveOutlined } from "@material-ui/icons";
 // import {getStudentsByName, changeStudentRoute} from "../pages/api/student";
 
 const useStyles = makeStyles(() => ({
@@ -137,11 +140,12 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const BusRoutes = ({ savedRoutes }) => {
+const BusRoutes = ({ clubName, savedRoutes }) => {
   const classes = useStyles();
   const [session, loading] = useSession();
   const [routes, setRoutes] = useState(savedRoutes);
   const [selectedRoute, setSelectedRoute] = useState(routes[0]);
+  const [selectedFile, setSelectedFile] = useState("");
   const [studentList, setStudentList] = useState([]);
   const [editedRoute, setEditedRoute] = useState(
     routes.length > 0 ? routes[0].name : ""
@@ -177,13 +181,28 @@ const BusRoutes = ({ savedRoutes }) => {
       setRouteNameError(true);
     } else {
       setRouteNameError(false);
+
       const body = { name };
-      const res = await fetch(`${urls.baseUrl}/api/routes`, {
+      const data = new FormData();
+      data.append("file", selectedFile);
+
+      const studentsRes = await fetch(
+        `${urls.baseUrl}/api/upload_csv?clubName=${clubName}`,
+        {
+          method: "POST",
+          body: data,
+        }
+      );
+
+      const students_data = await studentsRes.json;
+
+      //not tested beyond this point
+      const routesRes = await fetch(`${urls.baseUrl}/api/routes`, {
         method: "post",
         body: JSON.stringify(body),
         headers: { "Content-Type": "application/json" },
       });
-      const routes_data = await res.json;
+      const routes_data = await routesRes.json;
 
       if (routes_data.success && routes_data.payload) {
         setRoutes(routes.concat(routes_data.payload));
@@ -229,6 +248,16 @@ const BusRoutes = ({ savedRoutes }) => {
 
   const handleNameChange = (event) => {
     setEditedRoute(event.target.value);
+  };
+
+  const handleUpload = (files) => {
+    const fileName = files[0].name.split(".");
+    if (fileName[fileName.length - 1] === "csv") {
+      console.log(files[0]);
+      setSelectedFile(files[0]);
+    } else {
+      alert("You must upload a CSV file.");
+    }
   };
 
   const updateName = (name) => {
@@ -542,22 +571,42 @@ const BusRoutes = ({ savedRoutes }) => {
               <label className={classes.label}>
                 Upload Student Data (.csv):
               </label>
-              <Button
-                className={classes.textField}
-                variant="contained"
-                color="secondary"
-                size="small"
-              >
-                <label>
-                  Select file
-                  <input
-                    type="file"
-                    id="students-csv"
-                    name="students-csv"
-                    accept="csv"
-                  />
-                </label>
-              </Button>
+              <If condition={!selectedFile}>
+                <Then>
+                  <Button
+                    className={classes.textField}
+                    variant="contained"
+                    color="secondary"
+                    size="small"
+                  >
+                    <label>
+                      Select file
+                      <input
+                        type="file"
+                        id="students-csv"
+                        name="students-csv"
+                        accept="csv"
+                        onChange={(event) => handleUpload(event.target.files)}
+                      />
+                    </label>
+                  </Button>
+                </Then>
+                <Else>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      flexWrap: "wrap",
+                      alignItems: "center",
+                    }}
+                  >
+                    <p>{selectedFile.name}</p>
+                    <IconButton onClick={() => setSelectedFile("")}>
+                      <RemoveCircleOutline />
+                    </IconButton>
+                  </div>
+                </Else>
+              </If>
             </div>
           </DialogContent>
           <div hidden={!newRouteError} className={classes.error}>
@@ -588,7 +637,9 @@ export async function getServerSideProps(context) {
     `${urls.baseUrl}${urls.api.club}?clubName=${context.query.club}`
   );
   const clubRoutes = await routes.json();
-  return { props: { savedRoutes: clubRoutes.payload } };
+  return {
+    props: { clubName: context.query.club, savedRoutes: clubRoutes.payload },
+  };
   // let routes_data = {};
   // if (res) {
   //   let routes_data = res;

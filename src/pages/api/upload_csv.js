@@ -8,25 +8,22 @@ const neatCsv = require("neat-csv");
 // const fs = require("fs");
 
 export default async (req, res) => {
-  console.log("1");
   await mongoDB();
-
-  console.log("2");
   await useCors(req, res);
 
   const { method } = req;
 
   if (method === "POST") {
-    console.log("here", req.body.data);
+    console.log("here", req.body.csvData);
     parseCsv(req, res, req.body);
   }
 };
 
 function parseCsv(req, res, dat) {
+  const { clubName } = req.query;
   neatCsv(dat)
     .then((data) => {
       var dataMap = data[3];
-      console.log("data", data);
       // console.log
       var ret = {};
       for (var key in dataMap) {
@@ -51,7 +48,7 @@ function parseCsv(req, res, dat) {
             studentID: data[i][2],
             schoolName: data[i][3],
             grade: data[i][4],
-            clubName: "BGC",
+            clubName,
           });
 
           console.log("newStudent", newStudent);
