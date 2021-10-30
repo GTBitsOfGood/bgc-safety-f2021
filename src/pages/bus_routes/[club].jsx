@@ -182,33 +182,40 @@ const BusRoutes = ({ clubName, savedRoutes }) => {
     } else {
       setRouteNameError(false);
 
-      const body = { name };
       const data = new FormData();
       data.append("file", selectedFile);
 
-      const studentsRes = await fetch(
-        `${urls.baseUrl}/api/upload_csv?clubName=${clubName}`,
-        {
-          method: "POST",
-          body: data,
-        }
-      );
-
-      const students_data = await studentsRes.json;
-
-      //not tested beyond this point
       const routesRes = await fetch(`${urls.baseUrl}/api/routes`, {
         method: "post",
-        body: JSON.stringify(body),
+        body: JSON.stringify({
+          name,
+          clubName,
+        }),
         headers: { "Content-Type": "application/json" },
       });
-      const routes_data = await routesRes.json;
+      const routes_data = await routesRes.json();
 
       if (routes_data.success && routes_data.payload) {
         setRoutes(routes.concat(routes_data.payload));
         setModalOpen(false);
       } else {
         setNewRouteError(true);
+        return;
+      }
+
+      const studentsRes = await fetch(
+        `${urls.baseUrl}/api/upload_csv?clubName=${clubName}&routeId=${routes_data.payload._id}`,
+        {
+          method: "POST",
+          body: data,
+        }
+      );
+
+      const students_data = await studentsRes.json();
+
+      if (!students_data.success) {
+        setNewRouteError(true);
+        return;
       }
     }
   };

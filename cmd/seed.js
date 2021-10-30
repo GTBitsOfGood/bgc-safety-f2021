@@ -22,14 +22,6 @@ const init = async () => {
 
   const schools = ["Bog Town", "Burdell"];
 
-  console.info("Creating clubs");
-  const club = new Club({
-    ClubName: "Harland",
-    SchoolNames: schools,
-    Routes: [],
-  });
-  await club.save();
-
   console.info("Creating routes");
   const routes = await Promise.all(
     [...Array(10)].map(async (_, i) => {
@@ -43,6 +35,14 @@ const init = async () => {
     })
   );
 
+  console.info("Creating clubs");
+  const club = new Club({
+    ClubName: "Harland",
+    SchoolNames: schools,
+    Routes: routes,
+  });
+  await club.save();
+
   console.info("Creating students");
   const students = await Promise.all(
     [...Array(120)].map(async (_, i) => {
@@ -51,7 +51,7 @@ const init = async () => {
         lastName: faker.name.lastName(),
         studentID: `student-${i + 1}`,
         schoolName: randFrom(schools),
-        route: routes[Math.floor(i / 3) + 1],
+        route: randFrom(routes),
         grade: randFrom(GRADES),
         clubName: "Harland",
         notes: `Note for student ${i + 1}`,

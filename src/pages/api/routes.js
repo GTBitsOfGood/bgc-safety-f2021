@@ -7,6 +7,7 @@ import {
 } from "../../../server/mongodb/actions/Route";
 import mongoDB from "../../../server/mongodb";
 import useCors from "./corsMiddleware";
+import Club from "../../../server/mongodb/models/Club";
 
 export default async (req, res) => {
   await mongoDB();
@@ -20,7 +21,7 @@ export default async (req, res) => {
     } else {
       getRoutes(req, res);
     }
-  } else if (method === "POST" && req.body.name) {
+  } else if (method === "POST" && req.body.name && req.body.clubName) {
     addNewRoute(req, res);
   } else if (method === "POST" && req.query.id) {
     submitRoute(req, res);
@@ -67,10 +68,22 @@ async function findRouteByName(req, res) {
 async function addNewRoute(req, res) {
   addRoute(req.body.name)
     .then((result) => {
-      res.status(200).send({
-        success: true,
-        payload: result,
-      });
+      Club.findOneAndUpdate(
+        { ClubName: req.body.clubName },
+        { $push: { Routes: result._id } }
+      )
+        .then(() => {
+          res.status(200).send({
+            success: true,
+            payload: result,
+          });
+        })
+        .catch((err) => {
+          res.status(400).send({
+            success: false,
+            payload: err,
+          });
+        });
     })
     .catch((error) => {
       res.status(400).send({
