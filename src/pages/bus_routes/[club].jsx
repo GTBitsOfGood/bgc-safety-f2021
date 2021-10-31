@@ -151,8 +151,8 @@ const BusRoutes = ({ clubName, savedRoutes }) => {
     routes.length > 0 ? routes[0].name : ""
   );
   const [routeEditable, setEditable] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalOpen2, setModalOpen2] = useState(false);
+  const [addRouteModalOpen, setAddRouteModalOpen] = useState(false);
+  const [addStudentModalOpen, setAddStudentModalOpen] = useState(false);
 
   const [routeNameError, setRouteNameError] = useState(false);
   const [newRouteError, setNewRouteError] = useState(false);
@@ -169,11 +169,11 @@ const BusRoutes = ({ clubName, savedRoutes }) => {
   }, [selectedRoute]);
 
   const addRoute = () => {
-    setModalOpen(true);
+    setAddRouteModalOpen(true);
   };
 
   const addStudent = () => {
-    setModalOpen2(true);
+    setAddStudentModalOpen(true);
   };
 
   const handleRouteCreate = async (name) => {
@@ -197,7 +197,7 @@ const BusRoutes = ({ clubName, savedRoutes }) => {
 
       if (routes_data.success && routes_data.payload) {
         setRoutes(routes.concat(routes_data.payload));
-        setModalOpen(false);
+        setAddRouteModalOpen(false);
       } else {
         setNewRouteError(true);
         return;
@@ -220,37 +220,58 @@ const BusRoutes = ({ clubName, savedRoutes }) => {
     }
   };
 
-  const handleStudentCreate = async (
+  async function handleStudentCreate(
     studentFirstName,
     studentLastName,
+    studentId,
     studentSchool,
     studentGrade
-  ) => {
-    if (studentFirstName === "") {
+  ) {
+    if (![...arguments].every((e) => e)) {
       setRouteNameError(true);
-    } else {
-      setRouteNameError(false);
-      const body = {
-        firstName: studentFirstName,
-        lastName: studentLastName,
-        school: studentSchool,
-        grade: studentGrade,
-      };
-      console.log(body);
-      setStudentList([...studentList, body]);
-      console.log(studentList);
-      setModalOpen2(false);
+      return;
     }
-  };
+    setRouteNameError(false);
+
+    const addStudentRes = await fetch(`${urls.baseUrl}${urls.api.student}`, {
+      method: "POST",
+      body: JSON.stringify({
+        FirstName: studentFirstName,
+        LastName: studentLastName,
+        StudentID: studentId,
+        SchoolName: studentSchool,
+        RouteId: selectedRoute._id,
+        Grade: studentGrade,
+        ClubName: clubName,
+      }),
+      headers: { "Content-Type": "application/json" },
+    });
+
+    const newStudent = await addStudentRes.json();
+
+    if (!newStudent.success) {
+      setRouteNameError(false);
+      return;
+    }
+
+    const body = {
+      firstName: studentFirstName,
+      lastName: studentLastName,
+      schoolName: studentSchool,
+      grade: studentGrade,
+    };
+    setStudentList([...studentList, body]);
+    setAddStudentModalOpen(false);
+  }
 
   const handleRouteModalClose = () => {
     setNewRouteError(false);
     setRouteNameError(false);
-    setModalOpen(false);
+    setAddRouteModalOpen(false);
   };
 
   const handleStudentModalClose = () => {
-    setModalOpen2(false);
+    setAddStudentModalOpen(false);
   };
 
   const handleNameChange = (event) => {
@@ -354,7 +375,7 @@ const BusRoutes = ({ clubName, savedRoutes }) => {
             </Button>
             <Dialog
               style={{ padding: 10, margin: 10, minWidth: 600 }}
-              open={modalOpen2}
+              open={addStudentModalOpen}
               onClose={handleStudentModalClose}
             >
               <div
@@ -432,30 +453,6 @@ const BusRoutes = ({ clubName, savedRoutes }) => {
                     Name cannot be blank.
                   </div>
                 </div>
-                <div>
-                  <label className={classes.label}>Club Name:</label>
-                  <input
-                    id="clubName"
-                    className={classes.textField}
-                    placeholder="Type name here..."
-                    required
-                  />
-                  <div hidden={!routeNameError} className={classes.error}>
-                    Name cannot be blank.
-                  </div>
-                </div>
-                <div>
-                  <label className={classes.label}>Notes:</label>
-                  <input
-                    id="notes"
-                    className={classes.textField}
-                    placeholder="Type name here..."
-                    required
-                  />
-                  <div hidden={!routeNameError} className={classes.error}>
-                    Name cannot be blank.
-                  </div>
-                </div>
               </DialogContent>
               <div hidden={!newRouteError} className={classes.error}>
                 Sorry, an error occurred. Cannot create new student in route.
@@ -474,12 +471,11 @@ const BusRoutes = ({ clubName, savedRoutes }) => {
                     let studentId = document.getElementById("studentID").value;
                     let grade = document.getElementById("grade").value;
                     let school = document.getElementById("schoolName").value;
-                    let club = document.getElementById("clubName").value;
-                    let notes = document.getElementById("notes").value;
 
                     handleStudentCreate(
                       studentFirstName,
                       studentLastName,
+                      studentId,
                       school,
                       grade
                     );
@@ -544,7 +540,7 @@ const BusRoutes = ({ clubName, savedRoutes }) => {
         </Fab>
         <Dialog
           style={{ padding: 10, margin: 10, minWidth: 600 }}
-          open={modalOpen}
+          open={addRouteModalOpen}
           onClose={handleRouteModalClose}
         >
           <div

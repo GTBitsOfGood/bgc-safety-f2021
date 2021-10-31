@@ -43,9 +43,9 @@ function createStudent(req, res) {
     RouteId,
     Grade,
     ClubName,
-    Notes,
-    Picture,
   } = req.body;
+
+  console.log(req.body);
 
   Student.create({
     firstName: FirstName,
@@ -55,8 +55,8 @@ function createStudent(req, res) {
     route: RouteId,
     grade: Grade,
     clubName: ClubName,
-    notes: Notes,
-    picture: Picture,
+    checkIns: [],
+    picture: "",
   })
     .then((student) =>
       res.status(201).send({
