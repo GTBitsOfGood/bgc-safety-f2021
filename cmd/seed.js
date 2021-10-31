@@ -54,9 +54,8 @@ const init = async () => {
         route: randFrom(routes),
         grade: randFrom(GRADES),
         clubName: "Harland",
-        notes: `Note for student ${i + 1}`,
         picture: "",
-        checkInTimes: [],
+        checkIns: [],
       });
 
       await student.save();

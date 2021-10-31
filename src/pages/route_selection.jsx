@@ -65,7 +65,7 @@ const RouteSelection = ({ routes }) => {
           return (
             <Link
               href={`${urls.pages.bus_checkin_roster}/[route]`}
-              as={`bus_checkin_roster/${name}`}
+              as={`bus_checkin_roster/${encodeURIComponent(name)}`}
             >
               <a
                 className={classes.btn}

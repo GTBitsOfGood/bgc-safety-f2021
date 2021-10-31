@@ -21,23 +21,23 @@ export default async (req, res) => {
 
 function addNote(req, res) {
   const { id } = req.query;
-  const { note } = req.body;
+  const { note, date } = req.body;
 
   Student.findOneAndUpdate(
     {
-      studentID: id,
+      _id: id,
+      "checkIns.date": date,
     },
     {
-      $set: { notes: note },
-    },
-    {
-      new: true,
+      $set: {
+        "checkIns.$.note": note,
+      },
     }
   )
     .then((student) => {
       res.status(200).send({
         success: true,
-        payload: student.notes,
+        payload: student.note,
       });
     })
     .catch((err) => {
@@ -53,7 +53,7 @@ function deleteNote(req, res) {
 
   Student.findOneAndUpdate(
     {
-      studentID: id,
+      _id: id,
     },
     {
       notes: undefined,

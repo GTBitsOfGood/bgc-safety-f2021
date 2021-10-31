@@ -41,13 +41,13 @@ function getBusAttendanceInfo(req, res) {
     {
       firstName: 1,
       lastName: 1,
-      checkInTimes: 1,
+      checkIns: 1,
     }
   )
-    .then((checkInTimes) =>
+    .then((checkIns) =>
       res.status(200).send({
         success: true,
-        payload: checkInTimes,
+        payload: checkIns,
       })
     )
     .catch((err) =>

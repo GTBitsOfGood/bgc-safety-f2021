@@ -25,7 +25,7 @@ const useUserAuthorized = (session, requestedRoute) => {
 
 const verifyUserType = async (session, requestedRoute) => {
   const userData = await fetchUserData(session);
-  const userAllowedRoutes = filterRoutes(userData);
+  const userAllowedRoutes = filterRoutes(userData.type);
   const requestedRouteInAllowed = userAllowedRoutes.some(
     (route) => requestedRoute === route.link
   );
@@ -35,25 +35,25 @@ const verifyUserType = async (session, requestedRoute) => {
 const fetchUserData = async (session) => {
   const res = await fetch(`/api/user?email=${session.user.email}`);
   const userData = await res.json();
-  return userData[0];
+  return userData.payload;
 };
 
-const filterRoutes = (currentUser) => {
+const filterRoutes = (currentUserType) => {
   let fRoutes = [];
-  if (currentUser.type === userTypes.admin) {
+  if (currentUserType === userTypes.admin) {
     fRoutes = routes.filter(
       (item) =>
         item.type === "Admin" ||
         item.type === "ClubDirectorAttendanceClerk" ||
         item.type === "All"
     );
-  } else if (currentUser.type === userTypes.busDriver) {
+  } else if (currentUserType === userTypes.busDriver) {
     fRoutes = routes.filter(
       (item) => item.type === "BusDriver" || item.type === "All"
     );
   } else if (
-    currentUser.type === userTypes.clubDirector ||
-    currentUser.type === userTypes.attendanceClerk
+    currentUserType === userTypes.clubDirector ||
+    currentUserType === userTypes.attendanceClerk
   ) {
     fRoutes = routes.filter(
       (item) =>

@@ -250,7 +250,7 @@ Roster.getInitialProps = async () => {
       for (const student of d.payload) {
         students.push({
           name: `${student.firstName} ${student.lastName}`,
-          checkedIn: student.checkInTimes.includes(today),
+          checkedIn: student.checkIns.some((checkIn) => checkIn.date === today),
         });
       }
 
