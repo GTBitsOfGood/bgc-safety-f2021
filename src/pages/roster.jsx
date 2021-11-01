@@ -11,6 +11,8 @@ import urls from "../../utils/urls";
 import { useSession } from "next-auth/client";
 import Router from "next/router";
 import { useUserAuthorized } from "../../utils/userType";
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 
 const fetch = require("node-fetch");
 
@@ -81,6 +83,16 @@ const useStyles = makeStyles((theme) => ({
   formInput: {
     paddingBottom: "10px",
   },
+  datePicker: {
+    width: "10rem",
+    margin: "0.5rem",
+  },
+  datePickerParent: {
+    paddingBottom: "1rem"
+  },
+  button: {
+    margin: '0.5rem',
+  }
 }));
 
 const ClubName = "Harland"; // TODO: Allow user to select a club
@@ -101,11 +113,23 @@ function Roster({ schools }) {
   const [studentSchool, setStudentSchool] = useState("");
   const [session, loading] = useSession();
   const userAuthorized = useUserAuthorized(session, urls.pages.roster);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
   const handleSubmit = () => {
     setStudent({ firstName, lastName, studentSchool });
     // add to database
   };
+
+  const handleClear = () => {
+    setStartDate(null);
+    setEndDate(null);
+  }
+
+  const handleUpdate = () => {
+    setStartDate(null);
+    setEndDate(null);
+  }
 
   if (!session || !userAuthorized) {
     return <div />
@@ -114,6 +138,46 @@ function Roster({ schools }) {
   return (
     <div id="main">
       <h1>{`${ClubName} Boys and Girls Club`}</h1>
+      <h3>Select Date Range</h3>
+      <div className={classes.datePickerParent}>
+        <div>
+          <DatePicker
+            placeholderText="Select Start Date"
+            selected={startDate}
+            selectsStart
+            startDate={startDate}
+            endDate={endDate}
+            onChange={date => setStartDate(date)}
+            className={classes.datePicker}
+          />
+          <DatePicker
+            placeholderText="Select End Date"
+            selected={endDate}
+            selectsEnd
+            startDate={startDate}
+            endDate={endDate}
+            minDate={startDate}
+            onChange={date => setEndDate(date)}
+            className={classes.datePicker}
+          />
+        </div>
+        <div>
+          <button
+            type="button"
+            className={classes.button}
+            onClick={() => handleClear()}
+          >
+            Clear
+          </button>
+          <button
+            type="button"
+            className={classes.button}
+            onClick={() => handleUpdate()}
+          >
+            Update
+          </button>
+        </div>
+      </div>
       <div className={styles.roster}>
         <div>
           {schools.map((school) => (
