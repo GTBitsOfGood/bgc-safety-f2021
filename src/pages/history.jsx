@@ -13,7 +13,6 @@ import Calendar from "../components/calendar";
 import ModalComponent from "../components/modal";
 import styles from "./history.module.css";
 import urls from "../../utils/urls";
-import Router from "next/router";
 import { useSession } from "next-auth/client";
 import { useUserAuthorized } from "../../utils/userType";
 
@@ -21,7 +20,6 @@ const fetch = require("node-fetch");
 
 const lowAttendance = "#FFCF50";
 const highAttendance = "#40B24B";
-const ClubName = "Harland"; // TODO: Allow user to select a club
 const startDate = "1/01/2020";
 
 const getMonth = (date) => {
@@ -153,6 +151,7 @@ async function updateStudents(date, students) {
   const day_list = [];
   const curr = new Date(date);
   const today = new Date();
+
   while (
     curr.getMonth() === date.getMonth() &&
     (curr.getMonth() !== today.getMonth() ||
@@ -174,12 +173,12 @@ async function updateStudents(date, students) {
   daysInMonth = day_list.length;
 
   for (const student of students) {
-    const res1 = await fetch(
+    const res = await fetch(
       `${urls.baseUrl}/api/attendance?studentID=${
         student.studentID
       }&startDate=${day_list[0]}&endDate=${day_list[day_list.length - 1]}`
     );
-    const d = await res1.json();
+    const d = await res.json();
 
     if (d.success) {
       let count = 0;
@@ -227,15 +226,19 @@ const DateSelect = (props) => {
   );
 };
 
-function History({ students }) {
+const History = ({ notFound, clubName, students }) => {
   const classes = useStyles();
+
+  const filterLabels = ["schoolName", "grade", "attendance"];
+  const sortingLabels = ["Alphabetical", "Grade", "Low Attendance"];
+
   const [visibleStudents, setVisibleStudents] = useState([]);
   const [filters, setFilters] = useState(["", "", ""]);
-  const filterLabels = ["schoolName", "grade", "attendance"];
   const [filteredStudents, setFilteredStudents] = useState([]);
-  const sortingLabels = ["Alphabetical", "Grade", "Low Attendance"];
+
   const [sort, setSort] = useState("");
   const [date, setDate] = useState(new Date(startDate));
+
   const [session, loading] = useSession();
   const userAuthorized = useUserAuthorized(session, urls.pages.history);
 
@@ -391,16 +394,16 @@ function History({ students }) {
     </div>
   );
 
-  if (!session || !userAuthorized) {
-    return <div />
+  if (notFound || !session || !userAuthorized) {
+    return <div />;
   }
 
   return (
     <div className={styles.container}>
       <p style={{ fontSize: "200", margin: "0" }}>Bus Attendance Matrix</p>
       <h2 style={{ marginTop: "5px", marginBottom: "20px" }}>
-        {`${ClubName} Boys and Girls Club `}
-        2019-2020 Afterschool Registration
+        {`${clubName} Boys and Girls Club `}
+        2020-2021 Afterschool Registration
       </h2>
       <Filters />
       <Sorting />
@@ -506,18 +509,31 @@ function History({ students }) {
 
 // Declaring type of schools prop
 History.propTypes = {
+  clubName: PropTypes.string.isRequired,
   students: PropTypes.arrayOf(PropTypes.object),
 };
 
 // Setting default value for schools prop
 History.defaultProps = {
-  students: null,
+  clubName: "",
+  students: [],
 };
 
-History.getInitialProps = async () => {
-  const res = await fetch(`${urls.baseUrl}/api/club?ClubName=${ClubName}`);
+History.getInitialProps = async (context) => {
+  let clubName = context.query.ClubName;
+
+  // Default to Harland if no club name provided
+  if (clubName === undefined) {
+    clubName = "Harland";
+  }
+
+  const res = await fetch(`${urls.baseUrl}/api/club?ClubName=${clubName}`);
+
+  if (res.status === 404) {
+    return { notFound: true };
+  }
+
   const schools_data = await res.json();
-  console.log(schools_data);
 
   let schools = [];
   if (schools_data.success && schools_data.payload.length > 0) {
@@ -525,18 +541,16 @@ History.getInitialProps = async () => {
   }
 
   let students = [];
+  for (const school of schools) {
+    const res = await fetch(`${urls.baseUrl}/api/school?schoolName=${school}`);
+    const students_data = await res.json();
 
-  let school;
-  for (school of schools) {
-    console.log(school);
-    const res2 = await fetch(`${urls.baseUrl}/api/school?schoolName=${school}`);
-    const students_data = await res2.json();
     if (students_data.success) {
       students = students.concat(students_data.payload);
     }
   }
 
-  return { students: await updateStudents(new Date(startDate), students) };
+  return { clubName, students: await updateStudents(new Date(startDate), students) };
 };
 
 export default History;

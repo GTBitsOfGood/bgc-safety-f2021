@@ -108,12 +108,19 @@ function getSchoolsForClub(req, res) {
   const { ClubName } = req.query;
 
   Club.find({ ClubName }, { SchoolNames: 1 })
-    .then((SchoolNames) =>
-      res.status(200).json({
-        success: true,
-        payload: SchoolNames,
-      })
-    )
+    .then((SchoolNames) => {
+      if (SchoolNames.length === 0) {
+        res.status(404).send({
+          success: false,
+          message: "Club Not Found",
+        });
+      } else {
+        res.status(200).send({
+          success: true,
+          payload: SchoolNames,
+        });
+      }
+    })
     .catch((err) =>
       res.status(400).json({
         success: false,
