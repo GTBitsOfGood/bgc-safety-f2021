@@ -59,7 +59,7 @@ To keep things modular, the resources are divided into folders namely `/screens`
   - Each function should return a fetch request matching the template:
 
     ```
-    fetch(urls.baseUrl + urls.api.example, {
+    fetch(urls.api.example, {
       method: "get",
       mode: "same-origin",
       credentials: "include",
