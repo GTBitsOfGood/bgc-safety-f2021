@@ -21,12 +21,13 @@
     "lint:fix": "eslint \"**/*.{js,jsx}\" --fix",
     "format": "prettier \"**/*.{js,jsx}\" --write",
     "format:check": "prettier \"**/*.{js,jsx}\" -l",
-    "secrets": "npm run secrets:logout && cross-env-shell BW_SESSION=`npx bw login product@bitsofgood.org --raw` \"npm run secrets:sync\"",
+    "secrets": "npm run secrets-dev",
+    "secrets-dev": "BW_ITEM=e141fcfd-c713-4043-8b82-acc3013c6b38 npm run secrets:fetch",
+    "secrets-staging": "BW_ITEM=219c2c01-06a1-4527-9bfd-adaa0114838b npm run secrets-staging:fetch",
+    "secrets:fetch": "npm run secrets:logout && cross-env-shell BW_SESSION=`npx bw login product@bitsofgood.org --raw` \"npm run secrets:sync\"",
+    "secrets-staging:fetch": "npx bw login --apikey; echo $BW_PASSWORD | npx bw sync; echo $BW_PASSWORD | npx bw get item $BW_ITEM | npx fx .notes > .env",
     "secrets:logout": "(npx bw logout || exit 0)",
-    "secrets:login": "npx bw login product@bitsofgood.org",
-    "secrets:sync": "npx bw sync && npx bw get item $BW_ITEM | npx fx .notes > \".env\"",
-    "secrets-dev": "BW_ITEM=e141fcfd-c713-4043-8b82-acc3013c6b38 npm run secrets",
-    "secrets-staging": "BW_ITEM=219c2c01-06a1-4527-9bfd-adaa0114838b npm run secrets"
+    "secrets:sync": "npx bw sync && npx bw get item $BW_ITEM | npx fx .notes > \".env\""
   },
   "husky": {
     "hooks": {

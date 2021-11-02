@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Link from "next/link";
 const fetch = require("node-fetch");
 import urls from "../../utils/urls";
+import { useSession } from "next-auth/client";
+import { useUserAuthorized } from "../../utils/userType";
 
 const ClubName = "Harland"; // TODO: Allow user to select a club
 
@@ -32,10 +34,12 @@ const useStyles = makeStyles(() => ({
 }));
 
 const RouteSelection = ({ schools }) => {
-  const [selectedSchool, setselectedSchool] = React.useState("");
+  const [selectedSchool, setselectedSchool] = useState("");
   const classes = useStyles();
+  const [session, loading] = useSession();
+  const userAuthorized = useUserAuthorized(session, urls.pages.route_selection);
 
-  React.useEffect(() => {
+  useEffect(() => {
     // render/link to bus checkin page passing in selected school as props
   }, [selectedSchool]);
 
@@ -43,6 +47,10 @@ const RouteSelection = ({ schools }) => {
     console.log(e.target.innerHTML);
     setselectedSchool(e.target.innerHTML);
   };
+
+  if (!session || !userAuthorized) {
+    return <div />;
+  }
 
   return (
     <div className={classes.container}>

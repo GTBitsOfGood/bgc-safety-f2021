@@ -4,9 +4,9 @@ name: CD
 
 # Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
+  # Triggers the workflow on all pushes
   push:
-    branches: [main]
+    branches: [main, production]
   pull_request:
     branches: [main]
 
@@ -22,6 +22,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Get PR branch name
+      - name: Get Branch Name
+        if: github.event_name == 'pull_request'
+        id: pr_branch_name
+        uses: tj-actions/branch-names@v5
+
+      # Create deployment
+      - name: Create GitHub Deployment
+        id: create_deployment
+        uses: octokit/request-action@v2.x
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        with:
+          route: POST /repos/{repo}/deployments
+          repo: ${{ github.repository }}
+          ref: ${{ github.event_name == 'pull_request' && format('refs/heads/{0}', steps.pr_branch_name.outputs.head_ref_branch) || github.ref }}
+          auto_merge: false
+          required_contexts: "[]"
+          environment: ${{ github.ref == 'refs/heads/production' && 'Production' || (github.ref == 'refs/heads/main' && 'Preview' || 'Development') }}
+
       # Checkout
       - uses: actions/checkout@v2
 
@@ -33,11 +53,14 @@ jobs:
 
       - name: Pull Staging Secrets
         env:
+          BW_CLIENTID: ${{ secrets.BW_CLIENTID }}
+          BW_CLIENTSECRET: ${{ secrets.BW_CLIENTSECRET }}
           BW_PASSWORD: ${{ secrets.BW_PASSWORD }}
-        run: (echo $BW_PASSWORD && cat) | npm run secrets-staging
+        run: echo $BW_PASSWORD | npm run secrets-staging
 
       # Deploy using Vercel CLI
       - name: Vercel Deployment
+        id: vercel_deployment
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
@@ -47,14 +70,37 @@ jobs:
               cat out.log | egrep -o 'https:\/\/bgc-safety-f2021-.+-bitsofgood.vercel.app' \
             )\
           "
-          echo "::set-output name=DEPLOY_TIMESTAMP::$(date +'%Y-%m-%dT%H:%M:%S')"
-        id: deploy
 
-      - name: Pull Request Updater GitHub Action
+      # Comment deployment link on PRs
+      - name: Comment Deployment on PR
         if: github.event_name == 'pull_request'
+        uses: thollander/actions-comment-pull-request@v1
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          base-branch-regex: main
-          body-update-action: suffix
-          body-template: ${{ format('[Deployment ({0})]({1})', steps.deploy.outputs.DEPLOY_TIMESTAMP, steps.deploy.outputs.DEPLOY_LINK) }}
-        uses: tzkhan/pr-update-action@v2
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          message: ${{ format('### ⚡ [Deployment Live]({0}) :zap:', steps.vercel_deployment.outputs.DEPLOY_LINK) }}
+
+      # Links the Vercel Deployment to the GitHub Deployment
+      - name: Link Deployment
+        uses: octokit/request-action@v2.x
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        with:
+          route: POST /repos/{repo}/deployments/{deployment_id}/statuses
+          repo: ${{ github.repository }}
+          deployment_id: ${{ fromJson(steps.create_deployment.outputs.data).id }}
+          state: "success"
+          target_url: ${{ steps.vercel_deployment.outputs.DEPLOY_LINK }}
+          environment: ${{ github.ref == 'refs/heads/production' && 'Production' || (github.ref == 'refs/heads/main' && 'Preview' || 'Development') }}
+
+      # Fails deployment if job fails or is cancelled
+      - name: Fail Deployment
+        if: always() && (job.status == 'failure' || job.status == 'cancelled')
+        uses: octokit/request-action@v2.x
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        with:
+          route: POST /repos/{repo}/deployments/{deployment_id}/statuses
+          repo: ${{ github.repository }}
+          deployment_id: ${{ fromJson(steps.create_deployment.outputs.data).id }}
+          state: "failure"
+          environment: ${{ github.ref == 'refs/heads/production' && 'Production' || (github.ref == 'refs/heads/main' && 'Preview' || 'Development') }}

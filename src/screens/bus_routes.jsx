@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Button,
@@ -14,6 +14,9 @@ import EditIcon from "@material-ui/icons/Edit";
 import AddIcon from "@material-ui/icons/Add";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import urls from "../../utils/urls";
+import { useSession } from "next-auth/client";
+import Router from "next/router";
+import { useUserAuthorized } from "../../utils/userType";
 // import {getStudentsByName, changeStudentRoute} from "../pages/api/student";
 
 const fetch = require("node-fetch");
@@ -124,20 +127,22 @@ const useStyles = makeStyles(() => ({
 
 const BusRoutes = ({ savedRoutes }) => {
   const classes = useStyles();
-  const [routes, setRoutes] = React.useState(savedRoutes);
-  const [selectedRoute, setSelectedRoute] = React.useState(routes[0]);
-  const [editedRoute, setEditedRoute] = React.useState(
+  const [session, loading] = useSession();
+  const [routes, setRoutes] = useState(savedRoutes);
+  const [selectedRoute, setSelectedRoute] = useState(routes[0]);
+  const [editedRoute, setEditedRoute] = useState(
     routes.length > 0 ? routes[0].name : ""
   );
-  const [routeEditable, setEditable] = React.useState(false);
-  const [modalOpen, setModalOpen] = React.useState(false);
-  const [modalOpen2, setModalOpen2] = React.useState(false);
+  const [routeEditable, setEditable] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen2, setModalOpen2] = useState(false);
 
-  const [routeNameError, setRouteNameError] = React.useState(false);
-  const [newRouteError, setNewRouteError] = React.useState(false);
-  const [editNameError, setEditNameError] = React.useState(false);
+  const [routeNameError, setRouteNameError] = useState(false);
+  const [newRouteError, setNewRouteError] = useState(false);
+  const [editNameError, setEditNameError] = useState(false);
 
-  const [studentList, setStudentList] = React.useState([]);
+  const [studentList, setStudentList] = useState([]);
+  const userAuthorized = useUserAuthorized(session, urls.pages.bus_routes);
 
   const addRoute = () => {
     setModalOpen(true);
@@ -271,6 +276,10 @@ const BusRoutes = ({ savedRoutes }) => {
   };
 
   let modalName = "";
+
+  if (!session || !userAuthorized) {
+    return <div />;
+  }
 
   return (
     <div>
@@ -463,7 +472,10 @@ const BusRoutes = ({ savedRoutes }) => {
 
         <table className={classes.table}>
           <thead
-            style={{ backgroundColor: "#E0E0E0", width: "calc( 100% - 1em )" }}
+            style={{
+              backgroundColor: "#E0E0E0",
+              width: "calc( 100% - 1em )",
+            }}
           >
             <tr className={classes.tr}>
               <th className={classes.th}>Student Name</th>
@@ -486,17 +498,17 @@ const BusRoutes = ({ savedRoutes }) => {
             ))}
           </tbody>
           {/* <tbody className={classes.tbody}>
-                                
-            <tr className={classes.tr}>
-              <td scope="col">Donuts</td>
-              <td scope="col">Dheeraj</td>
-              <td scope="col">Donuts</td>
-              <td scope="col">Dheeraj</td>
-              <td scope="col">Donuts</td>
-            </tr>
+                            
+        <tr className={classes.tr}>
+          <td scope="col">Donuts</td>
+          <td scope="col">Dheeraj</td>
+          <td scope="col">Donuts</td>
+          <td scope="col">Dheeraj</td>
+          <td scope="col">Donuts</td>
+        </tr>
 
 
-          </tbody> */}
+      </tbody> */}
         </table>
       </div>
       <div className={classes.routeTabs}>
