@@ -601,8 +601,9 @@ const BusRoutes = ({ savedRoutes }) => {
   );
 };
 
-BusRoutes.getInitialProps = async () => {
-  const res = await fetch(`/api/routes`);
+BusRoutes.getInitialProps = async (context) => {
+  const { req } = context;
+  const res = await fetch(`http://${req.headers.host}${urls.api.routes}`);
   console.log(res);
   let routes_data = {};
   if (res) {

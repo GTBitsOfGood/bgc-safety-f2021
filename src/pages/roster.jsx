@@ -226,8 +226,11 @@ Roster.defaultProps = {
   schools: null,
 };
 
-Roster.getInitialProps = async () => {
-  const res = await fetch(`/api/club?ClubName=${ClubName}`);
+Roster.getInitialProps = async (context) => {
+  const { req } = context;
+  const res = await fetch(
+    `http://${req.headers.host}${urls.api.club}?ClubName=${ClubName}`
+  );
   const schools_data = await res.json();
   let schools_list = [];
   if (schools_data.success && schools_data.payload.length > 0) {

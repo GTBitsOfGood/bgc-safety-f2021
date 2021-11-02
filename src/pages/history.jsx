@@ -524,8 +524,11 @@ History.defaultProps = {
   students: null,
 };
 
-History.getInitialProps = async () => {
-  const res = await fetch(`/api/club?ClubName=${ClubName}`);
+History.getInitialProps = async (context) => {
+  const { req } = context;
+  const res = await fetch(
+    `http://${req.headers.host}${urls.api.club}?ClubName=${ClubName}`
+  );
   const schools_data = await res.json();
   console.log(schools_data);
 

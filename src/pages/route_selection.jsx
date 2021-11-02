@@ -83,9 +83,10 @@ const RouteSelection = ({ routes }) => {
   );
 };
 
-RouteSelection.getInitialProps = async () => {
+RouteSelection.getInitialProps = async (context) => {
   //currently no functionality to assign busDriver users to specific routes
-  const res = await fetch(urls.api.routes);
+  const { req } = context;
+  const res = await fetch(`http://${req.headers.host}${urls.api.routes}`);
   const routes = await res.json();
   return { routes: routes.payload };
 };
