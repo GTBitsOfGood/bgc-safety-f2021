@@ -132,7 +132,7 @@ const getCurrentDate = () => {
 };
 
 const getRouteMeta = async (route) => {
-  const idRes = await fetch(`${urls.baseUrl}${urls.api.routes}?name=${route}`);
+  const idRes = await fetch(`${urls.api.routes}?name=${route}`);
   const routeMeta = await idRes.json();
   return routeMeta.payload;
 };
@@ -214,7 +214,7 @@ const Roster = () => {
     };
     setStudents(modifiedStudents);
 
-    await fetch(`${urls.baseUrl}${urls.api.checkIn}?id=${_id}`, {
+    await fetch(`${urls.api.checkIn}?id=${_id}`, {
       method: "POST",
       headers: {
         Accept: "application/json",
