@@ -157,22 +157,19 @@ const Roster = () => {
 
   const submitAttendance = async (curDate, submissionNotes) => {
     //update routes
-    const routeRes = await fetch(
-      `${urls.baseUrl}${urls.api.routes}?id=${routeId}`,
-      {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
+    const routeRes = await fetch(`${urls.api.routes}?id=${routeId}`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        submissionDetails: {
+          date: curDate,
+          notes: submissionNotes,
         },
-        body: JSON.stringify({
-          submissionDetails: {
-            date: curDate,
-            notes: submissionNotes,
-          },
-        }),
-      }
-    );
+      }),
+    });
 
     if (routeRes.ok) {
       setSuccessOpen(true);
@@ -193,7 +190,7 @@ const Roster = () => {
     };
     setStudents(modifiedStudents);
 
-    await fetch(`${urls.baseUrl}${urls.api.notes}?id=${_id}`, {
+    await fetch(`${urls.api.notes}?id=${_id}`, {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -387,7 +384,7 @@ const Roster = () => {
       selectedRoute.checkIns.some((checkIn) => checkIn.date === curDate)
     );
     const studentRes = await fetch(
-      `${urls.baseUrl}${urls.api.student}?route=${selectedRoute._id}`
+      `${urls.api.student}?route=${selectedRoute._id}`
     );
     const d = await studentRes.json();
 

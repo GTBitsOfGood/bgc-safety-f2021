@@ -176,9 +176,9 @@ async function updateStudents(date, students) {
 
   for (const student of students) {
     const res1 = await fetch(
-      `${urls.baseUrl}/api/attendance?studentID=${
-        student.studentID
-      }&startDate=${day_list[0]}&endDate=${day_list[day_list.length - 1]}`
+      `/api/attendance?studentID=${student.studentID}&startDate=${
+        day_list[0]
+      }&endDate=${day_list[day_list.length - 1]}`
     );
     const d = await res1.json();
 
@@ -525,7 +525,7 @@ History.defaultProps = {
 };
 
 History.getInitialProps = async () => {
-  const res = await fetch(`${urls.baseUrl}/api/club?ClubName=${ClubName}`);
+  const res = await fetch(`/api/club?ClubName=${ClubName}`);
   const schools_data = await res.json();
   console.log(schools_data);
 
@@ -539,7 +539,7 @@ History.getInitialProps = async () => {
   let school;
   for (school of schools) {
     console.log(school);
-    const res2 = await fetch(`${urls.baseUrl}/api/school?schoolName=${school}`);
+    const res2 = await fetch(`/api/school?schoolName=${school}`);
     const students_data = await res2.json();
     if (students_data.success) {
       students = students.concat(students_data.payload);
