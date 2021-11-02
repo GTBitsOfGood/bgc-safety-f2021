@@ -108,7 +108,7 @@ function Roster({ schools }) {
   };
 
   if (!session || !userAuthorized) {
-    return <div />;
+    return <div />
   }
 
   return (
@@ -224,7 +224,7 @@ Roster.defaultProps = {
 };
 
 Roster.getInitialProps = async () => {
-  const res = await fetch(`/api/club?ClubName=${ClubName}`);
+  const res = await fetch(`${urls.baseUrl}/api/club?ClubName=${ClubName}`);
   const schools_data = await res.json();
   let schools_list = [];
   if (schools_data.success && schools_data.payload.length > 0) {
@@ -238,7 +238,7 @@ Roster.getInitialProps = async () => {
   const data = [];
 
   for (const s of schools_list) {
-    const res1 = await fetch(`/api/attendance?schoolName=${s}`);
+    const res1 = await fetch(`${urls.baseUrl}/api/attendance?schoolName=${s}`);
     const d = await res1.json();
 
     if (d.success) {

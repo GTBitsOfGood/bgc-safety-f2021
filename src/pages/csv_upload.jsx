@@ -30,7 +30,7 @@ const CSVUpload = () => {
     data.append("file", selectedFile);
     console.log(selectedFile);
     axios
-      .post(`/api/upload_csv`, data)
+      .post(`${urls.baseUrl}/api/upload_csv`, data)
       .then(function (response) {
         console.log("Uploaded file!! ... ", response);
         setUploadedFile(false);
@@ -48,7 +48,7 @@ const CSVUpload = () => {
   };
 
   if (!session || !userAuthorized) {
-    return <div />;
+    return <div />
   }
 
   return (
@@ -82,7 +82,11 @@ const CSVUpload = () => {
         </div>
       </div>
       <div className="button-container">
-        <button type="button" className="btn btn-danger" onClick={clearFile}>
+        <button
+          type="button"
+          className="btn btn-danger"
+          onClick={clearFile}
+        >
           Cancel
         </button>
         <button type="button" className="btn btn-success" onClick={sendCsv}>

@@ -37,7 +37,8 @@ const RouteSelection = ({ schools }) => {
   const [selectedSchool, setselectedSchool] = useState("");
   const classes = useStyles();
   const [session, loading] = useSession();
-  const userAuthorized = useUserAuthorized(session, urls.pages.route_selection);
+  const userAuthorized = useUserAuthorized(session, urls.pages.route_selection)
+
 
   useEffect(() => {
     // render/link to bus checkin page passing in selected school as props
@@ -49,7 +50,7 @@ const RouteSelection = ({ schools }) => {
   };
 
   if (!session || !userAuthorized) {
-    return <div />;
+    return <div />
   }
 
   return (
@@ -68,7 +69,8 @@ const RouteSelection = ({ schools }) => {
                   backgroundColor: school.complete ? "#6FCF97" : "#C4C4C4",
                 }}
               >
-                {school.name} -{school.complete ? " Complete" : " Incomplete"}
+                {school.name} -
+                {school.complete ? " Complete" : " Incomplete"}
               </a>
             </Link>
           );
@@ -79,7 +81,7 @@ const RouteSelection = ({ schools }) => {
 };
 
 RouteSelection.getInitialProps = async () => {
-  const res = await fetch(`/api/club?ClubName=${ClubName}`);
+  const res = await fetch(`${urls.baseUrl}/api/club?ClubName=${ClubName}`);
   const schools_data = await res.json();
   let schools_list = [];
   if (schools_data.success && schools_data.payload.length > 0) {

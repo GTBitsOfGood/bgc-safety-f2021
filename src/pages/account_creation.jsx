@@ -70,10 +70,7 @@ const AccountCreation = () => {
   const [password, setPassword] = useState("");
   const [selectText, setSelectText] = useState("Assigned Bus Routes");
   const [session, loading] = useSession();
-  const userAuthorized = useUserAuthorized(
-    session,
-    urls.pages.account_creation
-  );
+  const userAuthorized = useUserAuthorized(session, urls.pages.account_creation);
 
   const handleOpen = () => {
     setOpen(true);
@@ -88,7 +85,7 @@ const AccountCreation = () => {
       clubName: location,
     };
 
-    const res = await fetch(`/api/user`, {
+    const res = await fetch(`${urls.baseUrl}/api/user`, {
       method: "POST",
       body: JSON.stringify(body),
       headers: { "Content-Type": "application/json" },
@@ -123,7 +120,7 @@ const AccountCreation = () => {
   };
 
   if (!session || !userAuthorized) {
-    return <div />;
+    return <div />
   }
 
   return (
@@ -158,7 +155,9 @@ const AccountCreation = () => {
         </Box>
         <Box m={1}>
           <Button
-            variant={type !== "Executive Director" ? "outlined" : "contained"}
+            variant={
+              type !== "Executive Director" ? "outlined" : "contained"
+            }
             color="primary"
             onClick={() => {
               setType("Executive Director");
@@ -170,7 +169,9 @@ const AccountCreation = () => {
         </Box>
         <Box m={1}>
           <Button
-            variant={type !== "Regional Director" ? "outlined" : "contained"}
+            variant={
+              type !== "Regional Director" ? "outlined" : "contained"
+            }
             color="primary"
             onClick={() => {
               setType("Regional Director");

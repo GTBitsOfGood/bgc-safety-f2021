@@ -129,14 +129,11 @@ const Roster = () => {
   const [session, loading] = useSession();
   const { route } = router.query;
   const [students, setStudents] = useState([]);
-  const userAuthorized = useUserAuthorized(
-    session,
-    urls.pages.bus_checkin_roster
-  );
+  const userAuthorized = useUserAuthorized(session, urls.pages.bus_checkin_roster)
 
   const submitAttendance = async (index) => {
     // show modal
-    const res = await fetch(`/api/checkIn`, {
+    const res = await fetch(`${urls.baseUrl}/api/checkIn`, {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -317,7 +314,9 @@ const Roster = () => {
     let schoolName = route;
     let data = [];
 
-    const res1 = await fetch(`/api/school?schoolName=${schoolName}`);
+    const res1 = await fetch(
+      `${urls.baseUrl}/api/school?schoolName=${schoolName}`
+    );
     const d = await res1.json();
 
     if (d.success) {
@@ -342,7 +341,7 @@ const Roster = () => {
   }
 
   if (!session || !userAuthorized) {
-    return <div />;
+    return <div />
   }
 
   return (
