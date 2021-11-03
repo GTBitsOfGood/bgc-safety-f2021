@@ -17,6 +17,7 @@ import urls from "../../utils/urls";
 import { useSession } from "next-auth/client";
 import Router from "next/router";
 import { useUserAuthorized } from "../../utils/userType";
+import { findAllClubs } from "../../server/mongodb/actions/Club";
 // import {getStudentsByName, changeStudentRoute} from "../pages/api/student";
 
 const fetch = require("node-fetch");
@@ -601,20 +602,14 @@ const BusRoutes = ({ savedRoutes }) => {
   );
 };
 
-BusRoutes.getInitialProps = async (context) => {
-  const { req } = context;
-  const res = await fetch(`http://${req.headers.host}${urls.api.routes}`);
-  console.log(res);
-  let routes_data = {};
-  if (res) {
-    let routes_data = res;
-  }
-
-  if (routes_data.success) {
-    return { savedRoutes: routes_data.payload };
-  } else {
-    return { savedRoutes: [] };
-  }
-};
+export async function getServerSideProps() {
+  findAllClubs()
+    .then((clubs) => {
+      return { props: { clubs } };
+    })
+    .catch((err) => {
+      return { props: { clubs: [] } };
+    });
+}
 
 export default BusRoutes;

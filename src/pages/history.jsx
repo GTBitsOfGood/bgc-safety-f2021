@@ -17,6 +17,8 @@ import ModalButton from "../components/ModalButton";
 import Router from "next/router";
 import { useSession } from "next-auth/client";
 import { useUserAuthorized } from "../../utils/userType";
+import { getSchoolsByClub } from "../../server/mongodb/actions/Club";
+import { findStudentInfoBySchool } from "../../server/mongodb/actions/Student";
 
 const fetch = require("node-fetch");
 
@@ -524,32 +526,18 @@ History.defaultProps = {
   students: null,
 };
 
-History.getInitialProps = async (context) => {
-  const { req } = context;
-  const res = await fetch(
-    `http://${req.headers.host}${urls.api.club}?ClubName=${ClubName}`
-  );
-  const schools_data = await res.json();
-  console.log(schools_data);
-
-  let schools = [];
-  if (schools_data.success && schools_data.payload.length > 0) {
-    schools = schools_data.payload[0].SchoolNames;
-  }
-
+History.getInitialProps = async () => {
   let students = [];
 
-  let school;
-  for (school of schools) {
-    console.log(school);
-    const res2 = await fetch(`/api/school?schoolName=${school}`);
-    const students_data = await res2.json();
-    if (students_data.success) {
-      students = students.concat(students_data.payload);
+  return getSchoolsByClub(ClubName).then((schools_data) => {
+    const schools = schools_data[0].SchoolNames;
+    for (const school of schools) {
+      findStudentInfoBySchool(school).then((students_data) => {
+        students = students.concat(students_data);
+      });
     }
-  }
-
-  return { students: await updateStudents(new Date(startDate), students) };
+    return { students: await updateStudents(new Date(startDate), students) };
+  });
 };
 
 export default History;

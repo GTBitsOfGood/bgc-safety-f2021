@@ -2,6 +2,8 @@ import Route from "../models/Route.js";
 import mongoDB from "../index";
 
 export async function getAllRoutes() {
+  await mongoDB();
+
   return Route.find({})
     .then((routes) => {
       return Promise.resolve(routes);
@@ -12,6 +14,7 @@ export async function getAllRoutes() {
 }
 
 export async function getRouteByName(name) {
+  await mongoDB();
   return Route.findOne({ name })
     .then((route) => Promise.resolve(route))
     .catch((err) =>
@@ -20,6 +23,7 @@ export async function getRouteByName(name) {
 }
 
 export async function addRoute(name) {
+  await mongoDB();
   return Route.create({ name })
     .then((route) => {
       return Promise.resolve(route);
@@ -31,6 +35,7 @@ export async function addRoute(name) {
 }
 
 export async function editRouteName(id, name) {
+  await mongoDB();
   return Route.findByIdAndUpdate({ _id: id }, { name }, { new: true })
     .then((route) => {
       return Promise.resolve(route);
@@ -41,6 +46,7 @@ export async function editRouteName(id, name) {
 }
 
 export async function enterRouteSubmission(routeId, submissionDetails) {
+  await mongoDB();
   return Route.findOneAndUpdate(
     { _id: routeId },
     { $push: { checkIns: submissionDetails } }

@@ -6,6 +6,8 @@ import urls from "../../utils/urls";
 import { getCurrentDate } from "./bus_checkin_roster/[route]";
 import { useSession } from "next-auth/client";
 import { useUserAuthorized } from "../../utils/userType";
+import { getAllRoutes } from "../../server/mongodb/actions/Route";
+import Route from "../../server/mongodb/models/Route";
 
 const ClubName = "Harland"; // TODO: Allow user to select a club
 
@@ -83,12 +85,11 @@ const RouteSelection = ({ routes }) => {
   );
 };
 
-RouteSelection.getInitialProps = async (context) => {
+RouteSelection.getInitialProps = async () => {
   //currently no functionality to assign busDriver users to specific routes
-  const { req } = context;
-  const res = await fetch(`http://${req.headers.host}${urls.api.routes}`);
-  const routes = await res.json();
-  return { routes: routes.payload };
+  return await getAllRoutes().then((routes) => {
+    return { routes };
+  });
 };
 
 export default RouteSelection;

@@ -1,7 +1,10 @@
 /* eslint-disable no-use-before-define */
-import bcrypt from "bcryptjs";
+import {
+  createNewUser,
+  findUser,
+  removeUser,
+} from "../../../server/mongodb/actions/User";
 import mongoDB from "../../../server/mongodb/index";
-import User from "../../../server/mongodb/models/User";
 import useCors from "./corsMiddleware";
 
 export default async (req, res) => {
@@ -23,17 +26,7 @@ export default async (req, res) => {
 };
 
 function createUser(req, res) {
-  const { email, password, role, clubName } = req.body;
-  console.log(req.body);
-  const hashedPassword = bcrypt.hashSync(password, 10);
-  console.log("creating user");
-  User.create({
-    BGCMA_email: email,
-    password: hashedPassword,
-    type: role,
-    club: clubName,
-    username: email,
-  })
+  createNewUser(req.body)
     .then((user) => {
       res.status(201).send({
         success: true,
@@ -51,7 +44,7 @@ function createUser(req, res) {
 function getUser(req, res) {
   const { email } = req.query;
 
-  User.findOne({ BGCMA_email: email })
+  findUser(email)
     .then((user) =>
       res.status(200).send({
         success: true,
@@ -69,7 +62,7 @@ function getUser(req, res) {
 function deleteUser(req, res) {
   const { email } = req.params;
 
-  User.findOneAndDelete({ BGCMA_email: email })
+  removeUser(email)
     .then((user) =>
       res.status(200).send({
         success: true,

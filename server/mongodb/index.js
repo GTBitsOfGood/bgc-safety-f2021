@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import urls from "../../utils/urls";
 
-export default async () => {
+export default async function connectToDatabase() {
   if (mongoose.connections[0].readyState) return;
 
   await mongoose
@@ -17,4 +17,4 @@ export default async () => {
 
       throw e;
     });
-};
+}

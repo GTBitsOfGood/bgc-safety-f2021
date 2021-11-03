@@ -5,12 +5,9 @@ import {
   enterRouteSubmission,
   getRouteByName,
 } from "../../../server/mongodb/actions/Route";
-import mongoDB from "../../../server/mongodb";
 import useCors from "./corsMiddleware";
 
 export default async (req, res) => {
-  await mongoDB();
-
   await useCors(req, res);
 
   const { method } = req;

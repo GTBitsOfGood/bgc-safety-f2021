@@ -12,6 +12,8 @@ import { useSession } from "next-auth/client";
 import ModalButton from "../components/ModalButton";
 import Router from "next/router";
 import { useUserAuthorized } from "../../utils/userType";
+import { getSchoolsByClub } from "../../server/mongodb/actions/Club";
+import { findBusAttendanceInfo } from "../../server/mongodb/actions/Student";
 
 const fetch = require("node-fetch");
 
@@ -226,45 +228,40 @@ Roster.defaultProps = {
   schools: null,
 };
 
-Roster.getInitialProps = async (context) => {
-  const { req } = context;
-  const res = await fetch(
-    `http://${req.headers.host}${urls.api.club}?ClubName=${ClubName}`
-  );
-  const schools_data = await res.json();
-  let schools_list = [];
-  if (schools_data.success && schools_data.payload.length > 0) {
-    schools_list = schools_data.payload[0].SchoolNames;
-  }
+Roster.getInitialProps = async () => {
+  return getSchoolsByClub(ClubName).then((schools_data) => {
+    let schools_list = [];
+    if (schools_data.length > 0) {
+      schools_list = schools_data[0].SchoolNames;
+    }
 
-  const dateObj = new Date();
-  const day = String(dateObj.getDate()).padStart(2, "0");
-  const today = `${dateObj.getMonth() + 1}/${day}/${dateObj.getFullYear()}`;
+    const dateObj = new Date();
+    const day = String(dateObj.getDate()).padStart(2, "0");
+    const today = `${dateObj.getMonth() + 1}/${day}/${dateObj.getFullYear()}`;
 
-  const data = [];
+    const data = [];
 
-  for (const s of schools_list) {
-    const res1 = await fetch(`/api/attendance?schoolName=${s}`);
-    const d = await res1.json();
+    for (const s of schools_list) {
+      findBusAttendanceInfo(s).then((d) => {
+        const students = [];
 
-    if (d.success) {
-      const students = [];
+        for (const student of d) {
+          students.push({
+            name: `${student.firstName} ${student.lastName}`,
+            checkedIn: student.checkIns.some(
+              (checkIn) => checkIn.date === today
+            ),
+          });
+        }
 
-      for (const student of d.payload) {
-        students.push({
-          name: `${student.firstName} ${student.lastName}`,
-          checkedIn: student.checkIns.some((checkIn) => checkIn.date === today),
+        data.push({
+          name: s,
+          students,
         });
-      }
-
-      data.push({
-        name: s,
-        students,
       });
     }
-  }
-
-  return { schools: data };
+    return { schools: data };
+  });
 };
 
 export default Roster;

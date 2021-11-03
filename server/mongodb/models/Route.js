@@ -22,4 +22,6 @@ const RouteSchema = new Schema({
   },
 });
 
-export default mongoose.models.Route || mongoose.model("Route", RouteSchema);
+export default mongoose.models
+  ? mongoose.models.Route
+  : mongoose.model("Route", RouteSchema);
