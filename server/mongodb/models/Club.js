@@ -24,6 +24,4 @@ const ClubSchema = new Schema({
   },
 });
 
-export default mongoose.models
-  ? mongoose.models.Club
-  : mongoose.model("Club", ClubSchema);
+export default mongoose.models.Club || mongoose.model("Club", ClubSchema);

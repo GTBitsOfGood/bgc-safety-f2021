@@ -54,6 +54,5 @@ const StudentSchema = new Schema({
   },
 });
 
-export default mongoose.models
-  ? mongoose.models.Student
-  : mongoose.model("Student", StudentSchema);
+export default mongoose.models.Student ||
+  mongoose.model("Student", StudentSchema);
