@@ -88,7 +88,7 @@ const AccountCreation = () => {
       clubName: location,
     };
 
-    const res = await fetch(`${urls.baseUrl}/api/user`, {
+    const res = await fetch(`/api/user`, {
       method: "POST",
       body: JSON.stringify(body),
       headers: { "Content-Type": "application/json" },

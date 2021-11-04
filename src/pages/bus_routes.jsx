@@ -158,7 +158,7 @@ const BusRoutes = ({ savedRoutes }) => {
     } else {
       setRouteNameError(false);
       const body = { name };
-      const res = await fetch(`${urls.baseUrl}/api/routes`, {
+      const res = await fetch(`/api/routes`, {
         method: "post",
         body: JSON.stringify(body),
         headers: { "Content-Type": "application/json" },
@@ -253,7 +253,7 @@ const BusRoutes = ({ savedRoutes }) => {
       name,
     };
 
-    const res = await fetch(`${urls.baseUrl}/api/routes`, {
+    const res = await fetch(`/api/routes`, {
       method: "put",
       body: JSON.stringify(body),
       headers: { "Content-Type": "application/json" },
@@ -602,7 +602,7 @@ const BusRoutes = ({ savedRoutes }) => {
 };
 
 BusRoutes.getInitialProps = async () => {
-  const res = await fetch(`${urls.baseUrl}/api/routes`);
+  const res = await fetch(`/api/routes`);
   console.log(res);
   let routes_data = {};
   if (res) {

@@ -53,8 +53,10 @@ jobs:
 
       - name: Pull Staging Secrets
         env:
+          BW_CLIENTID: ${{ secrets.BW_CLIENTID }}
+          BW_CLIENTSECRET: ${{ secrets.BW_CLIENTSECRET }}
           BW_PASSWORD: ${{ secrets.BW_PASSWORD }}
-        run: (echo $BW_PASSWORD && cat) | npm run secrets-staging
+        run: echo $BW_PASSWORD | npm run secrets-staging
 
       # Deploy using Vercel CLI
       - name: Vercel Deployment

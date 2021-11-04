@@ -82,7 +82,7 @@ const Login = () => {
 
   // async function handleSubmit(event) {
   //   event.preventDefault();
-  //   const url = `${urls.baseUrl}/api/login`;
+  //   const url = `/api/login`;
 
   //   try {
   //     fetch(url, {

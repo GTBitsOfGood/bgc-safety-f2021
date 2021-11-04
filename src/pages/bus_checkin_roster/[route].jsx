@@ -136,7 +136,7 @@ const Roster = () => {
 
   const submitAttendance = async (index) => {
     // show modal
-    const res = await fetch(`${urls.baseUrl}/api/checkIn`, {
+    const res = await fetch(`/api/checkIn`, {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -317,9 +317,7 @@ const Roster = () => {
     let schoolName = route;
     let data = [];
 
-    const res1 = await fetch(
-      `${urls.baseUrl}/api/school?schoolName=${schoolName}`
-    );
+    const res1 = await fetch(`/api/school?schoolName=${schoolName}`);
     const d = await res1.json();
 
     if (d.success) {
