@@ -1,20 +1,28 @@
 import mongoose from "mongoose";
 import urls from "../../utils/urls";
 
-export default async function connectToDatabase() {
-  if (mongoose.connections[0].readyState) return;
+let cached = global.mongoose;
 
-  await mongoose
-    .connect(urls.dbUrl, {
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
+
+export default async function connectToDatabase() {
+  if (cached.conn) {
+    return cached.conn;
+  }
+
+  if (!cached.promise) {
+    cached.promise = mongoose.connect(urls.dbUrl, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       useFindAndModify: false,
       useCreateIndex: true,
       dbName: urls.dbName,
-    })
-    .catch((e) => {
-      console.error("Error connecting to database.");
-
-      throw e;
     });
+  }
+
+  cached.conn = await cached.promise;
+
+  return cached.conn;
 }
