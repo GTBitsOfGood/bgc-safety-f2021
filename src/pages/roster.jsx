@@ -228,40 +228,32 @@ Roster.defaultProps = {
   schools: null,
 };
 
-Roster.getInitialProps = async () => {
-  return getSchoolsByClub(ClubName).then((schools_data) => {
-    let schools_list = [];
-    if (schools_data.length > 0) {
-      schools_list = schools_data[0].SchoolNames;
-    }
+export async function getServerSideProps() {
+  const schoolData = await getSchoolsByClub(ClubName);
 
-    const dateObj = new Date();
-    const day = String(dateObj.getDate()).padStart(2, "0");
-    const today = `${dateObj.getMonth() + 1}/${day}/${dateObj.getFullYear()}`;
+  let schoolList = [];
+  if (schoolData.length > 0) {
+    schoolList = schoolData[0].SchoolNames;
+  }
 
-    const data = [];
+  const dateObj = new Date();
+  const day = String(dateObj.getDate()).padStart(2, "0");
+  const today = `${dateObj.getMonth() + 1}/${day}/${dateObj.getFullYear()}`;
 
-    for (const s of schools_list) {
-      findBusAttendanceInfo(s).then((d) => {
-        const students = [];
-
-        for (const student of d) {
-          students.push({
-            name: `${student.firstName} ${student.lastName}`,
-            checkedIn: student.checkIns.some(
-              (checkIn) => checkIn.date === today
-            ),
-          });
-        }
-
-        data.push({
-          name: s,
-          students,
-        });
-      });
-    }
-    return { schools: data };
+  const data = schoolList.map(async (school) => {
+    const d = await findBusAttendanceInfo(school);
+    const schoolStudents = d.map((student) => ({
+      name: `${student.firstName} ${student.lastName}`,
+      checkedIn: student.checkIns.some((checkIn) => checkIn.date === today),
+    }));
+    return {
+      name: school,
+      students: schoolStudents,
+    };
   });
-};
+  //data is empty
+
+  return { props: { schools: data } };
+}
 
 export default Roster;

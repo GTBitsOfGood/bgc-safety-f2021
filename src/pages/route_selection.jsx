@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Link from "next/link";
-const fetch = require("node-fetch");
 import urls from "../../utils/urls";
 import { getCurrentDate } from "./bus_checkin_roster/[route]";
 import { useSession } from "next-auth/client";
@@ -85,11 +84,11 @@ const RouteSelection = ({ routes }) => {
   );
 };
 
-RouteSelection.getInitialProps = async () => {
-  //currently no functionality to assign busDriver users to specific routes
-  return await getAllRoutes().then((routes) => {
-    return { routes };
-  });
-};
+export async function getServerSideProps() {
+  // await Route.find({});
+  const routes = await getAllRoutes();
+
+  return { props: { routes } };
+}
 
 export default RouteSelection;

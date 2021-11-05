@@ -5,6 +5,7 @@ import {
   getCurDayStudentAttendanceBySchool,
   getSchoolAttendanceByTimeRange,
   getStudentAttendance,
+  getStudentAttendanceByTimeRange,
 } from "../../../server/mongodb/actions/Student";
 import useCors from "./corsMiddleware";
 
@@ -109,7 +110,7 @@ function getStudentAttendanceTodayByClub(req, res) {
 function getStudentAttendanceTimeRange(req, res) {
   const { studentID, startDate, endDate } = req.query;
 
-  getStudentAttendanceTimeRange(studentID, startDate, endDate)
+  getStudentAttendanceByTimeRange(studentID, startDate, endDate)
     .then((attendance) =>
       res.status(200).send({
         success: true,

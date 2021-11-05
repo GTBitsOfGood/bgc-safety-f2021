@@ -18,9 +18,12 @@ import Router from "next/router";
 import { useSession } from "next-auth/client";
 import { useUserAuthorized } from "../../utils/userType";
 import { getSchoolsByClub } from "../../server/mongodb/actions/Club";
-import { findStudentInfoBySchool } from "../../server/mongodb/actions/Student";
-
-const fetch = require("node-fetch");
+import {
+  findStudentInfoBySchool,
+  getStudentAttendanceByTimeRange,
+} from "../../server/mongodb/actions/Student";
+import Club from "../../server/mongodb/models/Club";
+import Student from "../../server/mongodb/models/Student";
 
 const lowAttendance = "#FFCF50";
 const highAttendance = "#40B24B";
@@ -177,29 +180,26 @@ async function updateStudents(date, students) {
   daysInMonth = day_list.length;
 
   for (const student of students) {
-    const res1 = await fetch(
-      `/api/attendance?studentID=${student.studentID}&startDate=${
-        day_list[0]
-      }&endDate=${day_list[day_list.length - 1]}`
+    const d = await getStudentAttendanceByTimeRange(
+      student.studentID,
+      day_list[0],
+      day_list[day_list.length - 1]
     );
-    const d = await res1.json();
 
-    if (d.success) {
-      let count = 0;
-      for (const day of day_list) {
-        count += 1 ? d.payload.includes(day) : 0;
-      }
-
-      data.push({
-        firstName: student.firstName,
-        lastName: student.lastName,
-        schoolName: student.schoolName,
-        grade: student.grade,
-        attendance: count / day_list.length,
-        datesAttended: d.payload.map((d) => new Date(d)),
-        studentID: student.studentID,
-      });
+    let count = 0;
+    for (const day of day_list) {
+      count += 1 ? d.includes(day) : 0;
     }
+
+    data.push({
+      firstName: student.firstName,
+      lastName: student.lastName,
+      schoolName: student.schoolName,
+      grade: student.grade,
+      attendance: count / day_list.length,
+      datesAttended: d.map((d) => new Date(d)),
+      studentID: student.studentID,
+    });
   }
 
   return data;
@@ -526,18 +526,25 @@ History.defaultProps = {
   students: null,
 };
 
-History.getInitialProps = async () => {
+export async function getServerSideProps() {
+  // await Student.find({});
+  // await Club.find({});
+
   let students = [];
 
-  return getSchoolsByClub(ClubName).then((schools_data) => {
-    const schools = schools_data[0].SchoolNames;
-    for (const school of schools) {
-      findStudentInfoBySchool(school).then((students_data) => {
-        students = students.concat(students_data);
-      });
-    }
-    return { students: await updateStudents(new Date(startDate), students) };
-  });
-};
+  const res = await getSchoolsByClub(ClubName);
+  const schools = res[0].SchoolNames;
+
+  for (const school of schools) {
+    const schoolStudents = await findStudentInfoBySchool(school);
+    students = students.concat(schoolStudents);
+  }
+
+  const updatedStudents = await updateStudents(new Date(startDate), students);
+
+  return {
+    props: { students: updatedStudents },
+  };
+}
 
 export default History;

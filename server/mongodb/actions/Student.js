@@ -257,11 +257,13 @@ export async function findBusAttendanceInfo(schoolName) {
       schoolName,
     },
     {
+      _id: 0,
       firstName: 1,
       lastName: 1,
       checkIns: 1,
     }
   )
+    .lean()
     .then((checkIns) => {
       return Promise.resolve(checkIns);
     })
@@ -333,6 +335,7 @@ export async function getStudentAttendanceByTimeRange(
   endDate
 ) {
   await mongoDB();
+  console.log(studentID);
 
   return Student.findOne(
     {
