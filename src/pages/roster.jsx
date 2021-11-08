@@ -87,7 +87,7 @@ const useStyles = makeStyles((theme) => ({
     width: "10rem",
     margin: "0.5rem",
   },
-  datePickerParent: {
+  datePickerContainer: {
     paddingBottom: "1rem"
   },
   button: {
@@ -113,8 +113,7 @@ function Roster({ schools }) {
   const [studentSchool, setStudentSchool] = useState("");
   const [session, loading] = useSession();
   const userAuthorized = useUserAuthorized(session, urls.pages.roster);
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+  const [date, setDate] = useState(null);
 
   const handleSubmit = () => {
     setStudent({ firstName, lastName, studentSchool });
@@ -122,13 +121,11 @@ function Roster({ schools }) {
   };
 
   const handleClear = () => {
-    setStartDate(null);
-    setEndDate(null);
+    setDate(null);
   }
 
   const handleUpdate = () => {
-    setStartDate(null);
-    setEndDate(null);
+    setDate(null);
   }
 
   if (!session || !userAuthorized) {
@@ -138,26 +135,15 @@ function Roster({ schools }) {
   return (
     <div id="main">
       <h1>{`${ClubName} Boys and Girls Club`}</h1>
-      <h3>Select Date Range</h3>
-      <div className={classes.datePickerParent}>
+      <h3>Choose a Specific Date</h3>
+      <div className={classes.datePickerContainer}>
         <div>
           <DatePicker
-            placeholderText="Select Start Date"
-            selected={startDate}
+            placeholderText="Select Date"
+            selected={date}
             selectsStart
-            startDate={startDate}
-            endDate={endDate}
-            onChange={date => setStartDate(date)}
-            className={classes.datePicker}
-          />
-          <DatePicker
-            placeholderText="Select End Date"
-            selected={endDate}
-            selectsEnd
-            startDate={startDate}
-            endDate={endDate}
-            minDate={startDate}
-            onChange={date => setEndDate(date)}
+            startDate={date}
+            onChange={date => setDate(date)}
             className={classes.datePicker}
           />
         </div>
