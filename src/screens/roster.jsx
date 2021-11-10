@@ -9,10 +9,11 @@ import styles from "./roster.module.css";
 import ModalComponent from "../components/modal";
 import urls from "../../utils/urls";
 import { useSession } from "next-auth/client";
+import ModalButton from "../components/ModalButton";
 import Router from "next/router";
 import { useUserAuthorized } from "../../utils/userType";
-
-const fetch = require("node-fetch");
+import { getSchoolsByClub } from "../../server/mongodb/actions/Club";
+import { findBusAttendanceInfo } from "../../server/mongodb/actions/Student";
 
 const useStyles = makeStyles((theme) => ({
   ModalContent: {
@@ -95,6 +96,7 @@ function getNumberCheckedIn(school) {
 
 function Roster({ schools }) {
   const classes = useStyles();
+  const [modalOpen, setModalOpen] = useState(false);
   const [student, setStudent] = useState({});
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -104,6 +106,7 @@ function Roster({ schools }) {
 
   const handleSubmit = () => {
     setStudent({ firstName, lastName, studentSchool });
+    setModalOpen(false);
     // add to database
   };
 
@@ -153,16 +156,16 @@ function Roster({ schools }) {
                   </tr>
                 ))}
                 <tr>
-                  <ModalComponent
-                    setStudent={setStudent}
-                    button={
-                      <>
-                        Manually Add Entry
-                        <AddCircleIcon className={classes.icon} />
-                      </>
-                    }
+                  <ModalButton
+                    setOpen={() => setModalOpen(true)}
                     buttonStyle={classes.button}
                   >
+                    <>
+                      Manually Add Entry
+                      <AddCircleIcon className={classes.icon} />
+                    </>
+                  </ModalButton>
+                  <ModalComponent open={modalOpen} setStudent={setStudent}>
                     <form className={classes.form} onSubmit={handleSubmit}>
                       <h1 className={classes.formHeading}>
                         Manually Add Entry
@@ -224,41 +227,31 @@ Roster.defaultProps = {
 };
 
 Roster.getInitialProps = async () => {
-  const res = await fetch(`/api/club?ClubName=${ClubName}`);
-  const schools_data = await res.json();
-  let schools_list = [];
-  if (schools_data.success && schools_data.payload.length > 0) {
-    schools_list = schools_data.payload[0].SchoolNames;
+  const schoolData = await getSchoolsByClub(ClubName);
+
+  let schoolList = [];
+  if (schoolData.length > 0) {
+    schoolList = schoolData[0].SchoolNames;
   }
 
   const dateObj = new Date();
   const day = String(dateObj.getDate()).padStart(2, "0");
   const today = `${dateObj.getMonth() + 1}/${day}/${dateObj.getFullYear()}`;
 
-  const data = [];
+  const data = schoolList.map((school) => {
+    return findBusAttendanceInfo(school).then((d) => {
+      const schoolStudents = d.map((student) => ({
+        name: `${student.firstName} ${student.lastName}`,
+        checkedIn: student.checkIns.some((checkIn) => checkIn.date === today),
+      }));
+      return {
+        name: school,
+        students: schoolStudents,
+      };
+    });
+  });
 
-  for (const s of schools_list) {
-    const res1 = await fetch(`/api/attendance?schoolName=${s}`);
-    const d = await res1.json();
-
-    if (d.success) {
-      const students = [];
-
-      for (const student of d.payload) {
-        students.push({
-          name: `${student.firstName} ${student.lastName}`,
-          checkedIn: student.checkInTimes.includes(today),
-        });
-      }
-
-      data.push({
-        name: s,
-        students,
-      });
-    }
-  }
-
-  return { schools: data };
+  return { schools: await Promise.all(data) };
 };
 
 export default Roster;
