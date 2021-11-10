@@ -30,7 +30,7 @@ const CSVUpload = () => {
     data.append("file", selectedFile);
     console.log(selectedFile);
     axios
-      .post(`${urls.baseUrl}/api/upload_csv`, data)
+      .post(`/api/upload_csv`, data)
       .then(function (response) {
         console.log("Uploaded file!! ... ", response);
         setUploadedFile(false);

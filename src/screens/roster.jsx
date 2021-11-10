@@ -1,3 +1,6 @@
+import React, { useEffect, useState } from "react";
+import PropTypes from "prop-types";
+import { makeStyles } from "@material-ui/core/styles";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import modalStyles from "../components/Modal.module.css";
@@ -221,7 +224,7 @@ Roster.defaultProps = {
 };
 
 Roster.getInitialProps = async () => {
-  const res = await fetch(`${urls.baseUrl}/api/club?ClubName=${ClubName}`);
+  const res = await fetch(`/api/club?ClubName=${ClubName}`);
   const schools_data = await res.json();
   let schools_list = [];
   if (schools_data.success && schools_data.payload.length > 0) {
@@ -235,7 +238,7 @@ Roster.getInitialProps = async () => {
   const data = [];
 
   for (const s of schools_list) {
-    const res1 = await fetch(`${urls.baseUrl}/api/attendance?schoolName=${s}`);
+    const res1 = await fetch(`/api/attendance?schoolName=${s}`);
     const d = await res1.json();
 
     if (d.success) {
