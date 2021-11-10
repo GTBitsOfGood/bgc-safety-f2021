@@ -1,8 +1,5 @@
-import urls from "../../utils/urls";
 import mongoose from "mongoose";
-import Route from "./models/Route";
-import Student from "./models/Student";
-import Club from "./models/Club";
+import urls from "../../utils/urls";
 
 let cached = global.mongoose;
 
@@ -29,9 +26,6 @@ async function dbConnect() {
     });
   }
   cached.conn = await cached.promise;
-  await Route.find({});
-  await Club.find({});
-  await Student.find({});
   return cached.conn;
 }
 

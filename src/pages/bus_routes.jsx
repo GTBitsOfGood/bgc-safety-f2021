@@ -18,6 +18,7 @@ import { useSession } from "next-auth/client";
 import Router from "next/router";
 import { useUserAuthorized } from "../../utils/userType";
 import { findAllClubs } from "../../server/mongodb/actions/Club";
+import { getAllRoutes } from "../../server/mongodb/actions/Route";
 // import {getStudentsByName, changeStudentRoute} from "../pages/api/student";
 
 const fetch = require("node-fetch");
@@ -603,13 +604,7 @@ const BusRoutes = ({ savedRoutes }) => {
 };
 
 export async function getServerSideProps() {
-  findAllClubs()
-    .then((clubs) => {
-      return { props: { clubs } };
-    })
-    .catch((err) => {
-      return { props: { clubs: [] } };
-    });
+  return { props: { savedRoutes: await getAllRoutes() } };
 }
 
 export default BusRoutes;

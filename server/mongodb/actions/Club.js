@@ -3,9 +3,10 @@ import mongoDB from "../index";
 
 export async function findAllClubs() {
   await mongoDB();
-  return Club.find({})
+  return Club.find({}, { _id: 0, __v: 0 })
+    .lean()
     .then((clubs) => {
-      return Promise.resolve(clubs);
+      return Promise.resolve(JSON.parse(JSON.stringify(clubs)));
     })
     .catch((err) => {
       return Promise.reject(new Error("Error retrieving all clubs: " + err));

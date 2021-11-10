@@ -240,20 +240,20 @@ export async function getServerSideProps() {
   const day = String(dateObj.getDate()).padStart(2, "0");
   const today = `${dateObj.getMonth() + 1}/${day}/${dateObj.getFullYear()}`;
 
-  const data = schoolList.map(async (school) => {
-    const d = await findBusAttendanceInfo(school);
-    const schoolStudents = d.map((student) => ({
-      name: `${student.firstName} ${student.lastName}`,
-      checkedIn: student.checkIns.some((checkIn) => checkIn.date === today),
-    }));
-    return {
-      name: school,
-      students: schoolStudents,
-    };
+  const data = schoolList.map((school) => {
+    return findBusAttendanceInfo(school).then((d) => {
+      const schoolStudents = d.map((student) => ({
+        name: `${student.firstName} ${student.lastName}`,
+        checkedIn: student.checkIns.some((checkIn) => checkIn.date === today),
+      }));
+      return {
+        name: school,
+        students: schoolStudents,
+      };
+    });
   });
-  //data is empty
 
-  return { props: { schools: data } };
+  return { props: { schools: await Promise.all(data) } };
 }
 
 export default Roster;

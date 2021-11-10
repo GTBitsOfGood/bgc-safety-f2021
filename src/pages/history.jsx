@@ -527,9 +527,6 @@ History.defaultProps = {
 };
 
 export async function getServerSideProps() {
-  // await Student.find({});
-  // await Club.find({});
-
   let students = [];
 
   const res = await getSchoolsByClub(ClubName);

@@ -85,7 +85,6 @@ const RouteSelection = ({ routes }) => {
 };
 
 export async function getServerSideProps() {
-  // await Route.find({});
   const routes = await getAllRoutes();
 
   return { props: { routes } };
