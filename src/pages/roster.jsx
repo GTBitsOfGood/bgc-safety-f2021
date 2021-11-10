@@ -95,8 +95,6 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const ClubName = "Harland"; // TODO: Allow user to select a club
-
 function getNumberCheckedIn(school) {
   let count = 0;
   for (let i = 0; i < school.students.length; i += 1) {
@@ -105,7 +103,7 @@ function getNumberCheckedIn(school) {
   return ` ${count}/${school.students.length}`;
 }
 
-function Roster({ schools }) {
+function Roster({ notFound, clubName, schools }) {
   const classes = useStyles();
   const [student, setStudent] = useState({});
   const [firstName, setFirstName] = useState("");
@@ -128,13 +126,13 @@ function Roster({ schools }) {
     setDate(null);
   }
 
-  if (!session || !userAuthorized) {
+  if (notFound || !session || !userAuthorized) {
     return <div />;
   }
 
   return (
     <div id="main">
-      <h1>{`${ClubName} Boys and Girls Club`}</h1>
+      <h1>{`${clubName} Boys and Girls Club`}</h1>
       <h3>Choose a Specific Date</h3>
       <div className={classes.datePickerContainer}>
         <div>
@@ -265,16 +263,24 @@ function Roster({ schools }) {
 
 // Declaring type of schools prop
 Roster.propTypes = {
+  clubName: PropTypes.string.isRequired,
   schools: PropTypes.arrayOf(PropTypes.object),
 };
 
 // Setting default value for schools prop
 Roster.defaultProps = {
+  clubName: "",
   schools: null,
 };
 
-Roster.getInitialProps = async () => {
-  const res = await fetch(`/api/club?ClubName=${ClubName}`);
+Roster.getInitialProps = async (ctx) => {
+  let clubName = ctx.query.ClubName;
+
+  if (clubName === undefined) {
+    clubName = "Harland";
+  }
+
+  const res = await fetch(`/api/club?ClubName=${clubName}`);
   const schools_data = await res.json();
   let schools_list = [];
   if (schools_data.success && schools_data.payload.length > 0) {
@@ -308,7 +314,7 @@ Roster.getInitialProps = async () => {
     }
   }
 
-  return { schools: data };
+  return { clubName, schools: data };
 };
 
 export default Roster;
