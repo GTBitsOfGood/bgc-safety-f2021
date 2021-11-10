@@ -523,7 +523,7 @@ History.defaultProps = {
   students: null,
 };
 
-History.getInitialProps = async () => {
+export async function getServerSideProps() {
   let students = [];
 
   const res = await getSchoolsByClub(ClubName);
@@ -537,8 +537,11 @@ History.getInitialProps = async () => {
   const updatedStudents = await updateStudents(new Date(startDate), students);
 
   return {
-    students: updatedStudents,
+    props: {
+      students: updatedStudents,
+    },
   };
-};
+}
 
+export { updateStudents };
 export default History;

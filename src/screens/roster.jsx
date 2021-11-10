@@ -226,7 +226,7 @@ Roster.defaultProps = {
   schools: null,
 };
 
-Roster.getInitialProps = async () => {
+export async function getServerSideProps() {
   const schoolData = await getSchoolsByClub(ClubName);
 
   let schoolList = [];
@@ -251,7 +251,7 @@ Roster.getInitialProps = async () => {
     });
   });
 
-  return { schools: await Promise.all(data) };
-};
+  return { props: { schools: await Promise.all(data) } };
+}
 
 export default Roster;

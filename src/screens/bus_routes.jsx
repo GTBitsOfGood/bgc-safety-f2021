@@ -598,8 +598,8 @@ const BusRoutes = ({ savedRoutes }) => {
   );
 };
 
-BusRoutes.getInitialProps = async () => {
-  return { savedRoutes: await getAllRoutes() };
-};
+export async function getServerSideProps() {
+  return { props: { savedRoutes: await getAllRoutes() } };
+}
 
 export default BusRoutes;

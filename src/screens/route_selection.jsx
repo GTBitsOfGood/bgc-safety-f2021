@@ -83,10 +83,10 @@ const RouteSelection = ({ routes }) => {
   );
 };
 
-RouteSelection.getInitialProps = async () => {
+export async function getServerSideProps() {
   const routes = await getAllRoutes();
 
-  return { routes };
-};
+  return { props: { routes } };
+}
 
 export default RouteSelection;
