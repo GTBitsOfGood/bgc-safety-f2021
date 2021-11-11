@@ -1,11 +1,11 @@
 /* eslint-disable no-use-before-define */
-import mongoDB from "../../../server/mongodb/index";
-import Student from "../../../server/mongodb/models/Student";
+import {
+  addStudentNote,
+  deleteStudentNote,
+} from "../../../server/mongodb/actions/Student";
 import useCors from "./corsMiddleware";
 
 export default async (req, res) => {
-  await mongoDB();
-
   await useCors(req, res);
 
   const { method } = req;
@@ -23,21 +23,11 @@ function addNote(req, res) {
   const { id } = req.query;
   const { note, date } = req.body;
 
-  Student.findOneAndUpdate(
-    {
-      _id: id,
-      "checkIns.date": date,
-    },
-    {
-      $set: {
-        "checkIns.$.note": note,
-      },
-    }
-  )
-    .then((student) => {
+  addStudentNote(id, note, date)
+    .then((checkIns) => {
       res.status(200).send({
         success: true,
-        payload: student.note,
+        payload: checkIns,
       });
     })
     .catch((err) => {
@@ -51,14 +41,7 @@ function addNote(req, res) {
 function deleteNote(req, res) {
   const { id } = req.query;
 
-  Student.findOneAndUpdate(
-    {
-      _id: id,
-    },
-    {
-      notes: undefined,
-    }
-  )
+  deleteStudentNote(id)
     .then(() => {
       res.status(200).send({
         success: true,

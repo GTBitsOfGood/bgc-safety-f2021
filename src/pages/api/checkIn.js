@@ -1,11 +1,11 @@
 /* eslint-disable no-use-before-define */
-import mongoDB from "../../../server/mongodb/index";
-import Student from "../../../server/mongodb/models/Student";
+import {
+  findStudentCheckIns,
+  markStudentCheckIn,
+} from "../../../server/mongodb/actions/Student";
 import useCors from "./corsMiddleware";
 
 export default async (req, res) => {
-  await mongoDB();
-
   await useCors(req, res);
 
   const { method } = req;
@@ -21,11 +21,11 @@ export default async (req, res) => {
 
 function getStudentCheckIns(req, res) {
   const { id } = req.query;
-  Student.findOne({ _id: id })
-    .then((student) => {
+  findStudentCheckIns(id)
+    .then((checkIns) => {
       res.status(200).send({
         success: true,
-        payload: student.checkIns,
+        payload: checkIns,
       });
     })
     .catch((err) => {
@@ -40,26 +40,11 @@ function checkInStudent(req, res) {
   const { id } = req.query;
   const { date } = req.body;
 
-  Student.findOneAndUpdate(
-    {
-      _id: id,
-    },
-    {
-      $push: {
-        checkIns: {
-          date,
-          note: "",
-        },
-      },
-    },
-    {
-      new: true,
-    }
-  )
-    .then((student) => {
+  markStudentCheckIn(id, date)
+    .then((checkIns) => {
       res.status(200).send({
         success: true,
-        payload: student.checkIns,
+        payload: checkIns,
       });
     })
     .catch((err) => {

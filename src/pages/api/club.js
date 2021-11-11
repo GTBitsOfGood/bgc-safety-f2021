@@ -1,13 +1,15 @@
-/* eslint-disable no-use-before-define */
 import { getRoutesByIds } from "../../../server/mongodb/actions/Route";
-import { getStudentsByRoute } from "../../../server/mongodb/actions/Student";
-import mongoDB from "../../../server/mongodb/index";
-import Club from "../../../server/mongodb/models/Club";
+import {
+  createNewClub,
+  findAllClubs,
+  getRoutesByClub,
+  getSchoolsByClub,
+  removeClub,
+  updateClubData,
+} from "../../../server/mongodb/actions/Club";
 import useCors from "./corsMiddleware";
 
 export default async (req, res) => {
-  await mongoDB();
-
   await useCors(req, res);
 
   const { method } = req;
@@ -33,7 +35,7 @@ export default async (req, res) => {
 };
 
 function getAllClubs(req, res) {
-  Club.find()
+  findAllClubs()
     .then((clubs) => {
       res.status(200).send({
         success: true,
@@ -51,10 +53,7 @@ function getAllClubs(req, res) {
 function createClub(req, res) {
   const { ClubName, SchoolNames } = req.body;
 
-  Club.create({
-    ClubName: ClubName,
-    SchoolNames: SchoolNames,
-  })
+  createNewClub(ClubName, SchoolNames)
     .then((club) =>
       res.status(200).send({
         success: true,
@@ -71,13 +70,9 @@ function createClub(req, res) {
 
 function updateClub(req, res) {
   const { id } = req.query;
+  const { ClubName, SchoolNames } = req.body;
 
-  const filter = {
-    ClubName: req.body.clubName,
-    SchoolNames: req.body.schoolNames,
-  };
-
-  Club.findByIdAndUpdate(id, filter, { new: true })
+  updateClubData(id, ClubName, SchoolNames)
     .then((club) =>
       res.status(200).send({
         success: true,
@@ -95,7 +90,7 @@ function updateClub(req, res) {
 function deleteClub(req, res) {
   const { id } = req.query;
 
-  Club.findByIdAndDelete(id)
+  removeClub(id)
     .then((club) =>
       res.status(200).send({
         success: true,
@@ -113,7 +108,7 @@ function deleteClub(req, res) {
 function getSchoolsForClub(req, res) {
   const { ClubName } = req.query;
 
-  Club.find({ ClubName }, { SchoolNames: 1 })
+  getSchoolsByClub(ClubName)
     .then((SchoolNames) =>
       res.status(200).json({
         success: true,
@@ -130,7 +125,7 @@ function getSchoolsForClub(req, res) {
 
 async function getRoutesForClub(req, res) {
   const { clubName } = req.query;
-  Club.findOne({ ClubName: clubName })
+  getRoutesByClub(clubName)
     .then(({ Routes }) => {
       getRoutesByIds(Routes)
         .then((result) =>

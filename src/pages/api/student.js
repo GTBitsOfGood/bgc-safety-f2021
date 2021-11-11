@@ -1,15 +1,17 @@
 /* eslint-disable no-use-before-define */
-import mongoDB from "../../../server/mongodb/index";
-import Student from "../../../server/mongodb/models/Student";
 import {
   updateStudentRoute,
   getStudentsByRoute,
+  createNewStudent,
+  updateStudentData,
+  removeStudent,
+  findAllStudents,
+  findStudentsByName,
+  findStudentsOnBus,
 } from "../../../server/mongodb/actions/Student";
 import useCors from "./corsMiddleware";
 
 export default async (req, res) => {
-  await mongoDB();
-
   await useCors(req, res);
 
   const { method } = req;
@@ -35,29 +37,7 @@ export default async (req, res) => {
 };
 
 function createStudent(req, res) {
-  const {
-    FirstName,
-    LastName,
-    StudentID,
-    SchoolName,
-    RouteId,
-    Grade,
-    ClubName,
-  } = req.body;
-
-  console.log(req.body);
-
-  Student.create({
-    firstName: FirstName,
-    lastName: LastName,
-    studentID: StudentID,
-    schoolName: SchoolName,
-    route: RouteId,
-    grade: Grade,
-    clubName: ClubName,
-    checkIns: [],
-    picture: "",
-  })
+  createNewStudent(req.body)
     .then((student) =>
       res.status(201).send({
         success: true,
@@ -75,35 +55,7 @@ function createStudent(req, res) {
 function updateStudent(req, res) {
   const { id } = req.query;
 
-  const {
-    FirstName,
-    LastName,
-    StudentID,
-    SchoolName,
-    Grade,
-    ClubName,
-    Notes,
-    Picture,
-  } = req.body;
-
-  Student.findOneAndUpdate(
-    {
-      studentID: id,
-    },
-    {
-      firstName: FirstName,
-      lastName: LastName,
-      studentID: StudentID,
-      schoolName: SchoolName,
-      grade: Grade,
-      clubName: ClubName,
-      notes: Notes,
-      picture: Picture,
-    },
-    {
-      new: true,
-    }
-  )
+  updateStudentData({ id, ...req.body })
     .then((student) =>
       res.status(200).send({
         success: true,
@@ -120,7 +72,6 @@ function updateStudent(req, res) {
 
 function changeStudentRoute(req, res) {
   const { id, route } = req.query;
-  console.log("here");
   updateStudentRoute(id, route)
     .then((student) => {
       res.status(200).send({
@@ -139,9 +90,7 @@ function changeStudentRoute(req, res) {
 function deleteStudent(req, res) {
   const { id } = req.query;
 
-  Student.findOneAndDelete({
-    studentID: id,
-  })
+  removeStudent(id)
     .then((student) =>
       res.status(200).send({
         success: true,
@@ -157,7 +106,7 @@ function deleteStudent(req, res) {
 }
 
 function getAllStudents(req, res) {
-  Student.find()
+  findAllStudents()
     .then((students) => {
       res.status(200).send({
         success: true,
@@ -175,10 +124,7 @@ function getAllStudents(req, res) {
 function getStudentsByName(req, res) {
   const { first, last } = req.query;
 
-  Student.findOne({
-    firstName: first,
-    lastName: last,
-  })
+  findStudentsByName(first, last)
     .then((students) => {
       res.status(200).send({
         success: true,
@@ -196,10 +142,7 @@ function getStudentsByName(req, res) {
 function getStudentsOnBus(req, res) {
   const { school } = req.query;
 
-  Student.find({
-    schoolName: school,
-    onBus: true,
-  })
+  findStudentsOnBus(school)
     .then((students) => {
       res.status(200).send({
         success: true,
