@@ -95,15 +95,24 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-function getNumberCheckedIn(school) {
+const getNumberCheckedIn = (school, date) => {
   let count = 0;
   for (let i = 0; i < school.students.length; i += 1) {
-    count += school.students[i].checkedIn;
+    let currentStudent = school.students[i];
+    if (currentStudent.checkedIn) {
+      count++;
+    }
+
+    // when date property is added for students
+    // let currentStudent = school.students[i];
+    // if (currentStudent.checkedIn && currentStudent.checkInDate.equals(date)) {
+    //   count++;
+    // }
   }
   return ` ${count}/${school.students.length}`;
 }
 
-function Roster({ notFound, clubName, schools }) {
+const Roster = ({ notFound, clubName, schools }) => {
   const classes = useStyles();
   const [student, setStudent] = useState({});
   const [firstName, setFirstName] = useState("");
@@ -112,6 +121,7 @@ function Roster({ notFound, clubName, schools }) {
   const [session, loading] = useSession();
   const userAuthorized = useUserAuthorized(session, urls.pages.roster);
   const [date, setDate] = useState(null);
+  const [capacity, setCapacity] = useState(schools.map((school) => getNumberCheckedIn(school, new Date())));
 
   const handleSubmit = () => {
     setStudent({ firstName, lastName, studentSchool });
@@ -123,7 +133,11 @@ function Roster({ notFound, clubName, schools }) {
   }
 
   const handleUpdate = () => {
-    const selectedDate = formatDate(date);
+    if (date != null) {
+      const selectedDate = formatDate(date);
+      const newCapacity = schools.map((school) => getNumberCheckedIn(school, selectedDate));
+      setCapacity(newCapacity);
+    }
   }
 
   const formatDate = (dateObj) => {
@@ -170,13 +184,13 @@ function Roster({ notFound, clubName, schools }) {
       </div>
       <div className={styles.roster}>
         <div>
-          {schools.map((school) => (
+          {schools.map((school, index) => (
             <table className={styles.table}>
               <thead>
                 <tr className={styles.tr}>
                   <th className={styles.busth}>
                     Bus A Cap
-                    {getNumberCheckedIn(school)}
+                    {capacity[index]}
                   </th>
                 </tr>
                 <tr style={{ height: "10px" }} />
