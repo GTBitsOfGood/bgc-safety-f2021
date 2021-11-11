@@ -254,7 +254,7 @@ const Roster = () => {
           name="note"
           type="text"
           placeholder="Type your note here"
-          style={{ width: "600px", height: "100x" }}
+          style={{ width: "400px", height: "100x" }}
           value={submissionNote}
           onChange={(e) => {
             setSubmissionNote(e.target.value);
@@ -305,7 +305,7 @@ const Roster = () => {
           name="note"
           type="text"
           placeholder="Type your note here"
-          style={{ width: "450px", height: "150x" }}
+          style={{ width: "400px", height: "150x" }}
           value={studentNoteInput}
           onChange={(e) => {
             setStudentNoteInput(e.target.value);
