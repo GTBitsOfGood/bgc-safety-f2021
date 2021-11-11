@@ -26,7 +26,9 @@ const useStyles = makeStyles(() => ({
     outline: "none",
     border: "none",
     marginRight: "auto",
-    background: "white",
+    backgroundColor: "#C4C4C4",
+    borderRadius: "20px",
+    padding: "5px",
     "&:hover": {
       cursor: "pointer",
     },
@@ -34,8 +36,6 @@ const useStyles = makeStyles(() => ({
   header: {
     display: "grid",
     width: "100%",
-    gridTemplateColumns: "1fr repeat(3, auto) 1fr",
-    gridColumnGap: "5px",
     justifyItems: "center",
     alignItems: "center",
   },
@@ -43,6 +43,13 @@ const useStyles = makeStyles(() => ({
     borderRadius: "20px",
     margin: "5px",
     border: "none",
+  },
+  btnContainer: {
+    justifyContent: "left",
+    width: "100%",
+  },
+  btnText: {
+    fontSize: "medium",
   },
   text: {
     margin: "5px",
@@ -54,9 +61,9 @@ const useStyles = makeStyles(() => ({
     overflowX: "hidden",
   },
   th: {
-    width: "calc( 100% - 1em )",
+    width: "calc( 100% - 1em)",
     backgroundColor: "#828282",
-    padding: "10px",
+    padding: "5px",
   },
   td: {
     textAlign: "center",
@@ -91,15 +98,26 @@ const useStyles = makeStyles(() => ({
     alignItems: "center",
     backgroundColor: "#6FCF97",
   },
-  ModalButton: {
+  addBtn: {
     display: "flex",
     alignItems: "center",
     borderRadius: "40px",
     marginLeft: "auto",
     backgroundColor: "white",
-    opacity: "60%",
-    border: "none",
-    boxShadow: "none",
+    opacity: "90%",
+    borderStyle: "black",
+    "&:hover": {
+      cursor: "pointer",
+    },
+  },
+  editBtn: {
+    display: "flex",
+    alignItems: "center",
+    borderRadius: "40px",
+    marginLeft: "auto",
+    backgroundColor: "white",
+    opacity: "65%",
+    borderStyle: "white",
     "&:hover": {
       cursor: "pointer",
     },
@@ -110,11 +128,11 @@ const useStyles = makeStyles(() => ({
   },
   ModalContent: {
     position: "absolute",
-    width: "500px",
-    height: " 300px",
+    width: "450px",
+    height: " 350px",
     backgroundColor: "white",
     left: "50%",
-    marginLeft: "-250px",
+    marginLeft: "-225px",
     top: "50%",
     marginTop: "-150px",
     display: "flex",
@@ -238,9 +256,9 @@ const Roster = () => {
           setSubmissionModalOpen(false);
         }}
         style={{
-          width: "750px",
+          width: "450px",
           height: "350px",
-          marginLeft: "-375px",
+          marginLeft: "-225px",
           marginTop: "-175px",
         }}
       >
@@ -254,7 +272,7 @@ const Roster = () => {
           name="note"
           type="text"
           placeholder="Type your note here"
-          style={{ width: "600px", height: "100x" }}
+          style={{ width: "400px", height: "100x" }}
           value={submissionNote}
           onChange={(e) => {
             setSubmissionNote(e.target.value);
@@ -305,7 +323,7 @@ const Roster = () => {
           name="note"
           type="text"
           placeholder="Type your note here"
-          style={{ width: "450px", height: "150x" }}
+          style={{ width: "400px", height: "150x" }}
           value={studentNoteInput}
           onChange={(e) => {
             setStudentNoteInput(e.target.value);
@@ -445,9 +463,11 @@ const Roster = () => {
         <Link href={urls.pages.route_selection}>
           <button className={classes.backbtn}>
             <ArrowBackIosIcon />
-            <h1 className={classes.text}>Back </h1>
+            <h1 className={classes.btnText}>Back </h1>
           </button>
         </Link>
+      </div>
+      <div className={classes.header}>
         <h1>{route}</h1>
       </div>
       <table
