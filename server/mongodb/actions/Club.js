@@ -60,3 +60,14 @@ export async function getSchoolsByClub(ClubName) {
       return Promise.reject(new Error("Error finding schools by club: " + err));
     });
 }
+
+export async function getRoutesByClub(ClubName) {
+  await mongoDB();
+  return Club.findOne({ ClubName: ClubName })
+    .then(({ Routes }) => {
+      return Promise.resolve(Routes);
+    })
+    .catch((err) => {
+      return Promise.reject(new Error("Error finding routes by club: " + err));
+    });
+}
