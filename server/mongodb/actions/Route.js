@@ -5,7 +5,6 @@ export async function getAllRoutes() {
   await mongoDB();
 
   return Route.find({}, { _id: 0 })
-    .lean()
     .then((routes) => {
       return Promise.resolve(routes);
     })
