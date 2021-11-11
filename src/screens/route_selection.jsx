@@ -86,7 +86,7 @@ const RouteSelection = ({ routes }) => {
 export async function getServerSideProps() {
   const routes = await getAllRoutes();
 
-  return { props: { routes } };
+  return { props: { routes: JSON.parse(JSON.stringify(routes)) } };
 }
 
 export default RouteSelection;
