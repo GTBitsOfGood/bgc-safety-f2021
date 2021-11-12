@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useMemo, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Link from "next/link";
-const fetch = require("node-fetch");
 import urls from "../../utils/urls";
+import { getCurrentDate } from "../pages/bus_checkin_roster/[route]";
 import { useSession } from "next-auth/client";
 import { useUserAuthorized } from "../../utils/userType";
+import { getAllRoutes } from "../../server/mongodb/actions/Route";
 
 const ClubName = "Harland"; // TODO: Allow user to select a club
 
@@ -33,20 +34,24 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const RouteSelection = ({ schools }) => {
+const RouteSelection = ({ routes }) => {
   const [selectedSchool, setselectedSchool] = useState("");
   const classes = useStyles();
   const [session, loading] = useSession();
   const userAuthorized = useUserAuthorized(session, urls.pages.route_selection);
 
-  useEffect(() => {
-    // render/link to bus checkin page passing in selected school as props
-  }, [selectedSchool]);
-
-  const handleClick = (e) => {
-    console.log(e.target.innerHTML);
-    setselectedSchool(e.target.innerHTML);
-  };
+  // marks routes as complete or incomplete based on checkIn time
+  const markedRoutes = useMemo(() => {
+    const curDate = getCurrentDate();
+    return routes.map(({ _id, name, checkIns }) => {
+      const checkedIn = checkIns.some((checkIn) => checkIn.date === curDate);
+      return {
+        id: _id,
+        name,
+        checkInComplete: checkedIn,
+      };
+    });
+  }, [routes]);
 
   if (!session || !userAuthorized) {
     return <div />;
@@ -56,19 +61,19 @@ const RouteSelection = ({ schools }) => {
     <div className={classes.container}>
       <h1 className={classes.text}>Select a Bus Route:</h1>
       <div className={classes.btnContainer}>
-        {schools.map((school) => {
+        {markedRoutes.map(({ name, checkInComplete }) => {
           return (
             <Link
-              href="/bus_checkin_roster/[route]"
-              as={`bus_checkin_roster/${school.name}`}
+              href={`${urls.pages.bus_checkin_roster}/[route]`}
+              as={`bus_checkin_roster/${encodeURIComponent(name)}`}
             >
               <a
                 className={classes.btn}
                 style={{
-                  backgroundColor: school.complete ? "#6FCF97" : "#C4C4C4",
+                  backgroundColor: checkInComplete ? "#6FCF97" : "#C4C4C4",
                 }}
               >
-                {school.name} -{school.complete ? " Complete" : " Incomplete"}
+                {name} -{checkInComplete ? " Complete" : " Incomplete"}
               </a>
             </Link>
           );
@@ -78,24 +83,10 @@ const RouteSelection = ({ schools }) => {
   );
 };
 
-RouteSelection.getInitialProps = async () => {
-  const res = await fetch(`/api/club?ClubName=${ClubName}`);
-  const schools_data = await res.json();
-  let schools_list = [];
-  if (schools_data.success && schools_data.payload.length > 0) {
-    schools_list = schools_data.payload[0].SchoolNames;
-  }
+export async function getServerSideProps() {
+  const routes = await getAllRoutes();
 
-  let data = [];
-
-  for (let s of schools_list) {
-    data.push({
-      name: s,
-      complete: false,
-    });
-  }
-
-  return { schools: data };
-};
+  return { props: { routes: JSON.parse(JSON.stringify(routes)) } };
+}
 
 export default RouteSelection;

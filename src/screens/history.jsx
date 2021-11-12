@@ -13,11 +13,14 @@ import Calendar from "../components/calendar";
 import ModalComponent from "../components/modal";
 import styles from "./history.module.css";
 import urls from "../../utils/urls";
-import Router from "next/router";
+import ModalButton from "../components/ModalButton";
 import { useSession } from "next-auth/client";
 import { useUserAuthorized } from "../../utils/userType";
-
-const fetch = require("node-fetch");
+import { getSchoolsByClub } from "../../server/mongodb/actions/Club";
+import {
+  findStudentInfoBySchool,
+  getStudentAttendanceByTimeRange,
+} from "../../server/mongodb/actions/Student";
 
 const lowAttendance = "#FFCF50";
 const highAttendance = "#40B24B";
@@ -174,29 +177,26 @@ async function updateStudents(date, students) {
   daysInMonth = day_list.length;
 
   for (const student of students) {
-    const res1 = await fetch(
-      `/api/attendance?studentID=${student.studentID}&startDate=${
-        day_list[0]
-      }&endDate=${day_list[day_list.length - 1]}`
+    const d = await getStudentAttendanceByTimeRange(
+      student.studentID,
+      day_list[0],
+      day_list[day_list.length - 1]
     );
-    const d = await res1.json();
 
-    if (d.success) {
-      let count = 0;
-      for (const day of day_list) {
-        count += 1 ? d.payload.includes(day) : 0;
-      }
-
-      data.push({
-        firstName: student.firstName,
-        lastName: student.lastName,
-        schoolName: student.schoolName,
-        grade: student.grade,
-        attendance: count / day_list.length,
-        datesAttended: d.payload.map((d) => new Date(d)),
-        studentID: student.studentID,
-      });
+    let count = 0;
+    for (const day of day_list) {
+      count += 1 ? d.includes(day) : 0;
     }
+
+    data.push({
+      firstName: student.firstName,
+      lastName: student.lastName,
+      schoolName: student.schoolName,
+      grade: student.grade,
+      attendance: count / day_list.length,
+      datesAttended: d.map((d) => new Date(d)),
+      studentID: student.studentID,
+    });
   }
 
   return data;
@@ -234,6 +234,8 @@ function History({ students }) {
   const filterLabels = ["schoolName", "grade", "attendance"];
   const [filteredStudents, setFilteredStudents] = useState([]);
   const sortingLabels = ["Alphabetical", "Grade", "Low Attendance"];
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
   const [sort, setSort] = useState("");
   const [date, setDate] = useState(new Date(startDate));
   const [session, loading] = useSession();
@@ -407,6 +409,30 @@ function History({ students }) {
 
       <DateSelect date={date} setDate={setDate} />
 
+      {selectedStudent ? (
+        <ModalComponent open={modalOpen} setOpen={setModalOpen}>
+          <div className={classes.ModalComponent}>
+            <div className={classes.content}>
+              <div className={classes.info}>
+                <h1>{`${selectedStudent.firstName} ${selectedStudent.lastName}`}</h1>
+                <p>{`School: ${selectedStudent.schoolName}`}</p>
+                <p>{`Grade: ${selectedStudent.grade}`}</p>
+                <p>{`Status: ${selectedStudent.status}`}</p>
+                <p>{`Contact: ${selectedStudent.contact}`}</p>
+                <p>{`Emergency: ${selectedStudent.emergency}`}</p>
+              </div>
+              <div className={classes.calendar}>
+                <Calendar
+                  defaultMonth={date.getMonth()}
+                  defaultYear={date.getFullYear()}
+                  getDatesAttended={() => selectedStudent.datesAttended}
+                />
+              </div>
+            </div>
+          </div>
+        </ModalComponent>
+      ) : null}
+
       <table className={classes.table}>
         <thead
           style={{
@@ -436,30 +462,15 @@ function History({ students }) {
                   width: "25%",
                 }}
               >
-                <ModalComponent
-                  button={<>{`${student.lastName}, ${student.firstName}`}</>}
+                <ModalButton
                   buttonStyle={classes.ModalComponentButton}
+                  setOpen={() => {
+                    setSelectedStudent(student);
+                    setModalOpen(true);
+                  }}
                 >
-                  <div className={classes.ModalComponent}>
-                    <div className={classes.content}>
-                      <div className={classes.info}>
-                        <h1>{`${student.firstName} ${student.lastName}`}</h1>
-                        <p>{`School: ${student.schoolName}`}</p>
-                        <p>{`Grade: ${student.grade}`}</p>
-                        <p>{`Status: ${student.status}`}</p>
-                        <p>{`Contact: ${student.contact}`}</p>
-                        <p>{`Emergency: ${student.emergency}`}</p>
-                      </div>
-                      <div className={classes.calendar}>
-                        <Calendar
-                          defaultMonth={date.getMonth()}
-                          defaultYear={date.getFullYear()}
-                          getDatesAttended={() => student.datesAttended}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </ModalComponent>
+                  <>{`${student.lastName}, ${student.firstName}`}</>
+                </ModalButton>
               </td>
               <td className={classes.td}>
                 <div style={{ display: "flex", flexDirection: "row" }}>
@@ -512,29 +523,25 @@ History.defaultProps = {
   students: null,
 };
 
-History.getInitialProps = async () => {
-  const res = await fetch(`/api/club?ClubName=${ClubName}`);
-  const schools_data = await res.json();
-  console.log(schools_data);
-
-  let schools = [];
-  if (schools_data.success && schools_data.payload.length > 0) {
-    schools = schools_data.payload[0].SchoolNames;
-  }
-
+export async function getServerSideProps() {
   let students = [];
 
-  let school;
-  for (school of schools) {
-    console.log(school);
-    const res2 = await fetch(`/api/school?schoolName=${school}`);
-    const students_data = await res2.json();
-    if (students_data.success) {
-      students = students.concat(students_data.payload);
-    }
+  const res = await getSchoolsByClub(ClubName);
+  const schools = res[0].SchoolNames;
+
+  for (const school of schools) {
+    const schoolStudents = await findStudentInfoBySchool(school);
+    students = students.concat(schoolStudents);
   }
 
-  return { students: await updateStudents(new Date(startDate), students) };
-};
+  const updatedStudents = await updateStudents(new Date(startDate), students);
 
+  return {
+    props: {
+      students: updatedStudents,
+    },
+  };
+}
+
+export { updateStudents };
 export default History;

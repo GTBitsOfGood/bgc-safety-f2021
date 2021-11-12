@@ -2,20 +2,25 @@ import {
   getAllRoutes,
   addRoute,
   editRouteName,
+  enterRouteSubmission,
+  getRouteByName,
 } from "../../../server/mongodb/actions/Route";
-import mongoDB from "../../../server/mongodb";
 import useCors from "./corsMiddleware";
 
 export default async (req, res) => {
-  await mongoDB();
-
   await useCors(req, res);
 
   const { method } = req;
-  if (method == "GET") {
-    getRoutes(req, res);
-  } else if (method === "POST") {
+  if (method === "GET") {
+    if (req.query.name) {
+      findRouteByName(req, res);
+    } else {
+      getRoutes(req, res);
+    }
+  } else if (method === "POST" && req.body.name) {
     addNewRoute(req, res);
+  } else if (method === "POST" && req.query.id) {
+    submitRoute(req, res);
   } else if (method === "PUT") {
     changeRouteName(req, res);
   } else {
@@ -26,6 +31,22 @@ export default async (req, res) => {
 
 async function getRoutes(req, res) {
   getAllRoutes()
+    .then((result) => {
+      res.status(200).send({
+        success: true,
+        payload: result,
+      });
+    })
+    .catch((error) => {
+      res.status(400).send({
+        success: false,
+        payload: error.message,
+      });
+    });
+}
+
+async function findRouteByName(req, res) {
+  getRouteByName(req.query.name)
     .then((result) => {
       res.status(200).send({
         success: true,
@@ -60,6 +81,24 @@ async function changeRouteName(req, res) {
   const { id, name } = req.body;
 
   editRouteName(id, name)
+    .then((result) => {
+      res.status(200).send({
+        success: true,
+        payload: result,
+      });
+    })
+    .catch((error) => {
+      res.status(400).send({
+        success: false,
+        payload: error.message,
+      });
+    });
+}
+
+async function submitRoute(req, res) {
+  const { id } = req.query;
+  const { submissionDetails } = req.body;
+  enterRouteSubmission(id, submissionDetails)
     .then((result) => {
       res.status(200).send({
         success: true,

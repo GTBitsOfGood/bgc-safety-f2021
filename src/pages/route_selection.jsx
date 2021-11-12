@@ -1,3 +1,4 @@
-import RouteSelection from "../screens/route_selection";
+import RouteSelection, { getServerSideProps } from "../screens/route_selection";
 
+export { getServerSideProps };
 export default RouteSelection;
