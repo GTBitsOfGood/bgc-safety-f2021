@@ -61,24 +61,20 @@ const Login = () => {
   // console.log(process.env.NEXTAUTH_URL);
   const classes = useStyles();
 
-  const gotoLanding = async () => {
-    /*
-    Default landing page:
-      - Bus Driver: route_selection
-      - Attendance Clerk/Club Director: roster
-      - Admin: roster (ideally "Overview of Clubs" - Figma)
-    */
-    if (userType === userTypes.busDriver) {
-      Router.replace(urls.pages.route_selection);
-    } else if (
-      userType === userTypes.clubDirector ||
-      userType === userTypes.attendanceClerk
-    ) {
-      Router.replace(urls.pages.roster);
-    } else if (userType === userTypes.admin) {
-      Router.replace(urls.pages.roster);
+  useEffect(() => {
+    if (session) {
+      if (userType === userTypes.busDriver) {
+        Router.replace(urls.pages.route_selection);
+      } else if (
+        userType === userTypes.clubDirector ||
+        userType === userTypes.attendanceClerk
+      ) {
+        Router.replace(urls.pages.roster);
+      } else if (userType === userTypes.admin) {
+        Router.replace(urls.pages.roster);
+      }
     }
-  };
+  }, [session, userType]);
 
   // async function handleSubmit(event) {
   //   event.preventDefault();
@@ -132,25 +128,6 @@ const Login = () => {
             variant="contained"
           >
             Click to Sign In
-          </Button>
-        </>
-      )}
-      {session && (
-        <>
-          Signed in as {session.user.email} <br />
-          <Button
-            onClick={signOut}
-            className={classes.button}
-            variant="contained"
-          >
-            Click to Sign Out
-          </Button>
-          <Button
-            onClick={gotoLanding}
-            className={classes.button}
-            variant="contained"
-          >
-            Go to Landing page (to happen automatically)
           </Button>
         </>
       )}
