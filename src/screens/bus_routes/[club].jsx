@@ -329,15 +329,16 @@ const BusRoutes = ({ clubName, savedRoutes }) => {
   return (
     <div>
       <div className={classes.container}>
+        <div>
+          <Link href={urls.pages.bus_routes}>
+            <button className={classes.backbtn}>
+              <ArrowBackIosIcon />
+              <h1 className={classes.text}>Back </h1>
+            </button>
+          </Link>
+        </div>
         <div className={classes.pagehead}>
-          <div>
-            <Link href={urls.pages.bus_routes}>
-              <button className={classes.backbtn}>
-                <ArrowBackIosIcon />
-                <h1 className={classes.text}>Back </h1>
-              </button>
-            </Link>
-          </div>
+          
           <div className={classes.routeNameContainer}>
             <div>
               <TextField
