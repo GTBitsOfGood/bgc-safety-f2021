@@ -33,9 +33,6 @@ const StudentSchema = new Schema({
     type: String,
     required: true,
   },
-  notes: {
-    type: String,
-  },
   picture: {
     type: String,
   },
@@ -43,15 +40,19 @@ const StudentSchema = new Schema({
     type: Boolean,
     default: true,
   },
-  checkInTimes: {
+  checkIns: {
     type: [
       {
-        type: String, // TODO: Change type to a Standardized Date Format
-        required: true,
+        date: {
+          type: String,
+        },
+        note: {
+          type: String,
+        },
       },
     ],
   },
 });
 
-export default mongoose.models.Student ||
+export default (mongoose.models && mongoose.models.Student) ||
   mongoose.model("Student", StudentSchema);

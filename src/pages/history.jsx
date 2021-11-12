@@ -1,3 +1,4 @@
-import History from "../screens/history";
+import History, { getServerSideProps } from "../screens/history";
 
+export { getServerSideProps };
 export default History;
