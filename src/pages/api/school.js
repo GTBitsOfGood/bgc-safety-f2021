@@ -1,12 +1,12 @@
 /* eslint-disable no-use-before-define */
-import mongoDB from "../../../server/mongodb/index";
-import Student from "../../../server/mongodb/models/Student";
-import Club from "../../../server/mongodb/models/Club";
 import useCors from "./corsMiddleware";
+import {
+  findAllSchools,
+  findSchoolInfo,
+  findStudentInfoBySchool,
+} from "../../../server/mongodb/actions/Student";
 
 export default async (req, res) => {
-  await mongoDB();
-
   await useCors(req, res);
 
   const { method } = req;
@@ -26,14 +26,7 @@ export default async (req, res) => {
 function getSchoolInfo(req, res) {
   const { ids } = req.query;
 
-  Student.find(
-    {
-      studentID: { $in: ids },
-    },
-    {
-      schoolName: 1,
-    }
-  )
+  findSchoolInfo(ids)
     .then((schoolList) => {
       res.status(200).send({
         success: true,
@@ -51,9 +44,7 @@ function getSchoolInfo(req, res) {
 function getStudentInfo(req, res) {
   const { schoolName } = req.query;
 
-  Student.find({
-    schoolName,
-  })
+  findStudentInfoBySchool(schoolName)
     .then((students) => {
       res.status(200).send({
         success: true,
@@ -69,11 +60,11 @@ function getStudentInfo(req, res) {
 }
 
 function getAllSchools(req, res) {
-  Club.find()
-    .then((clubs) => {
+  findAllSchools()
+    .then((schools) => {
       res.status(200).send({
         success: true,
-        payload: clubs.reduce((acc, club) => acc.concat(club.SchoolNames), []),
+        payload: schools,
       });
     })
     .catch((err) => {

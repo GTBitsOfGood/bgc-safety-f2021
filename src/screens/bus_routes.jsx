@@ -15,11 +15,8 @@ import AddIcon from "@material-ui/icons/Add";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import urls from "../../utils/urls";
 import { useSession } from "next-auth/client";
-import Router from "next/router";
 import { useUserAuthorized } from "../../utils/userType";
-// import {getStudentsByName, changeStudentRoute} from "../pages/api/student";
-
-const fetch = require("node-fetch");
+import { getAllRoutes } from "../../server/mongodb/actions/Route";
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -601,19 +598,8 @@ const BusRoutes = ({ savedRoutes }) => {
   );
 };
 
-BusRoutes.getInitialProps = async () => {
-  const res = await fetch(`/api/routes`);
-  console.log(res);
-  let routes_data = {};
-  if (res) {
-    let routes_data = res;
-  }
-
-  if (routes_data.success) {
-    return { savedRoutes: routes_data.payload };
-  } else {
-    return { savedRoutes: [] };
-  }
-};
+export async function getServerSideProps() {
+  return { props: { savedRoutes: await getAllRoutes() } };
+}
 
 export default BusRoutes;

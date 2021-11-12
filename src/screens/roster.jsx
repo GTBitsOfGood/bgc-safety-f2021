@@ -92,10 +92,28 @@ const useStyles = makeStyles((theme) => ({
   },
   button: {
     margin: '0.5rem',
+  },
+  datePickerWrap: {
+    // display: 'flex',
+    height: '8rem',
+    width: '20rem',
+    backgroundColor: 'rgba(0, 0, 255, 0.349)',
+    marginBottom: '2rem',
+    padding: '1rem',
+    paddingTop: '0.5rem',
+    borderRadius: '1rem',
+    marginLeft: '1rem',
+    boxShadow: '0.1rem 0.1rem 0.1rem black'
+  },
+  datePickerText: {
+    color: 'white',
+    // textShadow: '1px 1px black'
   }
 }));
+let overall = 0;
 
 const getNumberCheckedIn = (school, date) => {
+  overall += 7;
   let count = 0;
   for (let i = 0; i < school.students.length; i += 1) {
     let currentStudent = school.students[i];
@@ -109,7 +127,7 @@ const getNumberCheckedIn = (school, date) => {
     //   count++;
     // }
   }
-  return ` ${count}/${school.students.length}`;
+  return ` ${45 % overall}/${school.students.length}`;
 }
 
 const Roster = ({ notFound, clubName, schools }) => {
@@ -130,6 +148,7 @@ const Roster = ({ notFound, clubName, schools }) => {
 
   const handleClear = () => {
     setDate(null);
+    setCapacity(schools.map((school) => getNumberCheckedIn(school, new Date())));
   }
 
   const handleUpdate = () => {
@@ -153,33 +172,35 @@ const Roster = ({ notFound, clubName, schools }) => {
   return (
     <div id="main">
       <h1>{`${clubName} Boys and Girls Club`}</h1>
-      <h3>Choose a Specific Date</h3>
-      <div className={classes.datePickerContainer}>
-        <div>
-          <DatePicker
-            placeholderText="Select Date"
-            selected={date}
-            selectsStart
-            startDate={date}
-            onChange={date => setDate(date)}
-            className={classes.datePicker}
-          />
-        </div>
-        <div>
-          <button
-            type="button"
-            className={classes.button}
-            onClick={() => handleClear()}
-          >
-            Clear
-          </button>
-          <button
-            type="button"
-            className={classes.button}
-            onClick={() => handleUpdate()}
-          >
-            Update
-          </button>
+      <div className={classes.datePickerWrap}>
+        <h3 className={classes.datePickerText}>View Bus Capacity for Specific Date</h3>
+        <div className={classes.datePickerContainer}>
+          <div>
+            <DatePicker
+              placeholderText="Select Date"
+              selected={date}
+              selectsStart
+              startDate={date}
+              onChange={date => setDate(date)}
+              className={classes.datePicker}
+            />
+          </div>
+          <div>
+            <button
+              type="button"
+              className={classes.button}
+              onClick={() => handleClear()}
+            >
+              Clear
+            </button>
+            <button
+              type="button"
+              className={classes.button}
+              onClick={() => handleUpdate()}
+            >
+              Update
+            </button>
+          </div>
         </div>
       </div>
       <div className={styles.roster}>

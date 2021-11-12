@@ -22,7 +22,7 @@ export default {
   api: {
     example: "/api/example",
     student: "/api/student",
-    notes: "/api/student/notes",
+    notes: "/api/notes",
     club: "/api/club",
     school: "/api/school",
     attendance: "api/attendance",
@@ -30,5 +30,6 @@ export default {
     uploadCsv: "/api/upload_csv",
     user: "/api/user",
     login: "/api/login",
+    routes: "/api/routes",
   },
 };

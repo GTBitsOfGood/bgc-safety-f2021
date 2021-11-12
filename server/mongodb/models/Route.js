@@ -8,6 +8,19 @@ const RouteSchema = new Schema({
     required: true,
     unique: true,
   },
+  checkIns: {
+    type: [
+      {
+        date: {
+          type: String,
+        },
+        notes: {
+          type: String,
+        },
+      },
+    ],
+  },
 });
 
-export default mongoose.models.Route || mongoose.model("Route", RouteSchema);
+export default (mongoose.models && mongoose.models.Route) ||
+  mongoose.model("Route", RouteSchema);

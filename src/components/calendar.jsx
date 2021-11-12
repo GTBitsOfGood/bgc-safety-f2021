@@ -114,9 +114,6 @@ const Calendar = (props) => {
   };
 
   const getAttended = (date) => {
-    console.log(datesAttended);
-    console.log(date);
-    console.log(datesAttended.includes(date));
     return datesAttended.includes(date);
   };
 
