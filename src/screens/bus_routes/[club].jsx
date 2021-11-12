@@ -34,6 +34,9 @@ const useStyles = makeStyles(() => ({
     justifyContent: "center",
     alignItems: "center",
   },
+  backbtncontainer: {
+    justifyContent: "space-between"
+  },
   backbtn: {
     display: "flex",
     alignItems: "center",
@@ -329,7 +332,7 @@ const BusRoutes = ({ clubName, savedRoutes }) => {
   return (
     <div>
       <div className={classes.container}>
-        <div>
+        <div className={classes.backbtncontainer}>
           <Link href={urls.pages.bus_routes}>
             <button className={classes.backbtn}>
               <ArrowBackIosIcon />
