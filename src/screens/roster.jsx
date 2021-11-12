@@ -110,7 +110,7 @@ const getNumberCheckedIn = (school, selectedDate) => {
   let count = 0;
   for (let i = 0; i < school.students.length; i += 1) {
     let currentStudent = school.students[i];
-    if (currentStudent.checkedInDates.some((checkIn) => checkIn === selectedDate)) {
+    if (currentStudent.checkIn && currentStudent.checkedInDates.some((checkIn) => checkIn === selectedDate)) {
       count++;
     }
   }
@@ -304,7 +304,7 @@ Roster.defaultProps = {
 };
 
 export async function getServerSideProps(context) {
-  let clubName = context.query.clubName;
+  let clubName = context.query.ClubName;
   if (clubName === undefined) {
     clubName = "Harland";
   }
@@ -328,10 +328,8 @@ export async function getServerSideProps(context) {
     return findBusAttendanceInfo(school).then((d) => {
       const schoolStudents = d.map((student) => ({
         name: `${student.firstName} ${student.lastName}`,
-        checkedIn: true,
-        checkedInDates: ["11/10/2021"]
-        // checkedIn: student.checkIns.some((checkIn) => checkIn.date === today),
-        // checkedInDates: student.checkIns
+        checkedIn: student.checkIns.some((checkIn) => checkIn.date === today),
+        checkedInDates: student.checkIns
       }));
       return {
         name: school,
