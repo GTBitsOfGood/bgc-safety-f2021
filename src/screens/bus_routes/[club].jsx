@@ -35,7 +35,11 @@ const useStyles = makeStyles(() => ({
     alignItems: "center",
   },
   backbtncontainer: {
-    justifyContent: "space-between"
+    width: "95%",
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   backbtn: {
     display: "flex",
@@ -333,12 +337,14 @@ const BusRoutes = ({ clubName, savedRoutes }) => {
     <div>
       <div className={classes.container}>
         <div className={classes.backbtncontainer}>
-          <Link href={urls.pages.bus_routes}>
-            <button className={classes.backbtn}>
-              <ArrowBackIosIcon />
-              <h1 className={classes.text}>Back </h1>
-            </button>
-          </Link>
+          <div>
+            <Link href={urls.pages.bus_routes}>
+              <button className={classes.backbtn}>
+                <ArrowBackIosIcon />
+                <h1 className={classes.text}>Back </h1>
+              </button>
+            </Link>
+          </div>
         </div>
         <div className={classes.pagehead}>
           
