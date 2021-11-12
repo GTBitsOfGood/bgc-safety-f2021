@@ -9,12 +9,13 @@ import styles from "./roster.module.css";
 import ModalComponent from "../components/modal";
 import urls from "../../utils/urls";
 import { useSession } from "next-auth/client";
+import ModalButton from "../components/ModalButton";
 import Router from "next/router";
 import { useUserAuthorized } from "../../utils/userType";
+import { getSchoolsByClub } from "../../server/mongodb/actions/Club";
+import { findBusAttendanceInfo } from "../../server/mongodb/actions/Student";
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-
-const fetch = require("node-fetch");
 
 const useStyles = makeStyles((theme) => ({
   ModalContent: {
@@ -86,52 +87,39 @@ const useStyles = makeStyles((theme) => ({
   datePicker: {
     width: "10rem",
     margin: "0.5rem",
-  },
-  datePickerContainer: {
-    paddingBottom: "1rem"
+    marginTop: "0rem"
   },
   button: {
     margin: '0.5rem',
   },
   datePickerWrap: {
-    // display: 'flex',
-    height: '8rem',
-    width: '20rem',
-    backgroundColor: 'rgba(0, 0, 255, 0.349)',
-    marginBottom: '2rem',
-    padding: '1rem',
-    paddingTop: '0.5rem',
-    borderRadius: '1rem',
-    marginLeft: '1rem',
-    boxShadow: '0.1rem 0.1rem 0.1rem black'
+    display: "flex",
+    flexDirection: "column",
+    height: "8rem",
+    width: "12rem",
+    backgroundColor: "rgba(128, 128, 128, 0.39)",
+    marginBottom: "2rem",
+    padding: "1rem",
+    paddingTop: "0.5rem",
+    marginLeft: "1rem",
+    boxShadow: "0.05rem 0.05rem 0.3rem black"
   },
-  datePickerText: {
-    color: 'white',
-    // textShadow: '1px 1px black'
-  }
 }));
-let overall = 0;
 
-const getNumberCheckedIn = (school, date) => {
-  overall += 7;
+const getNumberCheckedIn = (school, selectedDate) => {
   let count = 0;
   for (let i = 0; i < school.students.length; i += 1) {
     let currentStudent = school.students[i];
-    if (currentStudent.checkedIn) {
+    if (currentStudent.checkedInDates.some((checkIn) => checkIn === selectedDate)) {
       count++;
     }
-
-    // when date property is added for students
-    // let currentStudent = school.students[i];
-    // if (currentStudent.checkedIn && currentStudent.checkInDate.equals(date)) {
-    //   count++;
-    // }
   }
-  return ` ${45 % overall}/${school.students.length}`;
+  return ` ${count}/${school.students.length}`;
 }
 
 const Roster = ({ notFound, clubName, schools }) => {
   const classes = useStyles();
+  const [modalOpen, setModalOpen] = useState(false);
   const [student, setStudent] = useState({});
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -143,6 +131,7 @@ const Roster = ({ notFound, clubName, schools }) => {
 
   const handleSubmit = () => {
     setStudent({ firstName, lastName, studentSchool });
+    setModalOpen(false);
     // add to database
   };
 
@@ -173,7 +162,7 @@ const Roster = ({ notFound, clubName, schools }) => {
     <div id="main">
       <h1>{`${clubName} Boys and Girls Club`}</h1>
       <div className={classes.datePickerWrap}>
-        <h3 className={classes.datePickerText}>View Bus Capacity for Specific Date</h3>
+        <h3 className={classes.datePickerText}>View Bus Capacity</h3>
         <div className={classes.datePickerContainer}>
           <div>
             <DatePicker
@@ -242,16 +231,16 @@ const Roster = ({ notFound, clubName, schools }) => {
                   </tr>
                 ))}
                 <tr>
-                  <ModalComponent
-                    setStudent={setStudent}
-                    button={
-                      <>
-                        Manually Add Entry
-                        <AddCircleIcon className={classes.icon} />
-                      </>
-                    }
+                  <ModalButton
+                    setOpen={() => setModalOpen(true)}
                     buttonStyle={classes.button}
                   >
+                    <>
+                      Manually Add Entry
+                      <AddCircleIcon className={classes.icon} />
+                    </>
+                  </ModalButton>
+                  <ModalComponent open={modalOpen} setStudent={setStudent}>
                     <form className={classes.form} onSubmit={handleSubmit}>
                       <h1 className={classes.formHeading}>
                         Manually Add Entry
@@ -314,48 +303,44 @@ Roster.defaultProps = {
   schools: null,
 };
 
-Roster.getInitialProps = async (ctx) => {
-  let clubName = ctx.query.ClubName;
-
+export async function getServerSideProps(context) {
+  let clubName = context.query.clubName;
   if (clubName === undefined) {
     clubName = "Harland";
   }
 
-  const res = await fetch(`/api/club?ClubName=${clubName}`);
-  const schools_data = await res.json();
-  let schools_list = [];
-  if (schools_data.success && schools_data.payload.length > 0) {
-    schools_list = schools_data.payload[0].SchoolNames;
+  const schoolData = await getSchoolsByClub(clubName);
+
+  let schoolList = [];
+  if (schoolData.length > 0) {
+    schoolList = schoolData[0].SchoolNames;
+  } else {
+    return {
+      notFound: true,
+    }
   }
 
   const dateObj = new Date();
   const day = String(dateObj.getDate()).padStart(2, "0");
   const today = `${dateObj.getMonth() + 1}/${day}/${dateObj.getFullYear()}`;
 
-  const data = [];
+  const data = schoolList.map((school) => {
+    return findBusAttendanceInfo(school).then((d) => {
+      const schoolStudents = d.map((student) => ({
+        name: `${student.firstName} ${student.lastName}`,
+        checkedIn: true,
+        checkedInDates: ["11/10/2021"]
+        // checkedIn: student.checkIns.some((checkIn) => checkIn.date === today),
+        // checkedInDates: student.checkIns
+      }));
+      return {
+        name: school,
+        students: schoolStudents,
+      };
+    });
+  });
 
-  for (const s of schools_list) {
-    const res1 = await fetch(`/api/attendance?schoolName=${s}`);
-    const d = await res1.json();
-
-    if (d.success) {
-      const students = [];
-
-      for (const student of d.payload) {
-        students.push({
-          name: `${student.firstName} ${student.lastName}`,
-          checkedIn: student.checkInTimes.includes(today),
-        });
-      }
-
-      data.push({
-        name: s,
-        students,
-      });
-    }
-  }
-
-  return { clubName, schools: data };
-};
+  return { props: { clubName: clubName, schools: await Promise.all(data) } };
+}
 
 export default Roster;
