@@ -38,8 +38,10 @@ const useStyles = makeStyles(() => ({
     width: "95%",
     display: "flex",
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
+  },
+  titlecontainer: {
+    paddingLeft: 20
   },
   backbtn: {
     display: "flex",
@@ -341,9 +343,14 @@ const BusRoutes = ({ clubName, savedRoutes }) => {
             <Link href={urls.pages.bus_routes}>
               <button className={classes.backbtn}>
                 <ArrowBackIosIcon />
-                <h1 className={classes.text}>Back </h1>
+                <h2 className={classes.text}>Back </h2>
               </button>
             </Link>
+          </div>
+          <div className={classes.titlecontainer}>
+            <div>
+              <h1>{clubName} Boys and Girls Club Bus Routes</h1>
+            </div>
           </div>
         </div>
         <div className={classes.pagehead}>
