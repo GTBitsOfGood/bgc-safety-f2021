@@ -41,7 +41,7 @@ const useStyles = makeStyles(() => ({
     alignItems: "center",
   },
   titlecontainer: {
-    paddingLeft: 20
+    paddingLeft: 20,
   },
   backbtn: {
     display: "flex",
@@ -194,7 +194,7 @@ const BusRoutes = ({ clubName, savedRoutes }) => {
       const data = new FormData();
       data.append("file", selectedFile);
 
-      const routesRes = await fetch(`${urls.baseUrl}/api/routes`, {
+      const routesRes = await fetch(urls.api.routes, {
         method: "post",
         body: JSON.stringify({
           name,
@@ -213,7 +213,7 @@ const BusRoutes = ({ clubName, savedRoutes }) => {
       }
 
       const studentsRes = await fetch(
-        `${urls.baseUrl}/api/upload_csv?clubName=${clubName}&routeId=${routes_data.payload._id}`,
+        `${urls.api.uploadCsv}?clubName=${clubName}&routeId=${routes_data.payload._id}`,
         {
           method: "POST",
           body: data,
@@ -242,7 +242,7 @@ const BusRoutes = ({ clubName, savedRoutes }) => {
     }
     setRouteNameError(false);
 
-    const addStudentRes = await fetch(`${urls.baseUrl}${urls.api.student}`, {
+    const addStudentRes = await fetch(urls.api.student, {
       method: "POST",
       body: JSON.stringify({
         FirstName: studentFirstName,
@@ -307,7 +307,7 @@ const BusRoutes = ({ clubName, savedRoutes }) => {
       name,
     };
 
-    const res = await fetch(`${urls.baseUrl}/api/routes`, {
+    const res = await fetch(urls.api.routes, {
       method: "put",
       body: JSON.stringify(body),
       headers: { "Content-Type": "application/json" },
@@ -354,7 +354,6 @@ const BusRoutes = ({ clubName, savedRoutes }) => {
           </div>
         </div>
         <div className={classes.pagehead}>
-          
           <div className={classes.routeNameContainer}>
             <div>
               <TextField
