@@ -15,6 +15,7 @@ export default {
     bus_checkin_roster: "/bus_checkin_roster",
     login: "/login",
     bus_routes: "/bus_routes",
+    club_overview: "/club_overview",
     account_creation: "/account_creation",
     created_accounts: "/created_accounts",
     not_authorized: "/not_authorized",
