@@ -24,7 +24,6 @@ import {
 
 const lowAttendance = "#FFCF50";
 const highAttendance = "#40B24B";
-const ClubName = "Harland"; // TODO: Allow user to select a club
 const startDate = "1/01/2020";
 
 const getMonth = (date) => {
@@ -227,13 +226,15 @@ const DateSelect = (props) => {
   );
 };
 
-function History({ students }) {
+function History({ notFound, clubName, students }) {
   const classes = useStyles();
+
+  const filterLabels = ["schoolName", "grade", "attendance"];
+  const sortingLabels = ["Alphabetical", "Grade", "Low Attendance"];
+
   const [visibleStudents, setVisibleStudents] = useState([]);
   const [filters, setFilters] = useState(["", "", ""]);
-  const filterLabels = ["schoolName", "grade", "attendance"];
   const [filteredStudents, setFilteredStudents] = useState([]);
-  const sortingLabels = ["Alphabetical", "Grade", "Low Attendance"];
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [sort, setSort] = useState("");
@@ -393,7 +394,7 @@ function History({ students }) {
     </div>
   );
 
-  if (!session || !userAuthorized) {
+  if (notFound || !session || !userAuthorized) {
     return <div />;
   }
 
@@ -401,8 +402,8 @@ function History({ students }) {
     <div className={styles.container}>
       <p style={{ fontSize: "200", margin: "0" }}>Bus Attendance Matrix</p>
       <h2 style={{ marginTop: "5px", marginBottom: "20px" }}>
-        {`${ClubName} Boys and Girls Club `}
-        2019-2020 Afterschool Registration
+        {`${clubName} Boys and Girls Club `}
+        2020-2021 Afterschool Registration
       </h2>
       <Filters />
       <Sorting />
@@ -515,18 +516,22 @@ function History({ students }) {
 
 // Declaring type of schools prop
 History.propTypes = {
+  clubName: PropTypes.string.isRequired,
   students: PropTypes.arrayOf(PropTypes.object),
 };
 
 // Setting default value for schools prop
 History.defaultProps = {
   students: null,
+  clubName: "",
+  students: [],
 };
 
-export async function getServerSideProps() {
+export async function getServerSideProps(context) {
+  const clubName = context.query.ClubName || "Harland";
   let students = [];
 
-  const res = await getSchoolsByClub(ClubName);
+  const res = await getSchoolsByClub(clubName);
   const schools = res[0].SchoolNames;
 
   for (const school of schools) {
@@ -538,6 +543,7 @@ export async function getServerSideProps() {
 
   return {
     props: {
+      clubName,
       students: updatedStudents,
     },
   };
