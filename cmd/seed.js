@@ -40,6 +40,7 @@ const init = async () => {
     ClubName: "Harland",
     SchoolNames: schools,
     Routes: routes,
+    Region: "East",
   });
   await club.save();
 
