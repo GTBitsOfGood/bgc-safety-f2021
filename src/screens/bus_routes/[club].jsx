@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { makeStyles } from "@material-ui/core/styles";
+import ArrowBackIosIcon from "@material-ui/icons/ArrowBackIos";
 import {
   Button,
   ButtonGroup,
@@ -9,17 +11,21 @@ import {
   DialogContent,
   DialogActions,
   TextField,
+  IconButton,
 } from "@material-ui/core";
 import EditIcon from "@material-ui/icons/Edit";
 import AddIcon from "@material-ui/icons/Add";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
-import urls from "../../utils/urls";
+import urls from "../../../utils/urls";
 import { useSession } from "next-auth/client";
 import Router from "next/router";
-import { useUserAuthorized } from "../../utils/userType";
+import { useUserAuthorized } from "../../../utils/userType";
+import FileUploader from "../../components/file_uploader";
+import { If, Then, Else } from "react-if";
+import { RemoveCircleOutline, RemoveOutlined } from "@material-ui/icons";
+import { getRoutesByClub } from "../../../server/mongodb/actions/Club";
+import { getRoutesByIds } from "../../../server/mongodb/actions/Route";
 // import {getStudentsByName, changeStudentRoute} from "../pages/api/student";
-
-const fetch = require("node-fetch");
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -27,6 +33,26 @@ const useStyles = makeStyles(() => ({
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
+  },
+  backbtncontainer: {
+    width: "95%",
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  titlecontainer: {
+    paddingLeft: 20,
+  },
+  backbtn: {
+    display: "flex",
+    alignItems: "center",
+    outline: "none",
+    border: "none",
+    marginRight: "auto",
+    background: "white",
+    "&:hover": {
+      cursor: "pointer",
+    },
   },
   routeNameContainer: {
     display: "flex",
@@ -125,123 +151,150 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const BusRoutes = ({ savedRoutes }) => {
+const BusRoutes = ({ clubName, savedRoutes }) => {
   const classes = useStyles();
   const [session, loading] = useSession();
   const [routes, setRoutes] = useState(savedRoutes);
   const [selectedRoute, setSelectedRoute] = useState(routes[0]);
+  const [selectedFile, setSelectedFile] = useState("");
+  const [studentList, setStudentList] = useState([]);
   const [editedRoute, setEditedRoute] = useState(
     routes.length > 0 ? routes[0].name : ""
   );
   const [routeEditable, setEditable] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalOpen2, setModalOpen2] = useState(false);
+  const [addRouteModalOpen, setAddRouteModalOpen] = useState(false);
+  const [addStudentModalOpen, setAddStudentModalOpen] = useState(false);
 
   const [routeNameError, setRouteNameError] = useState(false);
   const [newRouteError, setNewRouteError] = useState(false);
   const [editNameError, setEditNameError] = useState(false);
 
-  const [studentList, setStudentList] = useState([]);
   const userAuthorized = useUserAuthorized(session, urls.pages.bus_routes);
 
+  useEffect(async () => {
+    const res = await fetch(`${urls.api.student}?route=${selectedRoute._id}`);
+    const routeStudents = await res.json();
+    setStudentList(routeStudents.payload);
+  }, [selectedRoute]);
 
   const addRoute = () => {
-    setModalOpen(true);
+    setAddRouteModalOpen(true);
   };
 
   const addStudent = () => {
-    setModalOpen2(true);
+    setAddStudentModalOpen(true);
   };
 
-  const handleCreate = async (name) => {
+  const handleRouteCreate = async (name) => {
     if (name === "") {
       setRouteNameError(true);
     } else {
       setRouteNameError(false);
-      const body = { name };
-      const res = await fetch(`${urls.baseUrl}/api/routes`, {
+
+      const data = new FormData();
+      data.append("file", selectedFile);
+
+      const routesRes = await fetch(urls.api.routes, {
         method: "post",
-        body: JSON.stringify(body),
+        body: JSON.stringify({
+          name,
+          clubName,
+        }),
         headers: { "Content-Type": "application/json" },
       });
-      // console.log(res);
-      const routes_data = await res.json;
+      const routes_data = await routesRes.json();
 
       if (routes_data.success && routes_data.payload) {
         setRoutes(routes.concat(routes_data.payload));
-        setModalOpen(false);
+        setAddRouteModalOpen(false);
       } else {
         setNewRouteError(true);
+        return;
+      }
+
+      const studentsRes = await fetch(
+        `${urls.api.uploadCsv}?clubName=${clubName}&routeId=${routes_data.payload._id}`,
+        {
+          method: "POST",
+          body: data,
+        }
+      );
+
+      const students_data = await studentsRes.json();
+
+      if (!students_data.success) {
+        setNewRouteError(true);
+        return;
       }
     }
   };
 
-  const handleCreate2 = async (
+  async function handleStudentCreate(
     studentFirstName,
     studentLastName,
+    studentId,
     studentSchool,
     studentGrade
-  ) => {
-    if (studentFirstName === "") {
+  ) {
+    if (![...arguments].every((e) => e)) {
       setRouteNameError(true);
-    } else {
-      setRouteNameError(false);
-      console.log("here");
-      const body = {
-        firstName: studentFirstName,
-        lastName: studentLastName,
-        school: studentSchool,
-        grade: studentGrade,
-      };
-      console.log(body);
-      setStudentList([...studentList, body]);
-      console.log(studentList);
-      setModalOpen2(false);
+      return;
     }
-  };
+    setRouteNameError(false);
 
-  const handleCreate3 = async (studentID) => {
-    if (studentID === "") {
-      setRouteNameError(true);
-    } else {
+    const addStudentRes = await fetch(urls.api.student, {
+      method: "POST",
+      body: JSON.stringify({
+        FirstName: studentFirstName,
+        LastName: studentLastName,
+        StudentID: studentId,
+        SchoolName: studentSchool,
+        RouteId: selectedRoute._id,
+        Grade: studentGrade,
+        ClubName: clubName,
+      }),
+      headers: { "Content-Type": "application/json" },
+    });
+
+    const newStudent = await addStudentRes.json();
+
+    if (!newStudent.success) {
       setRouteNameError(false);
-      console.log("here");
-      changeStudentRoute(studentID, selectedRoute._id);
+      return;
     }
-  };
 
-  //  function TableCreate(props) {
-  //    const tableDisplay = (
-  //        {studentList.map((entry, index) =>
-  //          <tr key={index} className={classes.tr}>
-  //            <td scope="col">{entry.firstName + entry.lastName}</td>
-  //            <td scope="col">{entry.school}</td>
-  //            <td scope="col">{entry.grade}</td>
-  //            <td scope="col">None</td>
-  //            <td scope="col">None</td>
-  //          </tr>
-  //        )}
-  //    );
-  //   }
+    const body = {
+      firstName: studentFirstName,
+      lastName: studentLastName,
+      schoolName: studentSchool,
+      grade: studentGrade,
+    };
+    setStudentList([...studentList, body]);
+    setAddStudentModalOpen(false);
+  }
 
-  // render() {
-  //    return (
-
-  //    )
-  // };
-
-  const handleClose = () => {
+  const handleRouteModalClose = () => {
     setNewRouteError(false);
     setRouteNameError(false);
-    setModalOpen(false);
+    setAddRouteModalOpen(false);
   };
 
-  const handleClose2 = () => {
-    setModalOpen2(false);
+  const handleStudentModalClose = () => {
+    setAddStudentModalOpen(false);
   };
 
   const handleNameChange = (event) => {
     setEditedRoute(event.target.value);
+  };
+
+  const handleUpload = (files) => {
+    const fileName = files[0].name.split(".");
+    if (fileName[fileName.length - 1] === "csv") {
+      console.log(files[0]);
+      setSelectedFile(files[0]);
+    } else {
+      alert("You must upload a CSV file.");
+    }
   };
 
   const updateName = (name) => {
@@ -254,7 +307,7 @@ const BusRoutes = ({ savedRoutes }) => {
       name,
     };
 
-    const res = await fetch(`${urls.baseUrl}/api/routes`, {
+    const res = await fetch(urls.api.routes, {
       method: "put",
       body: JSON.stringify(body),
       headers: { "Content-Type": "application/json" },
@@ -279,12 +332,27 @@ const BusRoutes = ({ savedRoutes }) => {
   let modalName = "";
 
   if (!session || !userAuthorized) {
-    return <div />
+    return <div />;
   }
 
   return (
     <div>
       <div className={classes.container}>
+        <div className={classes.backbtncontainer}>
+          <div>
+            <Link href={urls.pages.bus_routes}>
+              <button className={classes.backbtn}>
+                <ArrowBackIosIcon />
+                <h2 className={classes.text}>Back </h2>
+              </button>
+            </Link>
+          </div>
+          <div className={classes.titlecontainer}>
+            <div>
+              <h1>{clubName} Boys and Girls Club Bus Routes</h1>
+            </div>
+          </div>
+        </div>
         <div className={classes.pagehead}>
           <div className={classes.routeNameContainer}>
             <div>
@@ -300,9 +368,7 @@ const BusRoutes = ({ savedRoutes }) => {
               </div>
             </div>
             <EditIcon
-              className={
-                routeEditable ? classes.hideIcon : classes.editIcon
-              }
+              className={routeEditable ? classes.hideIcon : classes.editIcon}
               onClick={() => {
                 setEditable(true);
                 setEditedRoute(selectedRoute.name);
@@ -311,9 +377,7 @@ const BusRoutes = ({ savedRoutes }) => {
               }}
             />
             <CheckCircleIcon
-              className={
-                routeEditable ? classes.checkIcon : classes.hideIcon
-              }
+              className={routeEditable ? classes.checkIcon : classes.hideIcon}
               onClick={() => {
                 setEditable(false);
                 updateRouteName(editedRoute);
@@ -327,8 +391,8 @@ const BusRoutes = ({ savedRoutes }) => {
             </Button>
             <Dialog
               style={{ padding: 10, margin: 10, minWidth: 600 }}
-              open={modalOpen2}
-              onClose={handleClose2}
+              open={addStudentModalOpen}
+              onClose={handleStudentModalClose}
             >
               <div
                 style={{
@@ -337,7 +401,7 @@ const BusRoutes = ({ savedRoutes }) => {
                   marginRight: 5,
                   cursor: "pointer",
                 }}
-                onClick={handleClose}
+                onClick={handleRouteModalClose}
               >
                 x
               </div>
@@ -346,9 +410,7 @@ const BusRoutes = ({ savedRoutes }) => {
               </DialogTitle>
               <DialogContent>
                 <div>
-                  <label className={classes.label}>
-                    Student First Name:
-                  </label>
+                  <label className={classes.label}>Student First Name:</label>
                   <input
                     id="FirstName"
                     className={classes.textField}
@@ -360,9 +422,7 @@ const BusRoutes = ({ savedRoutes }) => {
                   </div>
                 </div>
                 <div>
-                  <label className={classes.label}>
-                    Student Last Name:
-                  </label>
+                  <label className={classes.label}>Student Last Name:</label>
                   <input
                     id="LastName"
                     className={classes.textField}
@@ -409,34 +469,9 @@ const BusRoutes = ({ savedRoutes }) => {
                     Name cannot be blank.
                   </div>
                 </div>
-                <div>
-                  <label className={classes.label}>Club Name:</label>
-                  <input
-                    id="clubName"
-                    className={classes.textField}
-                    placeholder="Type name here..."
-                    required
-                  />
-                  <div hidden={!routeNameError} className={classes.error}>
-                    Name cannot be blank.
-                  </div>
-                </div>
-                <div>
-                  <label className={classes.label}>Notes:</label>
-                  <input
-                    id="notes"
-                    className={classes.textField}
-                    placeholder="Type name here..."
-                    required
-                  />
-                  <div hidden={!routeNameError} className={classes.error}>
-                    Name cannot be blank.
-                  </div>
-                </div>
               </DialogContent>
               <div hidden={!newRouteError} className={classes.error}>
-                Sorry, an error occurred. Cannot create new student in
-                route.
+                Sorry, an error occurred. Cannot create new student in route.
               </div>
               <DialogActions>
                 <Button
@@ -449,17 +484,14 @@ const BusRoutes = ({ savedRoutes }) => {
                       document.getElementById("FirstName").value;
                     let studentLastName =
                       document.getElementById("LastName").value;
-                    let studentId =
-                      document.getElementById("studentID").value;
+                    let studentId = document.getElementById("studentID").value;
                     let grade = document.getElementById("grade").value;
-                    let school =
-                      document.getElementById("schoolName").value;
-                    let club = document.getElementById("clubName").value;
-                    let notes = document.getElementById("notes").value;
+                    let school = document.getElementById("schoolName").value;
 
-                    handleCreate2(
+                    handleStudentCreate(
                       studentFirstName,
                       studentLastName,
+                      studentId,
                       school,
                       grade
                     );
@@ -469,16 +501,6 @@ const BusRoutes = ({ savedRoutes }) => {
                 </Button>
               </DialogActions>
             </Dialog>
-
-            <Button
-              className={classes.btn}
-              onClick={() => {
-                let studentId = document.getElementById("studentID").value;
-                handleCreate3(studentId);
-              }}
-            >
-              Save Changes
-            </Button>
           </div>
         </div>
 
@@ -501,26 +523,14 @@ const BusRoutes = ({ savedRoutes }) => {
           <tbody className={classes.tbody}>
             {studentList.map((entry, index) => (
               <tr key={index} className={classes.tr}>
-                <td scope="col">{entry.firstName + entry.lastName}</td>
-                <td scope="col">{entry.school}</td>
+                <td scope="col">{entry.firstName + " " + entry.lastName}</td>
+                <td scope="col">{entry.schoolName}</td>
                 <td scope="col">{entry.grade}</td>
                 <td scope="col">None</td>
                 <td scope="col">None</td>
               </tr>
             ))}
           </tbody>
-          {/* <tbody className={classes.tbody}>
-                            
-        <tr className={classes.tr}>
-          <td scope="col">Donuts</td>
-          <td scope="col">Dheeraj</td>
-          <td scope="col">Donuts</td>
-          <td scope="col">Dheeraj</td>
-          <td scope="col">Donuts</td>
-        </tr>
-
-
-      </tbody> */}
         </table>
       </div>
       <div className={classes.routeTabs}>
@@ -546,8 +556,8 @@ const BusRoutes = ({ savedRoutes }) => {
         </Fab>
         <Dialog
           style={{ padding: 10, margin: 10, minWidth: 600 }}
-          open={modalOpen}
-          onClose={handleClose}
+          open={addRouteModalOpen}
+          onClose={handleRouteModalClose}
         >
           <div
             style={{
@@ -556,7 +566,7 @@ const BusRoutes = ({ savedRoutes }) => {
               marginRight: 5,
               cursor: "pointer",
             }}
-            onClick={handleClose}
+            onClick={handleRouteModalClose}
           >
             x
           </div>
@@ -580,14 +590,42 @@ const BusRoutes = ({ savedRoutes }) => {
               <label className={classes.label}>
                 Upload Student Data (.csv):
               </label>
-              <Button
-                className={classes.textField}
-                variant="contained"
-                color="secondary"
-                size="small"
-              >
-                Select File
-              </Button>
+              <If condition={!selectedFile}>
+                <Then>
+                  <Button
+                    className={classes.textField}
+                    variant="contained"
+                    color="secondary"
+                    size="small"
+                  >
+                    <label>
+                      Select file
+                      <input
+                        type="file"
+                        id="students-csv"
+                        name="students-csv"
+                        accept="csv"
+                        onChange={(event) => handleUpload(event.target.files)}
+                      />
+                    </label>
+                  </Button>
+                </Then>
+                <Else>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      flexWrap: "wrap",
+                      alignItems: "center",
+                    }}
+                  >
+                    <p>{selectedFile.name}</p>
+                    <IconButton onClick={() => setSelectedFile("")}>
+                      <RemoveCircleOutline />
+                    </IconButton>
+                  </div>
+                </Else>
+              </If>
             </div>
           </DialogContent>
           <div hidden={!newRouteError} className={classes.error}>
@@ -601,7 +639,7 @@ const BusRoutes = ({ savedRoutes }) => {
               size="large"
               onClick={() => {
                 modalName = document.getElementById("ModalName").value;
-                handleCreate(modalName);
+                handleRouteCreate(modalName);
               }}
             >
               Create
@@ -613,19 +651,15 @@ const BusRoutes = ({ savedRoutes }) => {
   );
 };
 
-BusRoutes.getInitialProps = async () => {
-  const res = await fetch(`${urls.baseUrl}/api/routes`);
-  console.log(res);
-  let routes_data = {};
-  if (res) {
-    let routes_data = res;
-  }
-
-  if (routes_data.success) {
-    return { savedRoutes: routes_data.payload };
-  } else {
-    return { savedRoutes: [] };
-  }
-};
+export async function getServerSideProps(context) {
+  const clubRoutes = await getRoutesByClub(context.query.club);
+  const routeIds = await getRoutesByIds(clubRoutes);
+  return {
+    props: {
+      clubName: context.query.club,
+      savedRoutes: JSON.parse(JSON.stringify(routeIds)),
+    },
+  };
+}
 
 export default BusRoutes;

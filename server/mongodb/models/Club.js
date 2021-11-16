@@ -14,14 +14,35 @@ const ClubSchema = new Schema({
         type: String,
         required: [true],
         validate: {
-          validator: (schoolName) => {
-            return typeof schoolName === "string";
-          },
+          validator: (schoolName) => typeof schoolName === "string",
           message: (props) => `${props.value} is not a valid string.`,
         },
       },
     ],
   },
+  Routes: {
+    type: [
+      {
+        type: Schema.Types.ObjectId,
+      },
+    ],
+  },
+  Region: {
+    type: String,
+    required: [true],
+    validate: {
+      validator: (region) => typeof region === "string",
+      message: (props) => `${props.value} is not a valid string.`,
+    },
+  },
+  Buses: [
+    {
+      busNumber: Number,
+      maxCapacity: Number,
+      currentCapacity: Number,
+    },
+  ],
 });
 
-export default mongoose.models.Club || mongoose.model("Club", ClubSchema);
+export default (mongoose.models && mongoose.models.Club) ||
+  mongoose.model("Club", ClubSchema);

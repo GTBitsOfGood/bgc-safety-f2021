@@ -1,19 +1,27 @@
-/* eslint-disable no-use-before-define */
-import mongoDB from "../../../server/mongodb/index";
-import Club from "../../../server/mongodb/models/Club";
+import { getRoutesByIds } from "../../../server/mongodb/actions/Route";
+import {
+  createNewClub,
+  findAllClubs,
+  getRoutesByClub,
+  getSchoolsByClub,
+  removeClub,
+  updateClubData,
+} from "../../../server/mongodb/actions/Club";
 import useCors from "./corsMiddleware";
 
 export default async (req, res) => {
-  await mongoDB();
-
   await useCors(req, res);
 
   const { method } = req;
 
-  if (method === "GET" && req.query.ClubName) {
-    getSchoolsForClub(req, res);
-  } else if (method === "GET") {
-    getAllClubs(req, res);
+  if (method === "GET") {
+    if (req.query.ClubName) {
+      getSchoolsForClub(req, res);
+    } else if (req.query.clubName) {
+      getRoutesForClub(req, res);
+    } else {
+      getAllClubs(req, res);
+    }
   } else if (method === "POST") {
     createClub(req, res);
   } else if (method === "PATCH") {
@@ -27,7 +35,7 @@ export default async (req, res) => {
 };
 
 function getAllClubs(req, res) {
-  Club.find()
+  findAllClubs()
     .then((clubs) => {
       res.status(200).send({
         success: true,
@@ -45,12 +53,9 @@ function getAllClubs(req, res) {
 function createClub(req, res) {
   const { ClubName, SchoolNames } = req.body;
 
-  Club.create({
-    ClubName: ClubName,
-    SchoolNames: SchoolNames,
-  })
+  createNewClub(ClubName, SchoolNames)
     .then((club) =>
-      res.status(201).send({
+      res.status(200).send({
         success: true,
         payload: club,
       })
@@ -65,13 +70,9 @@ function createClub(req, res) {
 
 function updateClub(req, res) {
   const { id } = req.query;
+  const { ClubName, SchoolNames } = req.body;
 
-  const filter = {
-    ClubName: req.body.clubName,
-    SchoolNames: req.body.schoolNames,
-  };
-
-  Club.findByIdAndUpdate(id, filter, { new: true })
+  updateClubData(id, ClubName, SchoolNames)
     .then((club) =>
       res.status(200).send({
         success: true,
@@ -89,7 +90,7 @@ function updateClub(req, res) {
 function deleteClub(req, res) {
   const { id } = req.query;
 
-  Club.findByIdAndDelete(id)
+  removeClub(id)
     .then((club) =>
       res.status(200).send({
         success: true,
@@ -107,19 +108,38 @@ function deleteClub(req, res) {
 function getSchoolsForClub(req, res) {
   const { ClubName } = req.query;
 
-  Club.find({ ClubName }, { SchoolNames: 1 })
-    .then((SchoolNames) => {
-      if (SchoolNames.length === 0) {
-        res.status(404).send({
-          success: false,
-          message: "Club Not Found",
-        });
-      } else {
-        res.status(200).send({
-          success: true,
-          payload: SchoolNames,
-        });
-      }
+  getSchoolsByClub(ClubName)
+    .then((SchoolNames) =>
+      res.status(200).json({
+        success: true,
+        payload: SchoolNames,
+      })
+    )
+    .catch((err) =>
+      res.status(400).json({
+        success: false,
+        message: err,
+      })
+    );
+}
+
+async function getRoutesForClub(req, res) {
+  const { clubName } = req.query;
+  getRoutesByClub(clubName)
+    .then(({ Routes }) => {
+      getRoutesByIds(Routes)
+        .then((result) =>
+          res.status(200).json({
+            success: true,
+            payload: result,
+          })
+        )
+        .catch((err) =>
+          res.status(400).json({
+            success: false,
+            message: err,
+          })
+        );
     })
     .catch((err) =>
       res.status(400).json({

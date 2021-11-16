@@ -12,6 +12,11 @@ const routes = [
     type: "none",
   },
   {
+    name: "Club Overview",
+    link: urls.pages.club_overview,
+    typr: "Admin",
+  },
+  {
     name: "Upload CSV",
     link: urls.pages.csv_upload,
     type: "Admin",

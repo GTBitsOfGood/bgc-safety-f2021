@@ -1,9 +1,6 @@
 const prod = process.env.NODE_ENV === "production";
 
 export default {
-  baseUrl: prod
-    ? "https://bgcsafety-dev.herokuapp.com"
-    : "http://localhost:3000",
   dbUrl: prod
     ? process.env.MONGO_DB
     : process.env.MONGO_DEV_DB || "mongodb://localhost:27017",
@@ -18,6 +15,7 @@ export default {
     bus_checkin_roster: "/bus_checkin_roster",
     login: "/login",
     bus_routes: "/bus_routes",
+    club_overview: "/club_overview",
     account_creation: "/account_creation",
     created_accounts: "/created_accounts",
     not_authorized: "/not_authorized",
@@ -25,7 +23,7 @@ export default {
   api: {
     example: "/api/example",
     student: "/api/student",
-    notes: "/api/student/notes",
+    notes: "/api/notes",
     club: "/api/club",
     school: "/api/school",
     attendance: "api/attendance",
@@ -33,5 +31,6 @@ export default {
     uploadCsv: "/api/upload_csv",
     user: "/api/user",
     login: "/api/login",
+    routes: "/api/routes",
   },
 };
