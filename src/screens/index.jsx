@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { helloWorld } from "../actions/api";
 import axios from "axios";
 // import { Login } from '../pages/login.jsx';
 import router from "next/router";
@@ -43,13 +42,6 @@ const HomePage = () => {
           <button onClick={signOut}>click to sign out</button>
         </>
       )}
-      <h2>Welcome to Next.js!</h2>
-      <h3>
-        This page is static rendered, because all API calls are made in
-        useEffect
-      </h3>
-      <h4>{payload}</h4>
-      <p>You can tell because the text above flashes on page refresh</p>
     </>
   );
 };
