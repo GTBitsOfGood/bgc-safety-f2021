@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Link from "next/link";
 import urls from "../../utils/urls";
-import { getCurrentDate } from "../pages/bus_checkin_roster/[route]";
+import { getCurrentDate } from "./bus_checkin_roster/[route]";
 import { useSession } from "next-auth/client";
 import { useUserAuthorized } from "../../utils/userType";
 import { getAllRoutes } from "../../server/mongodb/actions/Route";

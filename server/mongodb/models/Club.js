@@ -20,6 +20,13 @@ const ClubSchema = new Schema({
       },
     ],
   },
+  Routes: {
+    type: [
+      {
+        type: Schema.Types.ObjectId,
+      },
+    ],
+  },
   Region: {
     type: String,
     required: [true],

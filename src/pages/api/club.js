@@ -1,6 +1,8 @@
+import { getRoutesByIds } from "../../../server/mongodb/actions/Route";
 import {
   createNewClub,
   findAllClubs,
+  getRoutesByClub,
   getSchoolsByClub,
   removeClub,
   updateClubData,
@@ -12,10 +14,14 @@ export default async (req, res) => {
 
   const { method } = req;
 
-  if (method === "GET" && req.query.ClubName) {
-    getSchoolsForClub(req, res);
-  } else if (method === "GET") {
-    getAllClubs(req, res);
+  if (method === "GET") {
+    if (req.query.ClubName) {
+      getSchoolsForClub(req, res);
+    } else if (req.query.clubName) {
+      getRoutesForClub(req, res);
+    } else {
+      getAllClubs(req, res);
+    }
   } else if (method === "POST") {
     createClub(req, res);
   } else if (method === "PATCH") {
@@ -109,6 +115,32 @@ function getSchoolsForClub(req, res) {
         payload: SchoolNames,
       })
     )
+    .catch((err) =>
+      res.status(400).json({
+        success: false,
+        message: err,
+      })
+    );
+}
+
+async function getRoutesForClub(req, res) {
+  const { clubName } = req.query;
+  getRoutesByClub(clubName)
+    .then(({ Routes }) => {
+      getRoutesByIds(Routes)
+        .then((result) =>
+          res.status(200).json({
+            success: true,
+            payload: result,
+          })
+        )
+        .catch((err) =>
+          res.status(400).json({
+            success: false,
+            message: err,
+          })
+        );
+    })
     .catch((err) =>
       res.status(400).json({
         success: false,

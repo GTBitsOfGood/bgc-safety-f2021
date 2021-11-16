@@ -22,6 +22,18 @@ export async function getRouteByName(name) {
     );
 }
 
+export async function getRoutesByIds(idArr) {
+  return Route.find({
+    _id: {
+      $in: idArr,
+    },
+  })
+    .then((route) => Promise.resolve(route))
+    .catch((err) =>
+      Promise.reject(new Error("Error finding routes by ids: " + err))
+    );
+}
+
 export async function addRoute(name) {
   await mongoDB();
   return Route.create({ name })
