@@ -1,7 +1,7 @@
+import neatCsv from "neat-csv";
 import mongoDB from "../../../server/mongodb/index";
 import Student from "../../../server/mongodb/models/Student";
 import useCors from "./corsMiddleware";
-import neatCsv from "neat-csv";
 
 export default async (req, res) => {
   await mongoDB();

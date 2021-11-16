@@ -16,7 +16,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const SelectDropdown = (props) => {
-  const { label, options, setFilters, filters } = props;
+  const { label, options, setFilters, filters, className } = props;
   const classes = useStyles();
   const [value, setValue] = React.useState("");
 
@@ -37,16 +37,23 @@ const SelectDropdown = (props) => {
   };
 
   return (
-    <FormControl variant="outlined" className={classes.formControl}>
-      <InputLabel id="demo-simple-select-outlined-label">{label}</InputLabel>
+    <FormControl variant="outlined" className={`${classes.formControl}`}>
+      <InputLabel
+        id="demo-simple-select-outlined-label"
+        className={`${className}`}
+      >
+        {label}
+      </InputLabel>
       <Select
         labelId="demo-simple-select-outlined-label"
         id="demo-simple-select-outlined"
         value={value}
         onChange={(e) => handleClick(e.target.value)}
         label={label}
+        className={`${className}`}
       >
         {options.map((option) => {
+          console.log(option);
           return <MenuItem value={option}>{option}</MenuItem>;
         })}
       </Select>

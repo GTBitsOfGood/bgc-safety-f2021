@@ -71,7 +71,7 @@ const Login = () => {
       ) {
         Router.replace(urls.pages.roster);
       } else if (userType === userTypes.admin) {
-        Router.replace(urls.pages.roster);
+        Router.replace(urls.pages.club_overview);
       }
     }
   }, [session, userType]);
@@ -113,22 +113,26 @@ const Login = () => {
   // }
   return (
     <div className={classes.container}>
-      <img className={classes.image} src="bgc-logo.png" alt="BGC Logo" />
-      <Typography className={classes.title} variant="h3">
-        BGCMA Bus Safety App
-      </Typography>
-
       {error && <p className={classes.error}>{error}</p>}
       {!session && (
         <>
-          Not signed in <br />
-          <Button
-            onClick={signIn}
-            className={classes.button}
-            variant="contained"
-          >
-            Click to Sign In
-          </Button>
+          <img className={classes.image} src="bgc-logo.png" alt="BGC Logo" />
+          <Typography className={classes.title} variant="h3">
+            BGCMA Bus Safety App
+          </Typography>
+        
+
+      
+          <>
+            Not signed in <br />
+            <Button
+              onClick={signIn}
+              className={classes.button}
+              variant="contained"
+            >
+              Click to Sign In
+            </Button>
+          </>
         </>
       )}
     </div>
